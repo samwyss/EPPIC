@@ -56,6 +56,21 @@ else ()
     message(STATUS "Library `{fmt}` found on system.")
 endif ()
 
+find_package(MPIManager QUIET)
+if (NOT MPIManager_FOUND)
+    message(STATUS "Library `MPIManager` not found. Installing locally now.")
+    FetchContent_Declare(MPIManager
+            GIT_REPOSITORY https://github.com/samwyss/MPIManager
+            GIT_TAG v0.0.1
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
+            EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(MPIManager)
+else ()
+    message(STATUS "Library `MPIManager` found on system.")
+endif ()
+
 # testing --------------------------------------------------------------------------------------------------------------
 enable_testing()
 add_subdirectory(tests)
