@@ -85,7 +85,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${OPENMP_CXX_INCLUDE_PATH}
         PRIVATE ${HDF5_INCLUDE_DIRS}
         PRIVATE ${PROJECT_BINARY_DIR}
-        PRIVATE ${PROJECT_SOURCE_DIR}/src/utils
+        PRIVATE ${PROJECT_SOURCE_DIR}/src/core
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -94,4 +94,5 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE HDF5::HDF5
         PRIVATE fmt::fmt
         PRIVATE libutils
+        PRIVATE Core
 )
