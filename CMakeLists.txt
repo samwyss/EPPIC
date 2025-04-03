@@ -93,6 +93,5 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE OpenMP::OpenMP_CXX
         PRIVATE HDF5::HDF5
         PRIVATE fmt::fmt
-        PRIVATE libutils
         PRIVATE Core
 )
