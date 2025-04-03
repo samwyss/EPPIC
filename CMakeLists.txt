@@ -75,9 +75,6 @@ add_library(Core
         ${PROJECT_SOURCE_DIR}/src/core/config.hpp
 )
 
-add_library(Fields
-)
-
 add_library(Constants
         ${PROJECT_SOURCE_DIR}/src/constants/physical.hpp
 )
