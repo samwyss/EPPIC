@@ -2,7 +2,6 @@
 #define CORE_WORLD_HPP
 
 #include <expected>
-#include <fmt/core.h>
 #include <stdexcept>
 #include <string>
 
