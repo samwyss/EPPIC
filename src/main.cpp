@@ -1,5 +1,7 @@
 #include "world.h"
 
+#include <iostream>
+
 using namespace std;
 
 /*!
@@ -18,5 +20,7 @@ int main(int argc, char **argv) {
   // configuration
   // parallelization
 
-  auto world = World();
+  auto world = World::create();
+
+  std::cout << world.error() << std::endl;
 }

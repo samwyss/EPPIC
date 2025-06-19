@@ -1,9 +1,15 @@
 #include "world.h"
 
-World::World() {}
+World::World() { throw std::runtime_error("World::World()"); }
 
-World::~World() {}
+std::expected<World, std::string> World::create() {
+  try {
+    return World();
+  } catch (const std::runtime_error &err) {
+    return std::unexpected(err.what());
+  }
+}
 
-void World::adv_by() {}
+std::expected<void, std::string> World::adv_by() { return {}; }
 
-void World::adv_to() {}
+std::expected<void, std::string> World::adv_to() { return {}; }
