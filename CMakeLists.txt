@@ -70,9 +70,9 @@ message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 
 add_library(Core
         ${PROJECT_SOURCE_DIR}/src/core/world.cpp
-        ${PROJECT_SOURCE_DIR}/src/core/world.hpp
+        ${PROJECT_SOURCE_DIR}/src/core/world.h
         ${PROJECT_SOURCE_DIR}/src/core/config.cpp
-        ${PROJECT_SOURCE_DIR}/src/core/config.hpp
+        ${PROJECT_SOURCE_DIR}/src/core/config.h
 )
 
 add_library(Constants
