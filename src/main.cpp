@@ -8,4 +8,15 @@ using namespace std;
  * @param argv argument vector
  * @return
  */
-int main(int argc, char **argv) { auto world = World(); }
+int main(int argc, char **argv) {
+
+  // todo
+  // error handling
+  // fdtd engine
+  // hdf5 io
+  // particles
+  // configuration
+  // parallelization
+
+  auto world = World();
+}
