@@ -73,6 +73,8 @@ add_library(Core
         ${PROJECT_SOURCE_DIR}/src/core/world.h
         ${PROJECT_SOURCE_DIR}/src/core/config.cpp
         ${PROJECT_SOURCE_DIR}/src/core/config.h
+        src/core/fdtd.cpp
+        src/core/fdtd.h
 )
 
 add_library(Constants
