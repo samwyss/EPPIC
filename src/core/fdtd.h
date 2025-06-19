@@ -5,12 +5,6 @@
 #ifndef CORE_FDTD_H
 #define CORE_FDTD_H
 
+class FDTD_Engine {};
 
-
-class FDTD_Engine {
-
-};
-
-
-
-#endif //CORE_FDTD_H
+#endif // CORE_FDTD_H
