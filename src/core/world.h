@@ -1,5 +1,5 @@
-#ifndef CORE_WORLD_HPP
-#define CORE_WORLD_HPP
+#ifndef CORE_WORLD_H
+#define CORE_WORLD_H
 
 #include <expected>
 #include <stdexcept>
@@ -19,4 +19,4 @@ private:
   World();
 };
 
-#endif // CORE_WORLD_HPP
+#endif // CORE_WORLD_H
