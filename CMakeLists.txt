@@ -73,8 +73,8 @@ add_library(Core
         ${PROJECT_SOURCE_DIR}/src/core/world.h
         ${PROJECT_SOURCE_DIR}/src/core/config.cpp
         ${PROJECT_SOURCE_DIR}/src/core/config.h
-        src/core/em_engine.cpp
-        src/core/em_engine.h
+        src/core/emengine.cpp
+        src/core/emengine.h
 )
 
 add_library(Constants
