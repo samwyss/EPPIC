@@ -104,6 +104,8 @@ add_library(Fields
         src/fields/triplet.h
         src/fields/scalar.cpp
         src/fields/scalar.h
+        src/fields/vector.cpp
+        src/fields/vector.h
 
 )
 
