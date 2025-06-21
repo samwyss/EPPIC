@@ -2,6 +2,7 @@
 #define FIELDS_SCALAR_H
 
 #include <cstddef>
+#include <memory>
 
 #include "triplet.h"
 
@@ -9,35 +10,35 @@ template <typename T> class Scalar3 {
 public:
   /*!
    * Scalar3 constructor
-   * @param num_x number of cells in the x-direction
-   * @param num_y number of cells in the y-direction
-   * @param num_z number of cells in the z-direction
-   * @param value initial value to instantiate all field values to
+   * @param nx number of elements in the x-direction
+   * @param ny number of elements in the y-direction
+   * @param nz number of elements in the z-direction
+   * @param val initial value
    */
-  Scalar3(const size_t num_x, const size_t num_y, const size_t num_z, T value)
-      : cell_counts(Triplet<size_t>{num_x, num_y, num_z}), row_off(num_z),
-        plane_off(num_y * num_z), num_cells(num_x * num_y * num_z) {
-    // create data array
-    data = new T[num_cells];
+  Scalar3(const size_t nx, const size_t ny, const size_t nz, T val)
+      : cell_counts(Triplet{nx, ny, nz}), row_off(nz), plane_off(ny * nz),
+        num_cells(nx * ny * nz) {
+    // create data container
+    data = std::make_unique<T[]>(num_cells);
 
-    // initialize data array with value with overloaded assignment operator
-    (*this) = value;
+    // initialize data
+    *this = val;
   }
 
   /*!
    * Scalar3 destructor
    */
-  ~Scalar3() { delete[] data; }
+  ~Scalar3() = default;
 
   /*!
    * Scalar3 overloaded () operator for read-write access
    * @param i index into x-direction elements
    * @param j index into y-direction elements
    * @param k index into z-direction elements
-   * @return pointer to element at desired index
+   * @return mutable element at desired index
    */
   T &operator()(const size_t i, const size_t j, const size_t k) {
-    return data[k + row_off * j + plane_off * i];
+    return data.get()[k + row_off * j + plane_off * i];
   }
 
   /*!
@@ -45,29 +46,28 @@ public:
    * @param i index into x-direction elements
    * @param j index into y-direction elements
    * @param k index into z-direction elements
-   * @return pointer to element at desired index
+   * @return element at desired index
    */
   T operator()(const size_t i, const size_t j, const size_t k) const {
-    return data[k + row_off * j + plane_off * i];
+    return data.get()[k + row_off * j + plane_off * i];
   };
 
+private:
   /*!
-   * Scalar3 overloaded assignment operator to spatially constant scalar value
-   * @param rhs spatially constant scalar value
+   * Scalar3 overloaded assignment operator to initialize field
+   * @param val initial value
    * @return reference to existing Scalar3
    */
-  Scalar3 &operator=(const T &rhs) {
-    // assign data array with rhs
+  Scalar3 &operator=(const T &val) {
     for (size_t i = 0; i < num_cells; ++i) {
-      data[i] = rhs;
+      data.get()[i] = val;
     }
 
     return *this;
   }
 
-private:
   /// 1D array in row-major format containing field data
-  T *data;
+  std::unique_ptr<T[]> data;
 
   /// number of cells in each direction
   const Triplet<size_t> cell_counts;
@@ -75,7 +75,7 @@ private:
   /// row offset into data
   const size_t row_off;
 
-  /// collumn offset into data
+  /// column offset into data
   const size_t plane_off;
 
   /// number of cells in bounding box volume
