@@ -2,12 +2,12 @@
 #define FIELDS_SCALAR_H
 
 #include <cstddef>
+#include <mdspan>
 #include <memory>
 
 #include "coordinate.h"
 
 template <typename T> struct Scalar3 {
-public:
   /*!
    * Scalar3 constructor
    * @param nx number of elements in the x-direction
