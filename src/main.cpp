@@ -1,9 +1,5 @@
 #include "world.h"
 
-#include <iostream>
-
-using namespace std;
-
 /*!
  * main driver function and build target
  * @param argc argument count
@@ -13,7 +9,6 @@ using namespace std;
 int main(int argc, char **argv) {
 
   // todo
-  // error handling
   // fdtd engine
   // hdf5 io
   // particles
@@ -21,6 +16,4 @@ int main(int argc, char **argv) {
   // parallelization
 
   auto world = World::create();
-
-  std::cout << world.error() << std::endl;
 }
