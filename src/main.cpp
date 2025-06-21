@@ -1,4 +1,5 @@
-#include "world.h"
+#include "scalar.h"
+#include "spdlog/spdlog.h"
 
 /*!
  * main driver function and build target
@@ -15,5 +16,9 @@ int main(int argc, char **argv) {
   // configuration
   // parallelization
 
-  // auto world = World::create();
+  spdlog::set_level(spdlog::level::debug);
+
+  auto field = Scalar3<int>(2, 2, 2, 4);
+
+  spdlog::debug(field(1, 1, 1));
 }
