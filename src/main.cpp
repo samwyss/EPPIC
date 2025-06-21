@@ -15,5 +15,5 @@ int main(int argc, char **argv) {
   // configuration
   // parallelization
 
-  auto world = World::create();
+  //auto world = World::create();
 }
