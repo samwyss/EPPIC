@@ -103,8 +103,8 @@ add_library(Fields
         src/fields/triplet.h
         src/fields/scalar.h
         src/fields/vector.h
-
 )
+set_target_properties(Fields PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE ${MPI_CXX_INCLUDE_PATH}
@@ -112,6 +112,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${HDF5_INCLUDE_DIRS}
         PRIVATE ${PROJECT_BINARY_DIR}
         PRIVATE ${PROJECT_SOURCE_DIR}/src/core
+        PRIVATE ${PROJECT_SOURCE_DIR}/src/fields
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -121,4 +122,5 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE fmt::fmt
         PRIVATE spdlog::spdlog
         PRIVATE Core
+        PRIVATE Fields
 )
