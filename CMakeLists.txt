@@ -56,6 +56,21 @@ else ()
     message(STATUS "Library `{fmt}` found on system.")
 endif ()
 
+find_package(spdlog QUIET)
+if (NOT spdlog_FOUND)
+    message(STATUS "Library `spdlog` not found. Installing locally now.")
+    FetchContent_Declare(spdlog
+            GIT_REPOSITORY https://github.com/gabime/spdlog.git
+            GIT_TAG v1.15.3
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
+            EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(spdlog)
+else ()
+    message(STATUS "Library `spdlog` found on system.")
+endif ()
+
 # testing --------------------------------------------------------------------------------------------------------------
 enable_testing()
 add_subdirectory(tests)
@@ -105,5 +120,6 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE OpenMP::OpenMP_CXX
         PRIVATE HDF5::HDF5
         PRIVATE fmt::fmt
+        PRIVATE spdlog::spdlog
         PRIVATE Core
 )
