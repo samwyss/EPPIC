@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <memory>
 
-#include "triplet.h"
+#include "coordinate.h"
 
 template <typename T> class Scalar3 {
 public:
