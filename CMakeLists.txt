@@ -79,7 +79,6 @@ add_subdirectory(tests)
 add_executable(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/src/main.cpp
         src/fields/triplet.h
-        src/fields/scalar.cpp
         src/fields/scalar.h
 )
 
@@ -102,9 +101,7 @@ set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Fields
         src/fields/triplet.h
-        src/fields/scalar.cpp
         src/fields/scalar.h
-        src/fields/vector.cpp
         src/fields/vector.h
 
 )

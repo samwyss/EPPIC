@@ -15,12 +15,20 @@ public:
    * @param num_z number of cells in the z-direction
    * @param value initial value to instantiate all field values to
    */
-  Scalar3(size_t num_x, size_t num_y, size_t num_z, T value);
+  Scalar3(const size_t num_x, const size_t num_y, const size_t num_z, T value)
+      : cell_counts(Triplet<size_t>{num_x, num_y, num_z}), row_off(num_z),
+        plane_off(num_y * num_z), num_cells(num_x * num_y * num_z) {
+    // create data array
+    data = new T[num_cells] = {value};
+
+    // initialize data array with value with overloaded assignment operator
+    //(*this) = value;
+  }
 
   /*!
    * Scalar3 destructor
    */
-  ~Scalar3();
+  ~Scalar3() { delete[] data; }
 
   /*!
    * Scalar3 overloaded () operator for read-write access
@@ -29,7 +37,9 @@ public:
    * @param k index into z-direction elements
    * @return pointer to element at desired index
    */
-  T &operator()(size_t i, size_t j, size_t k);
+  T &operator()(const size_t i, const size_t j, const size_t k) {
+    return data[k + row_off * j + plane_off * i];
+  }
 
   /*!
    * Scalar3 overloaded () operator for read access
@@ -38,56 +48,39 @@ public:
    * @param k index into z-direction elements
    * @return pointer to element at desired index
    */
-  const T &operator()(size_t i, size_t j, size_t k) const;
+  T operator()(const size_t i, const size_t j, const size_t k) const {
+    return data[k + row_off * j + plane_off * i];
+  };
 
   /*!
    * Scalar3 overloaded assignment operator to spatially constant scalar value
    * @param rhs spatially constant scalar value
    * @return reference to existing Scalar3
    */
-  Scalar3 &operator=(const T &rhs);
+  Scalar3 &operator=(const T &rhs) {
+    // assign data array with rhs
+    for (size_t i = 0; i < num_cells; ++i) {
+      data[i] = rhs;
+    }
 
-  /*!
-   * num_cells getter
-   * @return const reference to num_cells
-   */
-  [[nodiscard]] const Triplet<size_t> &get_num_cells() const {
-    return num_cells;
+    return *this;
   }
-
-  /*!
-   * row_cells getter
-   * @return const reference to row_cells
-   */
-  [[nodiscard]] const size_t &get_row_cells() const { return row_cells; }
-
-  /*!
-   * plane_cells getter
-   * @return const reference to plane_cells
-   */
-  [[nodiscard]] const size_t &get_plane_cells() const { return plane_cells; }
-
-  /*!
-   * vol_cells getter
-   * @return const reference to vol_cells
-   */
-  [[nodiscard]] const size_t &get_vol_cells() const { return vol_cells; }
 
 private:
   /// 1D array in row-major format containing field data
   T *data;
 
   /// number of cells in each direction
-  const Triplet<size_t> num_cells;
+  const Triplet<size_t> cell_counts;
 
-  /// number of cells in each row within plane
-  const size_t row_cells;
+  /// row offset into data
+  const size_t row_off;
 
-  /// number of cells in each plane within bounding box
-  const size_t plane_cells;
+  /// collumn offset into data
+  const size_t plane_off;
 
   /// number of cells in bounding box volume
-  const size_t vol_cells;
+  const size_t num_cells;
 };
 
 #endif // FIELDS_SCALAR_H
