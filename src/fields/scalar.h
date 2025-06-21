@@ -6,7 +6,7 @@
 
 #include "coordinate.h"
 
-template <typename T> class Scalar3 {
+template <typename T> struct Scalar3 {
 public:
   /*!
    * Scalar3 constructor

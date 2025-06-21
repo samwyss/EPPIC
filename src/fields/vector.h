@@ -3,7 +3,7 @@
 
 #include "scalar.h"
 
-template <typename T> class Vector3 {
+template <typename T> struct Vector3 {
 public:
   Scalar3<T> x;
 
