@@ -78,7 +78,7 @@ add_subdirectory(tests)
 # EPPIC setup ------------------------------------------------------------------------------------------------
 add_executable(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/src/main.cpp
-        src/fields/triplet.h
+        src/fields/coordinate.h
         src/fields/scalar.h
 )
 
@@ -100,7 +100,7 @@ add_library(Constants
 set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
 
 add_library(Fields
-        src/fields/triplet.h
+        src/fields/coordinate.h
         src/fields/scalar.h
         src/fields/vector.h
 )
