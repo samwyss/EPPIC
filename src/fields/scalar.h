@@ -19,10 +19,10 @@ public:
       : cell_counts(Triplet<size_t>{num_x, num_y, num_z}), row_off(num_z),
         plane_off(num_y * num_z), num_cells(num_x * num_y * num_z) {
     // create data array
-    data = new T[num_cells] = {value};
+    data = new T[num_cells];
 
     // initialize data array with value with overloaded assignment operator
-    //(*this) = value;
+    (*this) = value;
   }
 
   /*!
