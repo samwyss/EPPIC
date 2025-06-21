@@ -63,6 +63,9 @@ add_subdirectory(tests)
 # EPPIC setup ------------------------------------------------------------------------------------------------
 add_executable(${PROJECT_NAME}
         ${PROJECT_SOURCE_DIR}/src/main.cpp
+        src/fields/triplet.h
+        src/fields/scalar.cpp
+        src/fields/scalar.h
 )
 
 get_target_property(EPPIC_COMPILE_OPTIONS ${PROJECT_NAME} COMPILE_OPTIONS)
@@ -81,6 +84,13 @@ add_library(Constants
         ${PROJECT_SOURCE_DIR}/src/constants/physical.hpp
 )
 set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
+
+add_library(Fields
+        src/fields/triplet.h
+        src/fields/scalar.cpp
+        src/fields/scalar.h
+
+)
 
 target_include_directories(${PROJECT_NAME}
         PRIVATE ${MPI_CXX_INCLUDE_PATH}
