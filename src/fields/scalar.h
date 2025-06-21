@@ -2,7 +2,6 @@
 #define FIELDS_SCALAR_H
 
 #include <cstddef>
-#include <cstdint>
 
 #include "triplet.h"
 
