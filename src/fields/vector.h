@@ -23,7 +23,7 @@ template <typename T> struct Vector3 {
     y = Kokkos::mdspan(y_data.get(), dims.x, dims.y, dims.z);
     z = Kokkos::mdspan(z_data.get(), dims.x, dims.y, dims.z);
 
-    for (size_t i = 0; i < nelems; i++) {
+    for (size_t i = 0; i < nelems; ++i) {
       x_data[i] = val;
       y_data[i] = val;
       z_data[i] = val;
