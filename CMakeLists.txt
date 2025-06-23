@@ -94,43 +94,60 @@ enable_testing()
 add_subdirectory(tests)
 
 # EPPIC setup ------------------------------------------------------------------------------------------------
+# main executable
 add_executable(${PROJECT_NAME}
-        ${PROJECT_SOURCE_DIR}/src/main.cpp
+        src/main.cpp
         src/fields/coordinate.h
         src/fields/scalar.h
 )
 
+# diagnostics
 get_target_property(EPPIC_COMPILE_OPTIONS ${PROJECT_NAME} COMPILE_OPTIONS)
 message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 
-add_library(Core
-        ${PROJECT_SOURCE_DIR}/src/core/world.cpp
-        ${PROJECT_SOURCE_DIR}/src/core/world.h
-        ${PROJECT_SOURCE_DIR}/src/core/config.cpp
-        ${PROJECT_SOURCE_DIR}/src/core/config.h
-        src/core/emengine.cpp
-        src/core/emengine.h
+# Constants library
+add_library(Constants
+        src/constants/physical.hpp
 )
 
-add_library(Constants
-        ${PROJECT_SOURCE_DIR}/src/constants/physical.hpp
-)
 set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
 
+# Fields library
 add_library(Fields
         src/fields/coordinate.h
         src/fields/scalar.h
         src/fields/vector.h
 )
+
 set_target_properties(Fields PROPERTIES LINKER_LANGUAGE CXX)
 
+# Core library
+add_library(Core
+        src/core/world.cpp
+        src/core/world.h
+        src/core/config.cpp
+        src/core/config.h
+        src/core/emengine.cpp
+        src/core/emengine.h
+)
+
+target_include_directories(Core
+        PUBLIC src/fields
+)
+
+target_link_libraries(Core
+        PUBLIC Fields
+        PUBLIC std::mdspan
+)
+
+# main executable
 target_include_directories(${PROJECT_NAME}
         PRIVATE ${MPI_CXX_INCLUDE_PATH}
         PRIVATE ${OPENMP_CXX_INCLUDE_PATH}
         PRIVATE ${HDF5_INCLUDE_DIRS}
         PRIVATE ${PROJECT_BINARY_DIR}
-        PRIVATE ${PROJECT_SOURCE_DIR}/src/core
-        PRIVATE ${PROJECT_SOURCE_DIR}/src/fields
+        PRIVATE src/core
+        PRIVATE src/fields
 )
 
 target_link_libraries(${PROJECT_NAME}
