@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.22)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 project(EPPIC
         VERSION 0.0.1
@@ -71,6 +72,8 @@ else ()
     message(STATUS "Library `spdlog` found on system.")
 endif ()
 
+set(MDSPAN_ENABLE_TESTS OFF)
+set(MDSPAN_ENABLE_BENCHMARKS OFF)
 find_package(mdspan QUIET)
 if (NOT mdspan_FOUND)
     message(STATUS "Library `mdspan` not found. Installing locally now.")
