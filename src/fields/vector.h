@@ -6,7 +6,8 @@
 
 #include "coordinate.h"
 
-template <typename T> struct Vector3 {
+template <typename T> class Vector3 {
+public:
   /*!
    * Vector3 constructor
    * @param dims field dimensions
