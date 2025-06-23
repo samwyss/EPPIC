@@ -17,10 +17,10 @@ template <typename T> struct Scalar3 {
 
     data_arr = std::make_unique<T[]>(nelems);
 
-    data = Kokkos::mdspan(data_arr.get(), dims);
+    data = Kokkos::mdspan(data_arr.get(), dims.x, dims.y, dims.z);
 
-    for (auto elem : data) {
-      elem = val;
+    for (size_t i = 0; i < nelems; ++i) {
+      data_arr[i] = val;
     }
   }
 
@@ -33,7 +33,7 @@ template <typename T> struct Scalar3 {
   Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> data;
 
 private:
-  // data container
+  /// data container
   std::unique_ptr<T[]> data_arr;
 };
 

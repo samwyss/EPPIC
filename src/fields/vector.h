@@ -23,18 +23,17 @@ template <typename T> struct Vector3 {
     y = Kokkos::mdspan(y_data.get(), dims);
     z = Kokkos::mdspan(z_data.get(), dims);
 
-    for (auto elem : x) {
-      elem = val;
-    }
-
-    for (auto elem : y) {
-      elem = val;
-    }
-
-    for (auto elem : z) {
-      elem = val;
+    for (size_t i = 0; i < nelems; i++) {
+      x_data[i] = val;
+      y_data[i] = val;
+      z_data[i] = val;
     }
   }
+
+  /*!
+   * Vector3 destructor
+   */
+  ~Vector3() = default;
 
   /// x-component data view
   Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> x;
