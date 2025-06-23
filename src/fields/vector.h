@@ -19,9 +19,9 @@ template <typename T> struct Vector3 {
     y_data = std::make_unique<T[]>(nelems);
     z_data = std::make_unique<T[]>(nelems);
 
-    x = Kokkos::mdspan(x_data.get(), dims);
-    y = Kokkos::mdspan(y_data.get(), dims);
-    z = Kokkos::mdspan(z_data.get(), dims);
+    x = Kokkos::mdspan(x_data.get(), dims.x, dims.y, dims.z);
+    y = Kokkos::mdspan(y_data.get(), dims.x, dims.y, dims.z);
+    z = Kokkos::mdspan(z_data.get(), dims.x, dims.y, dims.z);
 
     for (size_t i = 0; i < nelems; i++) {
       x_data[i] = val;
