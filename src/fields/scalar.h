@@ -9,7 +9,7 @@
 template <typename T> struct Scalar3 {
   /*!
    * Scalar3 constructor
-   * @param dims vector field dimensions
+   * @param dims field dimensions
    * @param val initial field value
    */
   Scalar3(const Coord3<size_t> &dims, const T val) {
