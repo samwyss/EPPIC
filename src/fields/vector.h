@@ -1,15 +1,24 @@
 #ifndef FIELDS_VECTOR_H
 #define FIELDS_VECTOR_H
 
-#include "scalar.h"
+#include <memory>
+
+#include "mdspan/mdspan.hpp"
 
 template <typename T> struct Vector3 {
-public:
-  Scalar3<T> x;
 
-  Scalar3<T> y;
+  Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> x;
 
-  Scalar3<T> z;
+  Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> y;
+
+  Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> z;
+
+private:
+  std::unique_ptr<T[]> x_data;
+
+  std::unique_ptr<T[]> y_data;
+
+  std::unique_ptr<T[]> z_data;
 };
 
 #endif // FIELDS_VECTOR_H
