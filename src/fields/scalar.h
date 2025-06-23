@@ -2,7 +2,7 @@
 #define FIELDS_SCALAR_H
 
 #include <cstddef>
-#include <mdspan>
+#include <mdspan/mdspan.hpp>
 #include <memory>
 
 #include "coordinate.h"

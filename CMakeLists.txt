@@ -71,6 +71,21 @@ else ()
     message(STATUS "Library `spdlog` found on system.")
 endif ()
 
+find_package(mdspan QUIET)
+if (NOT mdspan_FOUND)
+    message(STATUS "Library `mdspan` not found. Installing locally now.")
+    FetchContent_Declare(mdspan
+            GIT_REPOSITORY https://github.com/kokkos/mdspan.git
+            GIT_TAG stable
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
+            EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(mdspan)
+else ()
+    message(STATUS "Library `mdspan` found on system.")
+endif ()
+
 # testing --------------------------------------------------------------------------------------------------------------
 enable_testing()
 add_subdirectory(tests)
@@ -123,4 +138,5 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE spdlog::spdlog
         PRIVATE Core
         PRIVATE Fields
+        PRIVATE std::mdspan
 )
