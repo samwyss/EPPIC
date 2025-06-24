@@ -71,12 +71,12 @@ std::expected<void, std::string> FDTDEngine::advance_by(const double adv_t) {
 
   // (s) time step
   const double dt = adv_t / static_cast<double>(steps);
-
-
 }
 
 uint64_t FDTDEngine::calc_cfl_steps(const double time_span) const {
-  const double dt = 1.0 / (VAC_SPEED_OF_LIGHT * sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) + pow(geom.d_inv.z, 2)));
+  const double dt = 1.0 / (VAC_SPEED_OF_LIGHT *
+                           sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
+                                pow(geom.d_inv.z, 2)));
 
   return static_cast<uint64_t>(time_span / dt);
 }
