@@ -137,6 +137,7 @@ target_include_directories(Core
 
 target_link_libraries(Core
         PUBLIC Fields
+        PUBLIC Constants
         PUBLIC std::mdspan
 )
 
