@@ -71,7 +71,7 @@ public:
   size_t nvz;
 
 private:
-  FDTDGeometry(const Config &config);
+  explicit FDTDGeometry(const Config &config);
 };
 
 class FDTDEngine {
