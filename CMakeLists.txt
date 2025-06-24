@@ -133,6 +133,7 @@ add_library(Core
 
 target_include_directories(Core
         PUBLIC src/fields
+        PUBLIC src/constants
 )
 
 target_link_libraries(Core
