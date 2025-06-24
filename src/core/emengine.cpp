@@ -5,7 +5,7 @@ EMEngine::EMEngine(const Config &config)
 
 std::expected<EMEngine, std::string> EMEngine::create(const Config &config) {
   try {
-    return std::expected<EMEngine, std::string>{std::in_place, config};
+    return EMEngine(config);
   } catch (const std::runtime_error &err) {
     return std::unexpected(err.what());
   }
