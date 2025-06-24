@@ -25,11 +25,6 @@ public:
     }
   }
 
-  /*!
-   * Scalar3 destructor
-   */
-  ~Scalar3() = default;
-
   /// data view
   Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> data;
 

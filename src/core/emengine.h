@@ -17,11 +17,6 @@ public:
    */
   static std::expected<EMEngine, std::string> create(const Config &config);
 
-  /*!
-   * EMEngine destructor
-   */
-  ~EMEngine() = default;
-
 private:
   /*!
    * EMEngine constructor

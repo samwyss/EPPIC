@@ -31,11 +31,6 @@ public:
     }
   }
 
-  /*!
-   * Vector3 destructor
-   */
-  ~Vector3() = default;
-
   /// x-component data view
   Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> x;
 

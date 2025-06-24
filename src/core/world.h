@@ -9,8 +9,6 @@ class World {
 public:
   static std::expected<World, std::string> create();
 
-  ~World() = default;
-
   static std::expected<void, std::string> adv_by();
 
   static std::expected<void, std::string> adv_to();
