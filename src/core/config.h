@@ -3,8 +3,6 @@
 
 #include <cstdint>
 
-using namespace std;
-
 struct Config {
   /// (Hz) maximum frequency to resolve with FDTD engine
   double max_frequency = 15e9;
