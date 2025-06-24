@@ -60,12 +60,38 @@ public:
    */
   static std::expected<FDTDEngine, std::string> create(const Config &config);
 
+  /*!
+   * advances internal state to an end time
+   *
+   * will do nothing in the event that end_t <= time
+   * @param end_t (s) end time
+   * @return void
+   */
+  std::expected<void, std::string> advance_to(double end_t);
+
+  /*!
+   * advances internal state by a given time period
+   * @param adv_t (s) time period to advance by
+   * @return void
+   */
+  std::expected<void, std::string> advance_by(double adv_t);
+
 private:
   /*!
    * FDTDEngine constructor
    * @param config configuration object
    */
   explicit FDTDEngine(const Config &config);
+
+  /*!
+   * calculates the number of steps required to model a given time span
+   * @param time_span (s) time span to be modeled
+   * @return number of steps required by CFL stability condition
+   */
+  [[nodiscard]] uint64_t calc_cfl_steps(double time_span) const;
+
+  /// FDTD geometry
+  const FDTDGeometry geom;
 
   /// (V/m) electric field vector
   Vector3<double> e;
