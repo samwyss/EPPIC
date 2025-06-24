@@ -7,6 +7,7 @@
 #include <string>
 
 #include "config.h"
+#include "coordinate.h"
 #include "physical.h"
 #include "vector.h"
 
@@ -19,14 +20,8 @@ public:
    */
   static std::expected<FDTDGeometry, std::string> create(const Config &config);
 
-  /// (m) size of bounding box in the x-direction
-  const double x_len;
-
-  /// (m) size of bounding box in the y-direction
-  const double y_len;
-
-  /// (m) size of bounding box in the z-direction
-  const double z_len;
+  /// (m) size of bounding box in all directions
+  const Coord3<double> len;
 
   /// relative diagonally isotropic permittivity of material inside bounding box
   const double ep_r;
@@ -43,32 +38,14 @@ public:
   /// (S/m) diagonally isotropic conductivity of material inside bounding box
   const double sigma;
 
-  /// (m) spatial increment in x-direction
-  double dx;
+  /// (m) spatial increments in all directions
+  Coord3<double> d;
 
-  /// (m) spatial increment in y-direction
-  double dy;
+  /// (m) inverse spatial increments in all directions
+  Coord3<double> d_inv;
 
-  /// (m) spatial increment in z-direction
-  double dz;
-
-  /// (m) inverse spatial increment in x-direction
-  double dx_inv;
-
-  /// (m) inverse spatial increment in y-direction
-  double dy_inv;
-
-  /// (m) inverse spatial increment in z-direction
-  double dz_inv;
-
-  /// number of voxels in x-direction
-  size_t nvx;
-
-  /// number of voxels in y-direction
-  size_t nvy;
-
-  /// number of voxels in z-direction
-  size_t nvz;
+  /// number of voxels in all directions
+  Coord3<size_t> nv;
 
 private:
   explicit FDTDGeometry(const Config &config);

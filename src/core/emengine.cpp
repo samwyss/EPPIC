@@ -1,8 +1,8 @@
 #include "emengine.h"
 
 FDTDGeometry::FDTDGeometry(const Config &config)
-    : x_len(config.x_len), y_len(config.y_len), z_len(config.z_len),
-      ep_r(config.ep_r), mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY),
+    : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
+      mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY),
       mu(mu_r * VAC_PERMEABILITY), sigma(config.sigma) {
 
   // (m) minimum spatial step based on maximum frequency
@@ -12,26 +12,23 @@ FDTDGeometry::FDTDGeometry(const Config &config)
 
   // (m) minimum spatial step based on minimum feature size
   const double ds_min_feature_size =
-      std::min({x_len, y_len, z_len}) /
+      std::min({len.x, len.y, len.z}) /
       static_cast<double>(config.num_vox_min_feature);
 
   // (m) minimum required spatial step
   const double ds = std::min({ds_min_wavelength, ds_min_feature_size});
 
   // number of voxels in each direction snapped to ds
-  nvx = ceil(x_len / ds);
-  nvy = ceil(y_len / ds);
-  nvz = floor(z_len / ds);
+  nv = {static_cast<size_t>(ceil(len.x / ds)),
+        static_cast<size_t>(ceil(len.x / ds)),
+        static_cast<size_t>(ceil(len.x / ds))};
 
   // (m) final spatial steps
-  dx = x_len / static_cast<double>(nvx);
-  dy = y_len / static_cast<double>(nvy);
-  dz = z_len / static_cast<double>(nvz);
+  d = {len.x / static_cast<double>(nv.x), len.y / static_cast<double>(nv.y),
+       len.z / static_cast<double>(nv.z)};
 
   // (m^-1) inverse spatial steps
-  dx_inv = 1.0 / dx;
-  dy_inv = 1.0 / dy;
-  dz_inv = 1.0 / dz;
+  d_inv = {1.0 / d.x, 1.0 / d.y, 1.0 / d.z};
 
   // todo diagnostics
 }
