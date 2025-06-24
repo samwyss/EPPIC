@@ -2,18 +2,18 @@
 #define FIELDS_COORDINATE_H
 
 template <typename T> struct Coord3 {
-  const T x;
-  const T y;
-  const T z;
+  T x;
+  T y;
+  T z;
 };
 
 template <typename T> struct Coord2 {
-  const T x;
-  const T y;
+  T x;
+  T y;
 };
 
 template <typename T> struct Coord1 {
-  const T x;
+  T x;
 };
 
 #endif // FIELDS_COORDINATE_H
