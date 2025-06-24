@@ -1,6 +1,7 @@
 #ifndef CORE_CONFIG_H
 #define CORE_CONFIG_H
 
+#include <cstddef>
 #include <cstdint>
 
 struct Config {
