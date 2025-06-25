@@ -11,7 +11,7 @@ constexpr double VAC_PERMEABILITY = 4.0 * std::numbers::pi * 1e-7;
 
 /// (m/s) vacuum speed of light
 constexpr double VAC_SPEED_OF_LIGHT =
-    1.0 / (VAC_PERMITTIVITY * VAC_PERMEABILITY);
+    1.0 / sqrt(VAC_PERMITTIVITY * VAC_PERMEABILITY);
 
 /// (C) electron charge https://en.wikipedia.org/wiki/Elementary_charge
 constexpr double ELEC_CHARGE = 1.602176634e-19;
