@@ -11,6 +11,9 @@
 #include "physical.h"
 #include "vector.h"
 
+/*!
+ * FDTD geometry object
+ */
 class FDTDGeometry {
 public:
   /*!
@@ -51,6 +54,9 @@ private:
   explicit FDTDGeometry(const Config &config);
 };
 
+/*!
+ * FDTD engine object
+ */
 class FDTDEngine {
 public:
   /*!
