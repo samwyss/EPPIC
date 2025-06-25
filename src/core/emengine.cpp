@@ -28,7 +28,8 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
        len.z / static_cast<T>(nv.z)};
 
   // (m^-1) inverse spatial steps
-  d_inv = {1.0 / d.x, 1.0 / d.y, 1.0 / d.z};
+  d_inv = {static_cast<T>(1.0) / d.x, static_cast<T>(1.0) / d.y,
+           static_cast<T>(1.0) / d.z};
 
   // todo diagnostics
 }
@@ -100,10 +101,7 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
 template <std::floating_point T>
 uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
 
-  // todo use speed of light calculated from relative properties instead of
-  // todo vacuum
-
-  const T dt = 1.0 / (VAC_SPEED_OF_LIGHT<T> *
+  const T dt = 1.0 / (VAC_SPEED_OF_LIGHT<T> / sqrt(geom.ep_r * geom.mu_r) *
                       sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
                            pow(geom.d_inv.z, 2)));
 

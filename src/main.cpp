@@ -1,6 +1,8 @@
 #include <mdspan/mdspan.hpp>
 #include <spdlog/spdlog.h>
 
+#include <string>
+
 #include "scalar.h"
 #include "vector.h"
 #include "world.h"
@@ -22,7 +24,7 @@ int main(int argc, char **argv) {
 
   spdlog::set_level(spdlog::level::debug);
 
-  const auto fp_precision = "double";
+  const std::string fp_precision = "double";
 
   if (fp_precision == "double") {
     const auto config = Config<double>();
