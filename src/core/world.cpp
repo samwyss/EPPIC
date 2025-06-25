@@ -1,11 +1,11 @@
 #include "world.h"
 
 template <std::floating_point T>
-World<T>::World(const Config &config)
+World<T>::World(const Config<T> &config)
     : emengine(FDTDEngine<T>::create(config).value()) {}
 
 template <std::floating_point T>
-std::expected<World<T>, std::string> World<T>::create(const Config &config) {
+std::expected<World<T>, std::string> World<T>::create(const Config<T> &config) {
   try {
     return World(config);
   } catch (const std::runtime_error &err) {

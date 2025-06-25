@@ -1,7 +1,7 @@
 #include "emengine.h"
 
 template <std::floating_point T>
-FDTDGeometry<T>::FDTDGeometry(const Config &config)
+FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
     : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
       mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY<T>),
       mu(mu_r * VAC_PERMEABILITY<T>), sigma(config.sigma) {
@@ -35,7 +35,7 @@ FDTDGeometry<T>::FDTDGeometry(const Config &config)
 
 template <std::floating_point T>
 std::expected<FDTDGeometry<T>, std::string>
-FDTDGeometry<T>::create(const Config &config) {
+FDTDGeometry<T>::create(const Config<T> &config) {
   try {
     return FDTDGeometry(config);
   } catch (const std::runtime_error &err) {
@@ -44,13 +44,13 @@ FDTDGeometry<T>::create(const Config &config) {
 }
 
 template <std::floating_point T>
-FDTDEngine<T>::FDTDEngine(const Config &config)
+FDTDEngine<T>::FDTDEngine(const Config<T> &config)
     : geom(FDTDGeometry<T>::create(config).value()), e(geom.nv, 0.0),
       h(geom.nv, 0.0) {}
 
 template <std::floating_point T>
 std::expected<FDTDEngine<T>, std::string>
-FDTDEngine<T>::create(const Config &config) {
+FDTDEngine<T>::create(const Config<T> &config) {
   try {
     return FDTDEngine(config);
   } catch (const std::runtime_error &err) {

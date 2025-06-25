@@ -22,12 +22,14 @@ int main(int argc, char **argv) {
 
   spdlog::set_level(spdlog::level::debug);
 
-  const auto config = Config();
+  const auto fp_precision = "double";
 
-  if (config.fp_precision == "double") {
+  if (fp_precision == "double") {
+    const auto config = Config<double>();
     auto world = World<double>::create(config).value();
     world.advance_to(config.end_time).value();
-  } else if (config.fp_precision == "single") {
+  } else if (fp_precision == "single") {
+    const auto config = Config<float>();
     auto world = World<float>::create(config).value();
     world.advance_to(config.end_time).value();
   } else {

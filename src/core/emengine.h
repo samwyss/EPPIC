@@ -23,7 +23,8 @@ public:
    * @param config configuration object
    * @return FDTDGeometry
    */
-  static std::expected<FDTDGeometry, std::string> create(const Config &config);
+  static std::expected<FDTDGeometry, std::string>
+  create(const Config<T> &config);
 
   /// (m) size of bounding box in all directions
   const Coord3<T> len;
@@ -53,7 +54,7 @@ public:
   Coord3<size_t> nv;
 
 private:
-  explicit FDTDGeometry(const Config &config);
+  explicit FDTDGeometry(const Config<T> &config);
 };
 
 /*!
@@ -67,7 +68,7 @@ public:
    * @param config configuration object
    * @return FDTDEngine
    */
-  static std::expected<FDTDEngine, std::string> create(const Config &config);
+  static std::expected<FDTDEngine, std::string> create(const Config<T> &config);
 
   /*!
    * advances internal state to an end time
@@ -90,7 +91,7 @@ private:
    * FDTDEngine constructor
    * @param config configuration object
    */
-  explicit FDTDEngine(const Config &config);
+  explicit FDTDEngine(const Config<T> &config);
 
   /*!
    * calculates the number of steps required to model a given time span

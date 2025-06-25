@@ -20,7 +20,7 @@ public:
    * @param config configuration object
    * @return void
    */
-  static std::expected<World, std::string> create(const Config &config);
+  static std::expected<World, std::string> create(const Config<T> &config);
 
   /*!
    * advances internal state to an end time
@@ -43,7 +43,7 @@ private:
    * World constructor
    * @param config configuration object
    */
-  explicit World(const Config &config);
+  explicit World(const Config<T> &config);
 
   /// electromagnetic engine
   FDTDEngine<T> emengine;
