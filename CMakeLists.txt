@@ -140,6 +140,7 @@ target_link_libraries(Core
         PUBLIC Fields
         PUBLIC Constants
         PUBLIC std::mdspan
+        PUBLIC spdlog::spdlog
 )
 
 # main executable
