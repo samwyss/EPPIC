@@ -3,12 +3,12 @@
 template <std::floating_point T>
 FDTDGeometry<T>::FDTDGeometry(const Config &config)
     : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
-      mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY),
-      mu(mu_r * VAC_PERMEABILITY), sigma(config.sigma) {
+      mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY<T>),
+      mu(mu_r * VAC_PERMEABILITY<T>), sigma(config.sigma) {
 
   // (m) minimum spatial step based on maximum frequency
   const T ds_min_wavelength =
-      (VAC_SPEED_OF_LIGHT / (config.max_frequency * sqrt(ep_r * mu_r))) /
+      (VAC_SPEED_OF_LIGHT<T> / (config.max_frequency * sqrt(ep_r * mu_r))) /
       static_cast<T>(config.num_vox_min_wavelength);
 
   // (m) minimum spatial step based on minimum feature size
@@ -20,8 +20,8 @@ FDTDGeometry<T>::FDTDGeometry(const Config &config)
 
   // number of voxels in each direction snapped to ds
   nv = {static_cast<size_t>(ceil(static_cast<double>(len.x) / ds)),
-        static_cast<size_t>(static_cast<double>(ceil(len.y) / ds)),
-        static_cast<size_t>(static_cast<double>(ceil(len.z) / ds))};
+        static_cast<size_t>(ceil(static_cast<double>(len.y) / ds)),
+        static_cast<size_t>(ceil(static_cast<double>(len.z) / ds))};
 
   // (m) final spatial steps
   d = {len.x / static_cast<T>(nv.x), len.y / static_cast<T>(nv.y),
@@ -103,7 +103,7 @@ uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
   // todo use speed of light calculated from relative properties instead of
   // todo vacuum
 
-  const T dt = 1.0 / (VAC_SPEED_OF_LIGHT *
+  const T dt = 1.0 / (VAC_SPEED_OF_LIGHT<T> *
                       sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
                            pow(geom.d_inv.z, 2)));
 

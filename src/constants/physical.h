@@ -15,7 +15,7 @@ constexpr T VAC_PERMEABILITY = 4.0 * std::numbers::pi * 1e-7;
 /// (m/s) vacuum speed of light
 template <std::floating_point T>
 constexpr T VAC_SPEED_OF_LIGHT =
-    static_cast<T>(1.0 / sqrt(VAC_PERMITTIVITY * VAC_PERMEABILITY));
+    static_cast<T>(1.0 / sqrt(VAC_PERMITTIVITY<T> * VAC_PERMEABILITY<T>));
 
 /// (C) electron charge https://en.wikipedia.org/wiki/Elementary_charge
 template <std::floating_point T>
@@ -35,6 +35,6 @@ constexpr double BOLTZMANN = static_cast<T>(1.380649e-23);
 
 /// (K) electron volt temperature
 template <std::floating_point T>
-constexpr double EV_TEMP = static_cast<T>(ELEC_CHARGE / BOLTZMANN);
+constexpr double EV_TEMP = static_cast<T>(ELEC_CHARGE<T> / BOLTZMANN<T>);
 
 #endif // CONSTANTS_PHYSICAL_HPP
