@@ -1,18 +1,38 @@
 #ifndef FIELDS_COORDINATE_H
 #define FIELDS_COORDINATE_H
 
-template <typename T> struct Coord3 {
+#include <type_traits>
+
+/*!
+ * arithmetic container with x, y, and z components
+ * @tparam T arithmetic type
+ */
+template <typename T>
+  requires std::is_arithmetic_v<T>
+struct Coord3 {
   T x;
   T y;
   T z;
 };
 
-template <typename T> struct Coord2 {
+/*!
+ * arithmetic container with an x and y component
+ * @tparam T arithmetic type
+ */
+template <typename T>
+  requires std::is_arithmetic_v<T>
+struct Coord2 {
   T x;
   T y;
 };
 
-template <typename T> struct Coord1 {
+/*!
+ * arithmetic container with an x component
+ * @tparam T arithmetic type
+ */
+template <typename T>
+  requires std::is_arithmetic_v<T>
+struct Coord1 {
   T x;
 };
 

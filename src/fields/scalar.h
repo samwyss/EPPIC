@@ -6,7 +6,13 @@
 
 #include "coordinate.h"
 
-template <typename T> class Scalar3 {
+/*!
+ * 3D scalar field
+ * @tparam T arithmetic type
+ */
+template <typename T>
+  requires std::is_arithmetic_v<T>
+class Scalar3 {
 public:
   /*!
    * Scalar3 constructor
@@ -26,7 +32,7 @@ public:
   }
 
   /// data view
-  Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> data;
+  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> data;
 
 private:
   /// data container

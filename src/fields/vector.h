@@ -6,7 +6,13 @@
 
 #include "coordinate.h"
 
-template <typename T> class Vector3 {
+/*!
+ * 3D vector field
+ * @tparam T arithmetic type
+ */
+template <typename T>
+  requires std::is_arithmetic_v<T>
+class Vector3 {
 public:
   /*!
    * Vector3 constructor
@@ -32,13 +38,13 @@ public:
   }
 
   /// x-component data view
-  Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> x;
+  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> x;
 
   /// y-component data view
-  Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> y;
+  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> y;
 
   /// z-component data view
-  Kokkos::mdspan<double, Kokkos::dextents<size_t, 3>> z;
+  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> z;
 
 private:
   /// x-component data container

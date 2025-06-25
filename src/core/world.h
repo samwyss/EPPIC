@@ -4,14 +4,16 @@
 #include <expected>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 #include "config.h"
 #include "emengine.h"
 
 /*!
  * world object
+ * @tparam T floating point precision
  */
-class World {
+template <std::floating_point T> class World {
 public:
   /*!
    * World static factory method
@@ -27,14 +29,14 @@ public:
    * @param end_t (s) end time
    * @return void
    */
-  std::expected<void, std::string> advance_to(double end_t);
+  std::expected<void, std::string> advance_to(T end_t);
 
   /*!
    * advances internal state by a given time period
    * @param adv_t (s) time period to advance by
    * @return void
    */
-  std::expected<void, std::string> advance_by(double adv_t);
+  std::expected<void, std::string> advance_by(T adv_t);
 
 private:
   /*!
@@ -44,10 +46,10 @@ private:
   explicit World(const Config &config);
 
   /// electromagnetic engine
-  FDTDEngine emengine;
+  FDTDEngine<T> emengine;
 
   /// (s) elapsed time
-  double time = 0.0;
+  T time = 0.0;
 };
 
 #endif // CORE_WORLD_H

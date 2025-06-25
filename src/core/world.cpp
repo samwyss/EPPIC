@@ -1,9 +1,11 @@
 #include "world.h"
 
-World::World(const Config &config)
-    : emengine(FDTDEngine::create(config).value()) {}
+template <std::floating_point T>
+World<T>::World(const Config &config)
+    : emengine(FDTDEngine<T>::create(config).value()) {}
 
-std::expected<World, std::string> World::create(const Config &config) {
+template <std::floating_point T>
+std::expected<World<T>, std::string> World<T>::create(const Config &config) {
   try {
     return World(config);
   } catch (const std::runtime_error &err) {
@@ -11,17 +13,19 @@ std::expected<World, std::string> World::create(const Config &config) {
   }
 }
 
-std::expected<void, std::string> World::advance_to(const double end_t) {
+template <std::floating_point T>
+std::expected<void, std::string> World<T>::advance_to(const T end_t) {
   if (end_t > time) {
     // (s) time difference between current state and end time
-    const double adv_t = end_t - time;
+    const T adv_t = end_t - time;
 
     advance_by(adv_t).value();
   }
   return {};
 }
 
-std::expected<void, std::string> World::advance_by(const double adv_t) {
+template <std::floating_point T>
+std::expected<void, std::string> World<T>::advance_by(const T adv_t) {
 
   // get timesteps from sub solvers
 
@@ -32,3 +36,7 @@ std::expected<void, std::string> World::advance_by(const double adv_t) {
 
   return {};
 }
+
+// explicit template instantiation
+template class World<float>;
+template class World<double>;

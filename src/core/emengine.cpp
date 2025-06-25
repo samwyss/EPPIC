@@ -1,31 +1,31 @@
 #include "emengine.h"
 
-FDTDGeometry::FDTDGeometry(const Config &config)
+template <std::floating_point T>
+FDTDGeometry<T>::FDTDGeometry(const Config &config)
     : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
       mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY),
       mu(mu_r * VAC_PERMEABILITY), sigma(config.sigma) {
 
   // (m) minimum spatial step based on maximum frequency
-  const double ds_min_wavelength =
+  const T ds_min_wavelength =
       (VAC_SPEED_OF_LIGHT / (config.max_frequency * sqrt(ep_r * mu_r))) /
-      static_cast<double>(config.num_vox_min_wavelength);
+      static_cast<T>(config.num_vox_min_wavelength);
 
   // (m) minimum spatial step based on minimum feature size
-  const double ds_min_feature_size =
-      std::min({len.x, len.y, len.z}) /
-      static_cast<double>(config.num_vox_min_feature);
+  const T ds_min_feature_size = std::min({len.x, len.y, len.z}) /
+                                static_cast<T>(config.num_vox_min_feature);
 
   // (m) minimum required spatial step
-  const double ds = std::min({ds_min_wavelength, ds_min_feature_size});
+  const T ds = std::min({ds_min_wavelength, ds_min_feature_size});
 
   // number of voxels in each direction snapped to ds
-  nv = {static_cast<size_t>(ceil(len.x / ds)),
-        static_cast<size_t>(ceil(len.x / ds)),
-        static_cast<size_t>(ceil(len.x / ds))};
+  nv = {static_cast<size_t>(ceil(static_cast<double>(len.x) / ds)),
+        static_cast<size_t>(static_cast<double>(ceil(len.y) / ds)),
+        static_cast<size_t>(static_cast<double>(ceil(len.z) / ds))};
 
   // (m) final spatial steps
-  d = {len.x / static_cast<double>(nv.x), len.y / static_cast<double>(nv.y),
-       len.z / static_cast<double>(nv.z)};
+  d = {len.x / static_cast<T>(nv.x), len.y / static_cast<T>(nv.y),
+       len.z / static_cast<T>(nv.z)};
 
   // (m^-1) inverse spatial steps
   d_inv = {1.0 / d.x, 1.0 / d.y, 1.0 / d.z};
@@ -33,8 +33,9 @@ FDTDGeometry::FDTDGeometry(const Config &config)
   // todo diagnostics
 }
 
-std::expected<FDTDGeometry, std::string>
-FDTDGeometry::create(const Config &config) {
+template <std::floating_point T>
+std::expected<FDTDGeometry<T>, std::string>
+FDTDGeometry<T>::create(const Config &config) {
   try {
     return FDTDGeometry(config);
   } catch (const std::runtime_error &err) {
@@ -42,12 +43,14 @@ FDTDGeometry::create(const Config &config) {
   }
 }
 
-FDTDEngine::FDTDEngine(const Config &config)
-    : geom(FDTDGeometry::create(config).value()),
-      e(Vector3<double>(geom.nv, 0.0)), h(geom.nv, 0.0) {}
+template <std::floating_point T>
+FDTDEngine<T>::FDTDEngine(const Config &config)
+    : geom(FDTDGeometry<T>::create(config).value()), e(geom.nv, 0.0),
+      h(geom.nv, 0.0) {}
 
-std::expected<FDTDEngine, std::string>
-FDTDEngine::create(const Config &config) {
+template <std::floating_point T>
+std::expected<FDTDEngine<T>, std::string>
+FDTDEngine<T>::create(const Config &config) {
   try {
     return FDTDEngine(config);
   } catch (const std::runtime_error &err) {
@@ -55,29 +58,31 @@ FDTDEngine::create(const Config &config) {
   }
 }
 
-std::expected<void, std::string> FDTDEngine::advance_to(const double end_t) {
+template <std::floating_point T>
+std::expected<void, std::string> FDTDEngine<T>::advance_to(const T end_t) {
   if (end_t > time) {
     // (s) time difference between current state and end time
-    const double adv_t = end_t - time;
+    const T adv_t = end_t - time;
 
     advance_by(adv_t).value();
   }
   return {};
 }
 
-std::expected<void, std::string> FDTDEngine::advance_by(const double adv_t) {
+template <std::floating_point T>
+std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
   // number of steps required by CFL condition
   const size_t steps = calc_cfl_steps(adv_t);
 
   // (s) time step
-  const double dt = adv_t / static_cast<double>(steps);
+  const T dt = adv_t / static_cast<T>(steps);
 
   // preprocess loop constants
-  const double ea = 1.0 / (geom.ep / dt + geom.sigma / 2.0);
-  const double eb = geom.ep / dt - geom.sigma / 2.0;
-  const double hxa = dt * geom.d_inv.x / geom.mu;
-  const double hya = dt * geom.d_inv.y / geom.mu;
-  const double hza = dt * geom.d_inv.z / geom.mu;
+  const T ea = 1.0 / (geom.ep / dt + geom.sigma / 2.0);
+  const T eb = geom.ep / dt - geom.sigma / 2.0;
+  const T hxa = dt * geom.d_inv.x / geom.mu;
+  const T hya = dt * geom.d_inv.y / geom.mu;
+  const T hza = dt * geom.d_inv.z / geom.mu;
 
   // todo pre loop diagnostics
   spdlog::debug("steps: {}", steps);
@@ -92,18 +97,26 @@ std::expected<void, std::string> FDTDEngine::advance_by(const double adv_t) {
   return {};
 }
 
-uint64_t FDTDEngine::calc_cfl_steps(const double time_span) const {
+template <std::floating_point T>
+uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
 
   // todo use speed of light calculated from relative properties instead of
   // todo vacuum
 
-  const double dt = 1.0 / (VAC_SPEED_OF_LIGHT *
-                           sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
-                                pow(geom.d_inv.z, 2)));
+  const T dt = 1.0 / (VAC_SPEED_OF_LIGHT *
+                      sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
+                           pow(geom.d_inv.z, 2)));
 
   return static_cast<uint64_t>(ceil(time_span / dt));
 }
 
-std::expected<void, std::string> FDTDEngine::step(const double dt) {
+template <std::floating_point T>
+std::expected<void, std::string> FDTDEngine<T>::step(const T dt) {
   return {};
 }
+
+// explicit template instantiation
+template class FDTDGeometry<double>;
+template class FDTDGeometry<float>;
+template class FDTDEngine<double>;
+template class FDTDEngine<float>;

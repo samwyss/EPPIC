@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 struct Config {
   /// (Hz) maximum frequency to resolve with FDTD engine
@@ -37,6 +38,9 @@ struct Config {
 
   /// (S / m) diagonally isotropic conductivity of material in bounding box
   double sigma = 0.0;
+
+  /// floating point precision
+  std::string fp_precision = "double";
 };
 
 #endif // CORE_CONFIG_H

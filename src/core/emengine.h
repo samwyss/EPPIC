@@ -14,8 +14,9 @@
 
 /*!
  * FDTD geometry object
+ * @tparam T floating point precision
  */
-class FDTDGeometry {
+template <std::floating_point T> class FDTDGeometry {
 public:
   /*!
    * FDTDGeometry static factory method
@@ -25,28 +26,28 @@ public:
   static std::expected<FDTDGeometry, std::string> create(const Config &config);
 
   /// (m) size of bounding box in all directions
-  const Coord3<double> len;
+  const Coord3<T> len;
 
   /// relative diagonally isotropic permittivity of material inside bounding box
-  const double ep_r;
+  const T ep_r;
 
   /// relative diagonally isotropic permeability of material inside bounding box
-  const double mu_r;
+  const T mu_r;
 
   /// (F/m) diagonally isotropic permittivity of material inside bounding box
-  const double ep;
+  const T ep;
 
   /// (H/m) diagonally isotropic permeability of material inside bounding box
-  const double mu;
+  const T mu;
 
   /// (S/m) diagonally isotropic conductivity of material inside bounding box
-  const double sigma;
+  const T sigma;
 
   /// (m) spatial increments in all directions
-  Coord3<double> d;
+  Coord3<T> d;
 
   /// (m) inverse spatial increments in all directions
-  Coord3<double> d_inv;
+  Coord3<T> d_inv;
 
   /// number of voxels in all directions
   Coord3<size_t> nv;
@@ -57,8 +58,9 @@ private:
 
 /*!
  * FDTD engine object
+ * @tparam T floating point precision
  */
-class FDTDEngine {
+template <std::floating_point T> class FDTDEngine {
 public:
   /*!
    * FDTDEngine static factory method
@@ -74,14 +76,14 @@ public:
    * @param end_t (s) end time
    * @return void
    */
-  std::expected<void, std::string> advance_to(double end_t);
+  std::expected<void, std::string> advance_to(T end_t);
 
   /*!
    * advances internal state by a given time period
    * @param adv_t (s) time period to advance by
    * @return void
    */
-  std::expected<void, std::string> advance_by(double adv_t);
+  std::expected<void, std::string> advance_by(T adv_t);
 
 private:
   /*!
@@ -95,26 +97,26 @@ private:
    * @param time_span (s) time span to be modeled
    * @return number of steps required by CFL stability condition
    */
-  [[nodiscard]] uint64_t calc_cfl_steps(double time_span) const;
+  [[nodiscard]] uint64_t calc_cfl_steps(T time_span) const;
 
   /*!
    * advances internal field state by one time step
    * @param dt (s) time step
    * @return void
    */
-  std::expected<void, std::string> step(double dt);
+  std::expected<void, std::string> step(T dt);
 
   /// FDTD geometry
-  const FDTDGeometry geom;
+  const FDTDGeometry<T> geom;
 
   /// (V/m) electric field vector
-  Vector3<double> e;
+  Vector3<T> e;
 
   /// (A/m) magnetic field vector
-  Vector3<double> h;
+  Vector3<T> h;
 
   /// (s) elapsed time
-  double time = 0.0;
+  T time = 0.0;
 };
 
 #endif // CORE_EMENGINE_H

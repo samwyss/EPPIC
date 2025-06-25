@@ -24,7 +24,15 @@ int main(int argc, char **argv) {
 
   const auto config = Config();
 
-  auto world = World::create(config).value();
+  if (config.fp_precision == "double") {
+    auto world = World<double>::create(config).value();
+    world.advance_to(config.end_time).value();
+  } else if (config.fp_precision == "single") {
+    auto world = World<float>::create(config).value();
+    world.advance_to(config.end_time).value();
+  } else {
+    return EXIT_FAILURE;
+  }
 
-  world.advance_to(config.end_time).value();
+  return EXIT_SUCCESS;
 }
