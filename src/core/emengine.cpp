@@ -101,7 +101,7 @@ uint64_t FDTDEngine::calc_cfl_steps(const double time_span) const {
                            sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
                                 pow(geom.d_inv.z, 2)));
 
-  return static_cast<uint64_t>(time_span / dt);
+  return static_cast<uint64_t>(ceil(time_span / dt));
 }
 
 std::expected<void, std::string> FDTDEngine::step(const double dt) {
