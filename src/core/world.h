@@ -15,9 +15,10 @@ class World {
 public:
   /*!
    * World static factory method
+   * @param config configuration object
    * @return void
    */
-  static std::expected<World, std::string> create();
+  static std::expected<World, std::string> create(const Config &config);
 
   /*!
    * advances internal state to an end time
@@ -38,11 +39,9 @@ public:
 private:
   /*!
    * World constructor
+   * @param config configuration object
    */
-  World();
-
-  /// model configuration
-  const Config config;
+  explicit World(const Config &config);
 
   /// electromagnetic engine
   FDTDEngine emengine;

@@ -1,11 +1,11 @@
 #include "world.h"
 
-World::World()
-    : config(Config()), emengine(FDTDEngine::create(config).value()) {}
+World::World(const Config &config)
+    : emengine(FDTDEngine::create(config).value()) {}
 
-std::expected<World, std::string> World::create() {
+std::expected<World, std::string> World::create(const Config &config) {
   try {
-    return World();
+    return World(config);
   } catch (const std::runtime_error &err) {
     return std::unexpected(err.what());
   }

@@ -3,6 +3,7 @@
 
 #include "scalar.h"
 #include "vector.h"
+#include "world.h"
 
 /*!
  * main driver function and build target
@@ -21,14 +22,9 @@ int main(int argc, char **argv) {
 
   spdlog::set_level(spdlog::level::debug);
 
-  auto field = Scalar3<double>({3, 3, 3}, 5.0);
-  auto vfield = Vector3<double>({10, 10, 10}, 5.0);
+  const auto config = Config();
 
-  for (size_t i = 0; i < field.data.extent(0); ++i) {
-    for (size_t j = 0; j < field.data.extent(1); ++j) {
-      for (size_t k = 0; k < field.data.extent(2); ++k) {
-        spdlog::debug(field.data[4, 4, 4]);
-      }
-    }
-  }
+  auto world = World::create(config).value();
+
+  world.advance_to(config.end_time).value();
 }
