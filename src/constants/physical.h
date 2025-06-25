@@ -2,30 +2,39 @@
 #define CONSTANTS_PHYSICAL_HPP
 
 #include <numbers>
+#include <type_traits>
 
 /// (F/m) vacuum permittivity https://en.wikipedia.org/wiki/Vacuum_permittivity
-constexpr double VAC_PERMITTIVITY = 8.8541878188e-12;
+template <std::floating_point T>
+constexpr T VAC_PERMITTIVITY = static_cast<T>(8.8541878188e-12);
 
 /// (H/m) vacuum permeability https://en.wikipedia.org/wiki/Vacuum_permeability
-constexpr double VAC_PERMEABILITY = 4.0 * std::numbers::pi * 1e-7;
+template <std::floating_point T>
+constexpr T VAC_PERMEABILITY = 4.0 * std::numbers::pi * 1e-7;
 
 /// (m/s) vacuum speed of light
-constexpr double VAC_SPEED_OF_LIGHT =
-    1.0 / sqrt(VAC_PERMITTIVITY * VAC_PERMEABILITY);
+template <std::floating_point T>
+constexpr T VAC_SPEED_OF_LIGHT =
+    static_cast<T>(1.0 / sqrt(VAC_PERMITTIVITY * VAC_PERMEABILITY));
 
 /// (C) electron charge https://en.wikipedia.org/wiki/Elementary_charge
-constexpr double ELEC_CHARGE = 1.602176634e-19;
+template <std::floating_point T>
+constexpr T ELEC_CHARGE = static_cast<T>(1.602176634e-19);
 
 /// (kg) atomic mass unit https://en.wikipedia.org/wiki/Dalton_(unit)
-constexpr double AMU = 1.66053906892e-27;
+template <std::floating_point T>
+constexpr double AMU = static_cast<T>(1.66053906892e-27);
 
 /// (kg) electron mass https://en.wikipedia.org/wiki/Electron_mass
-constexpr double ELEC_MASS = 9.1093837139e-31;
+template <std::floating_point T>
+constexpr double ELEC_MASS = static_cast<T>(9.1093837139e-31);
 
 /// (J/K) boltzmann constant https://en.wikipedia.org/wiki/Boltzmann_constant
-constexpr double BOLTZMANN = 1.380649e-23;
+template <std::floating_point T>
+constexpr double BOLTZMANN = static_cast<T>(1.380649e-23);
 
 /// (K) electron volt temperature
-constexpr double EV_TEMP = ELEC_CHARGE / BOLTZMANN;
+template <std::floating_point T>
+constexpr double EV_TEMP = static_cast<T>(ELEC_CHARGE / BOLTZMANN);
 
 #endif // CONSTANTS_PHYSICAL_HPP
