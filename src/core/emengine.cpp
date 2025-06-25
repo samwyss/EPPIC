@@ -8,8 +8,9 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
 
   // (m) minimum spatial step based on maximum frequency
   const T ds_min_wavelength =
-      (VAC_SPEED_OF_LIGHT<T> / (config.max_frequency * sqrt(ep_r * mu_r))) /
-      static_cast<T>(config.num_vox_min_wavelength);
+      VAC_SPEED_OF_LIGHT<T> /
+      (sqrt(ep_r * mu_r) * static_cast<T>(config.num_vox_min_wavelength) *
+       config.max_frequency);
 
   // (m) minimum spatial step based on minimum feature size
   const T ds_min_feature_size = std::min({len.x, len.y, len.z}) /
