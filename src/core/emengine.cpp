@@ -71,6 +71,22 @@ std::expected<void, std::string> FDTDEngine::advance_by(const double adv_t) {
 
   // (s) time step
   const double dt = adv_t / static_cast<double>(steps);
+
+  // preprocess loop constants
+  const double ea = 1.0 / (geom.ep / dt + geom.sigma / 2.0);
+  const double eb = geom.ep / dt - geom.sigma / 2.0;
+  const double hxa = dt * geom.d_inv.x / geom.mu;
+  const double hya = dt * geom.d_inv.y / geom.mu;
+  const double hza = dt * geom.d_inv.z / geom.mu;
+
+  // todo pre loop diagnostics
+
+  // main time loop
+  for (uint64_t i = 0; i < steps; ++i) {
+    step(dt).value();
+  }
+
+  return {};
 }
 
 uint64_t FDTDEngine::calc_cfl_steps(const double time_span) const {
@@ -79,4 +95,8 @@ uint64_t FDTDEngine::calc_cfl_steps(const double time_span) const {
                                 pow(geom.d_inv.z, 2)));
 
   return static_cast<uint64_t>(time_span / dt);
+}
+
+std::expected<void, std::string> FDTDEngine::step(const double dt) {
+  return {};
 }

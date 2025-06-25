@@ -90,6 +90,13 @@ private:
    */
   [[nodiscard]] uint64_t calc_cfl_steps(double time_span) const;
 
+  /*!
+   * advances internal field state by one time step
+   * @param dt (s) time step
+   * @return void
+   */
+  std::expected<void, std::string> step(double dt);
+
   /// FDTD geometry
   const FDTDGeometry geom;
 
