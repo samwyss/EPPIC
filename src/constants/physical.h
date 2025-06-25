@@ -23,18 +23,18 @@ constexpr T ELEC_CHARGE = static_cast<T>(1.602176634e-19);
 
 /// (kg) atomic mass unit https://en.wikipedia.org/wiki/Dalton_(unit)
 template <std::floating_point T>
-constexpr double AMU = static_cast<T>(1.66053906892e-27);
+constexpr T AMU = static_cast<T>(1.66053906892e-27);
 
 /// (kg) electron mass https://en.wikipedia.org/wiki/Electron_mass
 template <std::floating_point T>
-constexpr double ELEC_MASS = static_cast<T>(9.1093837139e-31);
+constexpr T ELEC_MASS = static_cast<T>(9.1093837139e-31);
 
 /// (J/K) boltzmann constant https://en.wikipedia.org/wiki/Boltzmann_constant
 template <std::floating_point T>
-constexpr double BOLTZMANN = static_cast<T>(1.380649e-23);
+constexpr T BOLTZMANN = static_cast<T>(1.380649e-23);
 
 /// (K) electron volt temperature
 template <std::floating_point T>
-constexpr double EV_TEMP = static_cast<T>(ELEC_CHARGE<T> / BOLTZMANN<T>);
+constexpr T EV_TEMP = static_cast<T>(ELEC_CHARGE<T> / BOLTZMANN<T>);
 
 #endif // CONSTANTS_PHYSICAL_HPP
