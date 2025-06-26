@@ -1,6 +1,7 @@
 #ifndef CONSTANTS_PHYSICAL_HPP
 #define CONSTANTS_PHYSICAL_HPP
 
+#include <cmath>
 #include <numbers>
 #include <type_traits>
 
