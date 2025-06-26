@@ -18,10 +18,13 @@ message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         add_compile_options(-O0 -Wall -g3)
+        add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
     elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
         add_compile_options(-O3 -g0 -DNDEBUG -Wall -fstrict-aliasing -ftree-vectorize -march=native -mtune=native -mprefer-vector-width=512 -fno-trapping-math -fno-math-errno -ffast-math -flto)
+        add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
     elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
         add_compile_options(-O3 -g3 -Wall -fstrict-aliasing -ftree-vectorize -march=native -mtune=native -mprefer-vector-width=512 -fno-trapping-math -fno-math-errno -ffast-math)
+        add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
     endif ()
 else ()
     message(STATUS "Build flags are not explicitly set for this compiler.")
@@ -112,18 +115,6 @@ add_library(Constants
 
 set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
 
-# Logger library
-add_library(Logger
-        src/logger/logger.h
-        src/logger/logger.cpp
-)
-
-set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
-
-target_link_libraries(Logger
-        PUBLIC spdlog::spdlog
-)
-
 # Fields library
 add_library(Fields
         src/fields/coordinate.h
@@ -146,13 +137,11 @@ add_library(Core
 target_include_directories(Core
         PUBLIC src/fields
         PUBLIC src/constants
-        PUBLIC src/logger
 )
 
 target_link_libraries(Core
         PUBLIC Fields
         PUBLIC Constants
-        PUBLIC Logger
         PUBLIC std::mdspan
         PUBLIC spdlog::spdlog
 )
