@@ -18,8 +18,9 @@
 int main(int argc, char **argv) {
 
   // todo
-  // logging / diagnostics
-  // improved error handling
+  // finish logging emengine
+  // improve logging in main
+  // log other constructs
   // fdtd engine
   // hdf5 io
   // particles
