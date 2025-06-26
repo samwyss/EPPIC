@@ -11,8 +11,8 @@ project(EPPIC
 )
 
 # compiler settings ----------------------------------------------------------------------------------------------------
-message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
-message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "C Compiler: ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_VERSION}")
 message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
