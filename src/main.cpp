@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   }
 
   // initial diagnostics
-  SPDLOG_INFO("EPPIC run start");
+  SPDLOG_INFO("EPPIC begin");
 
   // floating point precision
   // todo get this from configuration
@@ -111,6 +111,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  SPDLOG_INFO("EPPIC run end");
+  SPDLOG_INFO("EPPIC end");
   return EXIT_SUCCESS;
 }
