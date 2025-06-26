@@ -87,8 +87,6 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
   const T hza = dt * geom.d_inv.z / geom.mu;
 
   // todo pre loop diagnostics
-  spdlog::debug("steps: {}", steps);
-  spdlog::debug("num vox: {}", e.x.size());
 
   // main time loop
   for (uint64_t i = 0; i < steps; ++i) {
