@@ -22,7 +22,7 @@ public:
    * @param config configuration object
    * @return FDTDGeometry
    */
-  static std::expected<FDTDGeometry, std::string>
+  [[nodiscard]] static std::expected<FDTDGeometry, std::string>
   create(const Config<T> &config);
 
   /// (m) size of bounding box in all directions
@@ -67,7 +67,8 @@ public:
    * @param config configuration object
    * @return FDTDEngine
    */
-  static std::expected<FDTDEngine, std::string> create(const Config<T> &config);
+  [[nodiscard]] static std::expected<FDTDEngine, std::string>
+  create(const Config<T> &config);
 
   /*!
    * advances internal state to an end time
@@ -104,7 +105,7 @@ private:
    * @param dt (s) time step
    * @return void
    */
-  std::expected<void, std::string> step(T dt);
+  [[nodiscard]] std::expected<void, std::string> step(T dt);
 
   /// FDTD geometry
   const FDTDGeometry<T> geom;
