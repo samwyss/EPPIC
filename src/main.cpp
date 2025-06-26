@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "logger.h"
 #include "scalar.h"
 #include "vector.h"
 #include "world.h"
@@ -16,6 +17,8 @@
 int main(int argc, char **argv) {
 
   // todo
+  // logging / diagnostics
+  // improved error handling
   // fdtd engine
   // hdf5 io
   // particles
@@ -25,6 +28,9 @@ int main(int argc, char **argv) {
   spdlog::set_level(spdlog::level::debug);
 
   const std::string fp_precision = "double";
+
+  auto _ = Logger::init();
+  auto logger = Logger::get();
 
   if (fp_precision == "double") {
     const auto config = Config<double>();
