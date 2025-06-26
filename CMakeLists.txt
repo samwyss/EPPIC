@@ -112,6 +112,18 @@ add_library(Constants
 
 set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
 
+# Logger library
+add_library(Logger
+        src/logger/logger.h
+        src/logger/logger.cpp
+)
+
+set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
+
+target_link_libraries(Logger
+        PUBLIC spdlog::spdlog
+)
+
 # Fields library
 add_library(Fields
         src/fields/coordinate.h
@@ -134,11 +146,13 @@ add_library(Core
 target_include_directories(Core
         PUBLIC src/fields
         PUBLIC src/constants
+        PUBLIC src/logger
 )
 
 target_link_libraries(Core
         PUBLIC Fields
         PUBLIC Constants
+        PUBLIC Logger
         PUBLIC std::mdspan
         PUBLIC spdlog::spdlog
 )
