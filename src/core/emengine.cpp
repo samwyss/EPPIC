@@ -179,6 +179,67 @@ uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
 
 template <std::floating_point T> void FDTDEngine<T>::step(const T dt) {}
 
+template <std::floating_point T>
+void FDTDEngine<T>::update_e(const T ea, const T eb) {
+  update_ex(ea, eb);
+  update_ey(ea, eb);
+  update_ez(ea, eb);
+}
+
+template <std::floating_point T> void FDTDEngine<T>::update_h() {
+  update_hx();
+  update_hy();
+  update_hz();
+}
+
+template <std::floating_point T>
+void FDTDEngine<T>::update_ex(const T ea, const T eb) {
+  // assumes PEC outer boundary
+  for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
+        e.x[i, j, k] = ea * (eb * e.x[i, j, k] +
+                             geom.d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]) -
+                             geom.d_inv.z * (h.y[i, j, k] - h.z[i, j, k - 1]));
+      }
+    }
+  }
+}
+
+template <std::floating_point T>
+void FDTDEngine<T>::update_ey(const T ea, const T eb) {
+  // assumes PEC outer boundary
+  for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
+        e.y[i, j, k] = ea * (eb * e.y[i, j, k] +
+                             geom.d_inv.z * (h.x[i, j, k] - h.x[i, j, k - 1]) -
+                             geom.d_inv.x * (h.z[i, j, k] - h.z[i - 1, j, k]));
+      }
+    }
+  }
+}
+
+template <std::floating_point T>
+void FDTDEngine<T>::update_ez(const T ea, const T eb) {
+  // assumes PEC outer boundary
+  for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
+        e.z[i, j, k] = ea * (eb * e.z[i, j, k] +
+                             geom.d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
+                             geom.d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]));
+      }
+    }
+  }
+}
+
+template <std::floating_point T> void FDTDEngine<T>::update_hx() {}
+
+template <std::floating_point T> void FDTDEngine<T>::update_hy() {}
+
+template <std::floating_point T> void FDTDEngine<T>::update_hz() {}
+
 // explicit template instantiation
 template class FDTDGeometry<double>;
 template class FDTDGeometry<float>;

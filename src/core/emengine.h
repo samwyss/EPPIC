@@ -108,6 +108,22 @@ private:
    */
   void step(T dt);
 
+  void update_e(T ea, T eb);
+
+  void update_h();
+
+  void update_ex(T ea, T eb);
+
+  void update_ey(T ea, T eb);
+
+  void update_ez(T ea, T eb);
+
+  void update_hx();
+
+  void update_hy();
+
+  void update_hz();
+
   /// FDTD geometry
   const FDTDGeometry<T> geom;
 
