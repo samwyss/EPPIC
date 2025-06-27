@@ -18,8 +18,6 @@
 int main(int argc, char **argv) {
 
   // todo
-  // finish logging emengine
-  // improve logging in main
   // log other constructs
   // fdtd engine
   // hdf5 io
@@ -55,10 +53,12 @@ int main(int argc, char **argv) {
 
   // initial diagnostics
   SPDLOG_INFO("EPPIC begin");
+  SPDLOG_INFO("logs will be written to `./logs/`");
 
   // floating point precision
   // todo get this from configuration
   const std::string precision = "double";
+  SPDLOG_INFO("floating point precision: {}", precision);
 
   if (precision == "single") {
     // EPPIC configuration
@@ -112,6 +112,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  SPDLOG_INFO("EPPIC end");
+  SPDLOG_INFO("EPPIC exiting");
   return EXIT_SUCCESS;
 }
