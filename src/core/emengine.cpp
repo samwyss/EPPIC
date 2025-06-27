@@ -58,7 +58,7 @@ FDTDGeometry<T>::create(const Config<T> &config) {
     SPDLOG_TRACE("exit FDTDGeometry<T>::create with success");
     return geom;
   } catch (const std::runtime_error &err) {
-    SPDLOG_TRACE("exit FDTDGeometry<T>::create with error: {}", err.what());
+    SPDLOG_CRITICAL("exit FDTDGeometry<T>::create with error: {}", err.what());
     return std::unexpected(err.what());
   }
 }
@@ -81,7 +81,7 @@ FDTDEngine<T>::create(const Config<T> &config) {
     SPDLOG_TRACE("exit FDTDEngine<T>::create with success");
     return engine;
   } catch (const std::runtime_error &err) {
-    SPDLOG_TRACE("exit FDTDEngine<T>::create with error: {}", err.what());
+    SPDLOG_CRITICAL("exit FDTDEngine<T>::create with error: {}", err.what());
     return std::unexpected(err.what());
   }
 }
@@ -136,20 +136,24 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
 
   // main time loop
   SPDLOG_INFO("FDTD enter main time loop");
-  for (uint64_t i = 0; i < steps; ++i) {
+  try {
+    for (uint64_t i = 0; i < steps; ++i) {
 
-    // advance by one step
-    if (const auto step_result = step(dt); !step_result.has_value()) {
-      return std::unexpected(step_result.error());
+      // advance by one step todo step should return void
+      step(dt);
+
+      // advance internal time state
+      time += dt;
+
+      SPDLOG_DEBUG(
+          "FDTD main loop | step: {}/{} elapsed time: {:.5e}/{:.5e} (s)", i + 1,
+          steps, time, init_time + adv_t);
     }
-
-    // advance internal time state
-    time += dt;
-
-    SPDLOG_DEBUG("FDTD main loop | step: {}/{} elapsed time: {:.5e}/{:.5e} (s)",
-                 i + 1, steps, time, init_time + adv_t);
+  } catch (const std::runtime_error &err) {
+    SPDLOG_CRITICAL("FDTD main time loop returned with error: {}", err.what());
+    return std::unexpected(err.what());
   }
-  SPDLOG_INFO("FDTD exit main time loop");
+  SPDLOG_INFO("FDTD exit main time loop with success");
 
   SPDLOG_TRACE("exit FDTDEngine<T>::advance_by");
   return {};
@@ -174,10 +178,7 @@ uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
   return num_steps;
 }
 
-template <std::floating_point T>
-std::expected<void, std::string> FDTDEngine<T>::step(const T dt) {
-  return {};
-}
+template <std::floating_point T> void FDTDEngine<T>::step(const T dt) {}
 
 // explicit template instantiation
 template class FDTDGeometry<double>;

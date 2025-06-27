@@ -106,7 +106,7 @@ private:
    * @param dt (s) time step
    * @return void
    */
-  [[nodiscard]] std::expected<void, std::string> step(T dt);
+  void step(T dt);
 
   /// FDTD geometry
   const FDTDGeometry<T> geom;
