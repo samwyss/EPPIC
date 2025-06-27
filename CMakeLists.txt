@@ -111,6 +111,7 @@ message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 # Constants library
 add_library(Constants
         src/constants/physical.h
+        src/constants/numeric.h
 )
 
 set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
