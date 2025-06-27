@@ -7,8 +7,8 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
       mu(mu_r * VAC_PERMEABILITY<T>), sigma(config.sigma) {
 
   SPDLOG_TRACE("enter FDTDGeometry<T>::FDTDGeometry");
-  SPDLOG_INFO("FDTD bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y,
-              len.z);
+  SPDLOG_DEBUG("FDTD bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y,
+               len.z);
 
   // (m) maximum spatial step based on maximum frequency
   const T ds_min_wavelength =
@@ -33,12 +33,12 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
   nv = {static_cast<size_t>(ceil(static_cast<double>(len.x) / ds)),
         static_cast<size_t>(ceil(static_cast<double>(len.y) / ds)),
         static_cast<size_t>(ceil(static_cast<double>(len.z) / ds))};
-  SPDLOG_INFO("FDTD voxels: {} x {} x {}", nv.x, nv.y, nv.z);
+  SPDLOG_DEBUG("FDTD voxels: {} x {} x {}", nv.x, nv.y, nv.z);
 
   // (m) final spatial steps
   d = {len.x / static_cast<T>(nv.x), len.y / static_cast<T>(nv.y),
        len.z / static_cast<T>(nv.z)};
-  SPDLOG_INFO("FDTD voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
+  SPDLOG_DEBUG("FDTD voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
 
   // (m^-1) inverse spatial steps
   d_inv = {static_cast<T>(1.0) / d.x, static_cast<T>(1.0) / d.y,
@@ -135,7 +135,7 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
   const T hza = dt * geom.d_inv.z / geom.mu;
 
   // main time loop
-  SPDLOG_INFO("FDTD enter main time loop");
+  SPDLOG_DEBUG("FDTD enter main time loop");
   try {
     for (uint64_t i = 0; i < steps; ++i) {
 
@@ -145,15 +145,14 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
       // advance internal time state
       time += dt;
 
-      SPDLOG_DEBUG(
-          "FDTD main loop | step: {}/{} elapsed time: {:.5e}/{:.5e} (s)", i + 1,
-          steps, time, init_time + adv_t);
+      SPDLOG_TRACE("step: {}/{} elapsed time: {:.5e}/{:.5e} (s)", i + 1, steps,
+                   time, init_time + adv_t);
     }
   } catch (const std::runtime_error &err) {
     SPDLOG_CRITICAL("FDTD main time loop returned with error: {}", err.what());
     return std::unexpected(err.what());
   }
-  SPDLOG_INFO("FDTD exit main time loop with success");
+  SPDLOG_DEBUG("FDTD exit main time loop with success");
 
   SPDLOG_TRACE("exit FDTDEngine<T>::advance_by");
   return {};
