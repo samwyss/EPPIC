@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <numbers>
-#include <type_traits>
 
 /// (F/m) vacuum permittivity https://en.wikipedia.org/wiki/Vacuum_permittivity
 template <std::floating_point T>
