@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_PHYSICAL_HPP
-#define CONSTANTS_PHYSICAL_HPP
+#ifndef CONSTANTS_PHYSICAL_H
+#define CONSTANTS_PHYSICAL_H
 
 #include <cmath>
 #include <numbers>
@@ -38,4 +38,4 @@ constexpr T BOLTZMANN = static_cast<T>(1.380649e-23);
 template <std::floating_point T>
 constexpr T EV_TEMP = static_cast<T>(ELEC_CHARGE<T> / BOLTZMANN<T>);
 
-#endif // CONSTANTS_PHYSICAL_HPP
+#endif // CONSTANTS_PHYSICAL_HP
