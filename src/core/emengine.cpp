@@ -1,5 +1,7 @@
 #include "emengine.h"
 
+#include "numeric.h"
+
 template <std::floating_point T>
 FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
     : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
@@ -118,7 +120,8 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
   SPDLOG_DEBUG("FDTD advance time by {:.3e} (s)", adv_t);
 
   // (s) initial time
-  const auto init_time = time;
+  // only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
+  [[maybe_unused]] const auto init_time = time;
 
   // number of steps required by CFL condition
   const size_t steps = calc_cfl_steps(adv_t);
@@ -139,11 +142,8 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
   try {
     for (uint64_t i = 0; i < steps; ++i) {
 
-      // advance by one step todo step should return void
-      step(dt);
-
-      // advance internal time state
-      time += dt;
+      // advance by one step
+      step(dt, ea, eb, hxa, hya, hza);
 
       SPDLOG_TRACE("step: {}/{} elapsed time: {:.5e}/{:.5e} (s)", i + 1, steps,
                    time, init_time + adv_t);
@@ -177,7 +177,21 @@ uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
   return num_steps;
 }
 
-template <std::floating_point T> void FDTDEngine<T>::step(const T dt) {}
+template <std::floating_point T>
+void FDTDEngine<T>::step(const T dt, const T ea, const T eb, const T hxa,
+                         const T hya, const T hza) {
+  // half timestep update before updating magnetic fields
+  time += ONE_OVER_TWO<T> * dt;
+
+  // update magnetic fields
+  update_h();
+
+  // half timestep update before updating electric fields
+  time += ONE_OVER_TWO<T> * dt;
+
+  // update electric fields
+  update_e(ea, eb);
+}
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_e(const T ea, const T eb) {
@@ -200,7 +214,7 @@ void FDTDEngine<T>::update_ex(const T ea, const T eb) {
       for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
         e.x[i, j, k] = ea * (eb * e.x[i, j, k] +
                              geom.d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]) -
-                             geom.d_inv.z * (h.y[i, j, k] - h.z[i, j, k - 1]));
+                             geom.d_inv.z * (h.y[i, j, k] - h.y[i, j, k - 1]));
       }
     }
   }
@@ -228,7 +242,7 @@ void FDTDEngine<T>::update_ez(const T ea, const T eb) {
       for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
         e.z[i, j, k] = ea * (eb * e.z[i, j, k] +
                              geom.d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
-                             geom.d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]));
+                             geom.d_inv.y * (h.x[i, j, k] - h.x[i, j - 1, k]));
       }
     }
   }

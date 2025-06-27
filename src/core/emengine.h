@@ -104,9 +104,14 @@ private:
   /*!
    * advances internal field state by one time step
    * @param dt (s) time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   * @param hxa magnetic field a loop constant for x-component
+   * @param hya magnetic field a loop constant for y-component
+   * @param hza magnetic field a loop constant for z-component
    * @return void
    */
-  void step(T dt);
+  void step(T dt, T ea, T eb, T hxa, T hya, T hza);
 
   void update_e(T ea, T eb);
 
