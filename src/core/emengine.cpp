@@ -184,7 +184,7 @@ void FDTDEngine<T>::step(const T dt, const T ea, const T eb, const T hxa,
   time += ONE_OVER_TWO<T> * dt;
 
   // update magnetic fields
-  update_h();
+  update_h(hxa, hya, hza);
 
   // half timestep update before updating electric fields
   time += ONE_OVER_TWO<T> * dt;
@@ -200,10 +200,11 @@ void FDTDEngine<T>::update_e(const T ea, const T eb) {
   update_ez(ea, eb);
 }
 
-template <std::floating_point T> void FDTDEngine<T>::update_h() {
-  update_hx();
-  update_hy();
-  update_hz();
+template <std::floating_point T>
+void FDTDEngine<T>::update_h(const T hxa, const T hya, const T hza) {
+  update_hx(hya, hza);
+  update_hy(hxa, hza);
+  update_hz(hya, hza);
 }
 
 template <std::floating_point T>
@@ -223,9 +224,9 @@ void FDTDEngine<T>::update_ex(const T ea, const T eb) {
 template <std::floating_point T>
 void FDTDEngine<T>::update_ey(const T ea, const T eb) {
   // assumes PEC outer boundary
-  for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
+  for (size_t i = 1; i < e.y.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < e.y.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < e.y.extent(2) - 1; ++k) {
         e.y[i, j, k] = ea * (eb * e.y[i, j, k] +
                              geom.d_inv.z * (h.x[i, j, k] - h.x[i, j, k - 1]) -
                              geom.d_inv.x * (h.z[i, j, k] - h.z[i - 1, j, k]));
@@ -237,9 +238,9 @@ void FDTDEngine<T>::update_ey(const T ea, const T eb) {
 template <std::floating_point T>
 void FDTDEngine<T>::update_ez(const T ea, const T eb) {
   // assumes PEC outer boundary
-  for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
+  for (size_t i = 1; i < e.z.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < e.z.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < e.z.extent(2) - 1; ++k) {
         e.z[i, j, k] = ea * (eb * e.z[i, j, k] +
                              geom.d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
                              geom.d_inv.y * (h.x[i, j, k] - h.x[i, j - 1, k]));
@@ -248,11 +249,44 @@ void FDTDEngine<T>::update_ez(const T ea, const T eb) {
   }
 }
 
-template <std::floating_point T> void FDTDEngine<T>::update_hx() {}
+template <std::floating_point T>
+void FDTDEngine<T>::update_hx(const T hya, const T hza) {
+  // todo correctly implement for PEC boundary
+  for (size_t i = 1; i < h.x.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < h.x.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < h.x.extent(2) - 1; ++k) {
+        h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) +
+                        hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
+      }
+    }
+  }
+}
 
-template <std::floating_point T> void FDTDEngine<T>::update_hy() {}
+template <std::floating_point T>
+void FDTDEngine<T>::update_hy(const T hxa, const T hza) {
+  // todo correctly implement for PEC boundary
+  for (size_t i = 1; i < h.y.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < h.y.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < h.y.extent(2) - 1; ++k) {
+        h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) +
+                        hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
+      }
+    }
+  }
+}
 
-template <std::floating_point T> void FDTDEngine<T>::update_hz() {}
+template <std::floating_point T>
+void FDTDEngine<T>::update_hz(const T hxa, const T hya) {
+  // todo correctly implement for PEC boundary
+  for (size_t i = 1; i < h.z.extent(0) - 1; ++i) {
+    for (size_t j = 1; j < h.z.extent(1) - 1; ++j) {
+      for (size_t k = 1; k < h.z.extent(2) - 1; ++k) {
+        h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) +
+                        hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
+      }
+    }
+  }
+}
 
 // explicit template instantiation
 template class FDTDGeometry<double>;

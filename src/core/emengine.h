@@ -115,7 +115,7 @@ private:
 
   void update_e(T ea, T eb);
 
-  void update_h();
+  void update_h(T hxa, T hya, T hza);
 
   void update_ex(T ea, T eb);
 
@@ -123,11 +123,11 @@ private:
 
   void update_ez(T ea, T eb);
 
-  void update_hx();
+  void update_hx(T hya, T hza);
 
-  void update_hy();
+  void update_hy(T hxa, T hza);
 
-  void update_hz();
+  void update_hz(T hxa, T hya);
 
   /// FDTD geometry
   const FDTDGeometry<T> geom;
