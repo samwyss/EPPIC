@@ -23,12 +23,15 @@ template <std::floating_point T> struct Config {
   T end_time = 25e-9;
 
   /// (m) length of bounding box in the x-direction
+  /// todo revert back to 0.1
   T x_len = 0.001;
 
   /// (m) length of bounding box in the y-direction
+  /// todo revert back to 0.1
   T y_len = 0.001;
 
   /// (m) length of bounding box in the z-direction
+  /// todo revert back to 0.1
   T z_len = 0.001;
 
   /// diagonally isotropic relative permittivity inside bounding box
