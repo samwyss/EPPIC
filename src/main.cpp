@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 
   // floating point precision
   // todo get this from configuration
-  const std::string precision = "double";
+  const std::string precision = "single";
   SPDLOG_INFO("floating point precision: {}", precision);
 
   if (precision == "single") {
