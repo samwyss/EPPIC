@@ -20,7 +20,8 @@ template <std::floating_point T> struct Config {
   uint64_t num_snapshots = 100;
 
   /// (s) end time of simulation
-  T end_time = 25e-9;
+  /// todo revert back to 25e-9
+  T end_time = 1e-9;
 
   /// (m) length of bounding box in the x-direction
   /// todo revert back to 0.1
