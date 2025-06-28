@@ -113,20 +113,60 @@ private:
    */
   void step(T dt, T ea, T eb, T hxa, T hya, T hza);
 
+  /*!
+   * advances internal electric field state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
   void update_e(T ea, T eb);
 
+  /*!
+   * advances internal magnetic field state by one time step
+   * @param hxa magnetic field a loop constant for x-component
+   * @param hya magnetic field a loop constant for y-component
+   * @param hza magnetic field a loop constant for z-component
+   */
   void update_h(T hxa, T hya, T hza);
 
+  /*!
+   * advances internal electric field x-component state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
   void update_ex(T ea, T eb);
-
+  /*!
+   * advances internal electric field y-component state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
   void update_ey(T ea, T eb);
 
+  /*!
+   * advances internal electric field z-component state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
   void update_ez(T ea, T eb);
 
+  /*!
+   * advances internal magnetic field x-component state by one time step
+   * @param hya magnetic field a loop constant for y-component
+   * @param hza magnetic field a loop constant for z-component
+   */
   void update_hx(T hya, T hza);
 
+  /*!
+   * advances internal magnetic field y-component state by one time step
+   * @param hxa magnetic field a loop constant for x-component
+   * @param hza magnetic field a loop constant for z-component
+   */
   void update_hy(T hxa, T hza);
 
+  /*!
+   * advances internal magnetic field z-component state by one time step
+   * @param hxa magnetic field a loop constant for x-component
+   * @param hya magnetic field a loop constant for y-component
+   */
   void update_hz(T hxa, T hya);
 
   /// FDTD geometry
