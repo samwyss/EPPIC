@@ -7,7 +7,7 @@
 #include <type_traits>
 
 #include "config.h"
-#include "emengine.h"
+#include "fdtd_engine.h"
 
 /*!
  * world object
@@ -47,7 +47,7 @@ private:
   explicit World(const Config<T> &config);
 
   /// electromagnetic engine
-  FDTDEngine<T> emengine;
+  FDTDEngine<T> engine;
 
   /// (s) elapsed time
   T time = 0.0;

@@ -1,5 +1,5 @@
-#ifndef CORE_EMENGINE_H
-#define CORE_EMENGINE_H
+#ifndef CORE_FDTD_ENGINE_H
+#define CORE_FDTD_ENGINE_H
 
 #include <algorithm>
 #include <expected>
@@ -72,22 +72,6 @@ public:
    */
   [[nodiscard]] static std::expected<FDTDEngine, std::string>
   create(const Config<T> &config);
-
-  /*!
-   * advances internal state to an end time
-   *
-   * will do nothing in the event that end_t <= time
-   * @param end_t (s) end time
-   * @return void
-   */
-  std::expected<void, std::string> advance_to(T end_t);
-
-  /*!
-   * advances internal state by a given time period
-   * @param adv_t (s) time period to advance by
-   * @return void
-   */
-  std::expected<void, std::string> advance_by(T adv_t);
 
 private:
   /*!
@@ -184,4 +168,4 @@ private:
   T time = 0.0;
 };
 
-#endif // CORE_EMENGINE_H
+#endif // CORE_FDTD_ENGINE_H
