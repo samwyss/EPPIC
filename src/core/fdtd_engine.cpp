@@ -7,7 +7,7 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
       mu(mu_r * VAC_PERMEABILITY<T>), sigma(config.sigma) {
 
   SPDLOG_TRACE("enter FDTDGeometry<T>::FDTDGeometry");
-  SPDLOG_DEBUG("FDTD bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y,
+  SPDLOG_DEBUG("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y,
                len.z);
 
   // (m) maximum spatial step based on maximum frequency
@@ -15,37 +15,36 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
       VAC_SPEED_OF_LIGHT<T> /
       (sqrt(ep_r * mu_r) * static_cast<T>(config.num_vox_min_wavelength) *
        config.max_frequency);
-  SPDLOG_DEBUG(
-      "FDTD maximum spatial step based on maximum frequency (m): {:.3e}",
-      ds_min_wavelength);
+  SPDLOG_DEBUG("maximum spatial step based on maximum frequency (m): {:.3e}",
+               ds_min_wavelength);
 
   // (m) maximum spatial step based on minimum feature size
   const T ds_min_feature_size = std::min({len.x, len.y, len.z}) /
                                 static_cast<T>(config.num_vox_min_feature);
-  SPDLOG_DEBUG("FDTD maximum spatial step based on feature size (m): {:.3e}",
+  SPDLOG_DEBUG("maximum spatial step based on feature size (m): {:.3e}",
                ds_min_feature_size);
 
   // (m) maximum required spatial step
   const T ds = std::min({ds_min_wavelength, ds_min_feature_size});
-  SPDLOG_DEBUG("FDTD maximum spatial step (m): {:.3e}", ds);
+  SPDLOG_DEBUG("maximum spatial step (m): {:.3e}", ds);
 
   // number of voxels in each direction snapped to ds
   nv = {static_cast<size_t>(ceil(static_cast<double>(len.x) / ds)),
         static_cast<size_t>(ceil(static_cast<double>(len.y) / ds)),
         static_cast<size_t>(ceil(static_cast<double>(len.z) / ds))};
-  SPDLOG_DEBUG("FDTD voxels per field: {} x {} x {}", nv.x, nv.y, nv.z);
-  SPDLOG_DEBUG("FDTD voxels to update each step: {}", 6 * nv.x);
+  SPDLOG_DEBUG("field voxel dimensions: {} x {} x {}", nv.x, nv.y, nv.z);
+  SPDLOG_DEBUG("voxels to update each step: {}", 6 * nv.x);
 
   // (m) final spatial steps
   d = {len.x / static_cast<T>(nv.x), len.y / static_cast<T>(nv.y),
        len.z / static_cast<T>(nv.z)};
-  SPDLOG_DEBUG("FDTD voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
+  SPDLOG_DEBUG("voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
 
   // (m^-1) inverse spatial steps
   d_inv = {static_cast<T>(1.0) / d.x, static_cast<T>(1.0) / d.y,
            static_cast<T>(1.0) / d.z};
-  SPDLOG_DEBUG("FDTD inverse voxel size (m) , {:.3e} x {:.3e} x {:.3e}",
-               d_inv.x, d_inv.y, d_inv.z);
+  SPDLOG_DEBUG("inverse voxel size (m) , {:.3e} x {:.3e} x {:.3e}", d_inv.x,
+               d_inv.y, d_inv.z);
 
   SPDLOG_TRACE("exit FDTDGeometry<T>::FDTDGeometry");
 }
@@ -77,7 +76,7 @@ std::expected<FDTDEngine<T>, std::string>
 FDTDEngine<T>::create(const Config<T> &config) {
   SPDLOG_TRACE("enter FDTDEngine<T>::create");
   try {
-    // todo why not const like FDTD geometry?
+    // todo why not const like FDTDGeometry?
     FDTDEngine engine(config);
     SPDLOG_TRACE("exit FDTDEngine<T>::create with success");
     return engine;
@@ -88,83 +87,16 @@ FDTDEngine<T>::create(const Config<T> &config) {
 }
 
 template <std::floating_point T>
-std::expected<void, std::string> FDTDEngine<T>::advance_to(const T end_t) {
-  SPDLOG_TRACE("enter FDTDEngine<T>::advance_to");
-  SPDLOG_DEBUG("FDTD current time is {:.3e} (s)", time);
-  SPDLOG_DEBUG("FDTD advance time to {:.3e} (s)", end_t);
-  if (end_t > time) {
-    // (s) time difference between current state and end time
-    const T adv_t = end_t - time;
+uint64_t FDTDEngine<T>::calc_num_steps(const T adv_t) const {
+  SPDLOG_TRACE("enter FDTDEngine<T>::calc_num_steps");
 
-    if (const auto adv_by_result = advance_by(adv_t);
-        !adv_by_result.has_value()) {
-      SPDLOG_CRITICAL("FDTD advance time by advance_by returned with error: {}",
-                      adv_by_result.error());
-      return std::unexpected(adv_by_result.error());
-    }
+  // find maximum number of timesteps required for any solver
+  const uint64_t max_num_steps = calc_cfl_steps(adv_t);
+  SPDLOG_DEBUG("maximum number of steps required by any solver: {}",
+               max_num_steps);
 
-  } else {
-    SPDLOG_WARN(
-        "end time of {:.3e} (s) is not greater than current time of {:.3e} (s)",
-        end_t, time);
-  }
-
-  SPDLOG_TRACE("exit FDTDEngine<T>::advance_to");
-  return {};
-}
-
-template <std::floating_point T>
-std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
-  SPDLOG_TRACE("enter FDTDEngine<T>::advance_by");
-  SPDLOG_DEBUG("FDTD advance time by {:.3e} (s)", adv_t);
-
-  // (s) initial time
-  // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
-  [[maybe_unused]] const auto init_time = time;
-
-  // number of steps required by CFL condition
-  const size_t steps = calc_cfl_steps(adv_t);
-
-  // (s) time step
-  const T dt = adv_t / static_cast<T>(steps);
-  SPDLOG_DEBUG("FDTD timestep: {:.3e} (s)", dt);
-
-  // preprocess loop constants
-  const T ea = 1.0 / (geom.ep / dt + geom.sigma / 2.0);
-  const T eb = geom.ep / dt - geom.sigma / 2.0;
-  const T hxa = dt * geom.d_inv.x / geom.mu;
-  const T hya = dt * geom.d_inv.y / geom.mu;
-  const T hza = dt * geom.d_inv.z / geom.mu;
-
-  // loop start time
-  [[maybe_unused]] const spdlog::stopwatch watch;
-
-  // main time loop
-  SPDLOG_DEBUG("FDTD enter main time loop");
-  try {
-    for (uint64_t i = 0; i < steps; ++i) {
-
-      // advance by one step
-      step(dt, ea, eb, hxa, hya, hza);
-
-      SPDLOG_TRACE("step: {}/{} elapsed time: {:.5e}/{:.5e} (s)", i + 1, steps,
-                   time, init_time + adv_t);
-    }
-  } catch (const std::runtime_error &err) {
-    SPDLOG_CRITICAL("FDTD main time loop returned with error: {}", err.what());
-    return std::unexpected(err.what());
-  }
-  SPDLOG_DEBUG("FDTD exit main time loop with success");
-
-  // basic loop performance diagnostics
-  [[maybe_unused]] const auto loop_time = watch.elapsed().count();
-  [[maybe_unused]] const auto num_cells = 6 * e.x.size() * steps;
-  SPDLOG_INFO("loop runtime: {:.3e} (s)", loop_time);
-  SPDLOG_INFO("voxel compute rate {:.3e}",
-              static_cast<double>(num_cells) / loop_time);
-
-  SPDLOG_TRACE("exit FDTDEngine<T>::advance_by");
-  return {};
+  SPDLOG_TRACE("exit FDTDEngine<T>::calc_num_steps");
+  return max_num_steps;
 }
 
 template <std::floating_point T>
@@ -175,49 +107,92 @@ uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
       1.0 / (VAC_SPEED_OF_LIGHT<T> / sqrt(geom.ep_r * geom.mu_r) *
              sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
                   pow(geom.d_inv.z, 2)));
-  SPDLOG_DEBUG(
-      "FDTD maximum possible timesteps to satisfy CFL condition: {:.3e} (s)",
-      maximum_dt);
+  SPDLOG_DEBUG("maximum possible timestep to satisfy CFL condition (s): {:.3e}",
+               maximum_dt);
 
   const T num_steps = static_cast<uint64_t>(ceil(time_span / maximum_dt));
-  SPDLOG_DEBUG("FDTD steps required to satisfy CFL condition: {}", num_steps);
+  SPDLOG_DEBUG("steps required to satisfy CFL condition: {}", num_steps);
 
   SPDLOG_TRACE("exit FDTDEngine<T>::calc_cfl_steps");
   return num_steps;
 }
 
-template <std::floating_point T>
-void FDTDEngine<T>::step(const T dt, const T ea, const T eb, const T hxa,
-                         const T hya, const T hza) {
+template <std::floating_point T> void FDTDEngine<T>::step(const T dt) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::step");
+
+  // TODO it would be nice to not need to recalculate these every time step is
+  // TODO called, the performance penalty of this has yet to be assed however
+
+  // electric field a loop constant
+  const T ea = 1.0 / (geom.ep / dt + geom.sigma / 2.0);
+  SPDLOG_TRACE("ea loop constant: {:.3e}", ea);
+
+  // electric field b loop constant
+  const T eb = geom.ep / dt - geom.sigma / 2.0;
+  SPDLOG_TRACE("eb loop constant: {:.3e}", eb);
+
+  // magnetic field a loop constant for x-component
+  const T hxa = dt * geom.d_inv.x / geom.mu;
+  SPDLOG_TRACE("hxa loop constant: {:.3e}", hxa);
+
+  // magnetic field a loop constant for y-component
+  const T hya = dt * geom.d_inv.y / geom.mu;
+  SPDLOG_TRACE("hya loop constant: {:.3e}", hya);
+
+  // magnetic field a loop constant for z-component
+  const T hza = dt * geom.d_inv.z / geom.mu;
+  SPDLOG_TRACE("hza loop constant: {:.3e}", hza);
+
   // half timestep update before updating magnetic fields
   time += ONE_OVER_TWO<T> * dt;
+  SPDLOG_TRACE("advance half time step to (s): {:.5e}", time);
 
   // update magnetic fields
   update_h(hxa, hya, hza);
 
   // half timestep update before updating electric fields
   time += ONE_OVER_TWO<T> * dt;
+  SPDLOG_TRACE("advance half time step to (s): {:.5e}", time);
 
   // update electric fields
   update_e(ea, eb);
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::step");
+}
+
+template <std::floating_point T>
+uint64_t FDTDEngine<T>::get_field_num_vox() const {
+  SPDLOG_TRACE("enter FDTDEngine<T>::get_field_num_vox");
+
+  const auto num_vox = e.x.size();
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::get_field_num_vox");
+  return num_vox;
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_e(const T ea, const T eb) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_e");
   update_ex(ea, eb);
   update_ey(ea, eb);
   update_ez(ea, eb);
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_e");
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_h(const T hxa, const T hya, const T hza) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_h");
   update_hx(hya, hza);
   update_hy(hxa, hza);
   update_hz(hya, hza);
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_h");
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_ex(const T ea, const T eb) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_ex");
   // assumes PEC outer boundary
   for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
@@ -228,10 +203,13 @@ void FDTDEngine<T>::update_ex(const T ea, const T eb) {
       }
     }
   }
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_ex");
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_ey(const T ea, const T eb) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_ey");
   // assumes PEC outer boundary
   for (size_t i = 1; i < e.y.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.y.extent(1) - 1; ++j) {
@@ -242,10 +220,13 @@ void FDTDEngine<T>::update_ey(const T ea, const T eb) {
       }
     }
   }
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_ey");
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_ez(const T ea, const T eb) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_ez");
   // assumes PEC outer boundary
   for (size_t i = 1; i < e.z.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.z.extent(1) - 1; ++j) {
@@ -256,10 +237,13 @@ void FDTDEngine<T>::update_ez(const T ea, const T eb) {
       }
     }
   }
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_ez");
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_hx(const T hya, const T hza) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_hx");
   // todo correctly implement for PEC boundary
   for (size_t i = 1; i < h.x.extent(0) - 1; ++i) {
     for (size_t j = 1; j < h.x.extent(1) - 1; ++j) {
@@ -269,10 +253,14 @@ void FDTDEngine<T>::update_hx(const T hya, const T hza) {
       }
     }
   }
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_hx");
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_hy(const T hxa, const T hza) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_hy");
+
   // todo correctly implement for PEC boundary
   for (size_t i = 1; i < h.y.extent(0) - 1; ++i) {
     for (size_t j = 1; j < h.y.extent(1) - 1; ++j) {
@@ -282,10 +270,14 @@ void FDTDEngine<T>::update_hy(const T hxa, const T hza) {
       }
     }
   }
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_hy");
 }
 
 template <std::floating_point T>
 void FDTDEngine<T>::update_hz(const T hxa, const T hya) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::update_hz");
+
   // todo correctly implement for PEC boundary
   for (size_t i = 1; i < h.z.extent(0) - 1; ++i) {
     for (size_t j = 1; j < h.z.extent(1) - 1; ++j) {
@@ -295,6 +287,8 @@ void FDTDEngine<T>::update_hz(const T hxa, const T hya) {
       }
     }
   }
+
+  SPDLOG_TRACE("exit FDTDEngine<T>::update_hz");
 }
 
 // explicit template instantiation

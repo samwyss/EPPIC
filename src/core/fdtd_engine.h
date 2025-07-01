@@ -73,6 +73,27 @@ public:
   [[nodiscard]] static std::expected<FDTDEngine, std::string>
   create(const Config<T> &config);
 
+  /*!
+   * calculates the number of steps required to advance engine state by some
+   * time period
+   * @param adv_t (s) time period to advance by
+   * @return uint64_t
+   */
+  [[nodiscard]] uint64_t calc_num_steps(T adv_t) const;
+
+  /*!
+   * advances internal field state by one time step
+   * @param dt (s) time step
+   * @return void
+   */
+  void step(T dt);
+
+  /*!
+   * returns the number of total voxels per field
+   * @return uint64_t
+   */
+  [[nodiscard]] uint64_t get_field_num_vox() const;
+
 private:
   /*!
    * FDTDEngine constructor
@@ -86,18 +107,6 @@ private:
    * @return number of steps required by CFL stability condition
    */
   [[nodiscard]] uint64_t calc_cfl_steps(T time_span) const;
-
-  /*!
-   * advances internal field state by one time step
-   * @param dt (s) time step
-   * @param ea electric field a loop constant
-   * @param eb electric field b loop constant
-   * @param hxa magnetic field a loop constant for x-component
-   * @param hya magnetic field a loop constant for y-component
-   * @param hza magnetic field a loop constant for z-component
-   * @return void
-   */
-  void step(T dt, T ea, T eb, T hxa, T hya, T hza);
 
   /*!
    * advances internal electric field state by one time step
