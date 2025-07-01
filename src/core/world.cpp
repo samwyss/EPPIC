@@ -69,7 +69,7 @@ std::expected<void, std::string> World<T>::advance_by(const T adv_t) {
       engine.step(dt);
       time += dt;
 
-      SPDLOG_TRACE("step: {}/{} elapsed time: {:.5e}/{:.5e} (s)", i + 1, steps,
+      SPDLOG_TRACE("step: {}/{} elapsed time (s): {:.5e}/{:.5e}", i + 1, steps,
                    time, init_time + adv_t);
     }
   } catch (const std::runtime_error &err) {
@@ -82,8 +82,8 @@ std::expected<void, std::string> World<T>::advance_by(const T adv_t) {
   [[maybe_unused]] const auto loop_time = watch.elapsed().count();
   [[maybe_unused]] const auto num_cells =
       6 * engine.get_field_num_vox() * steps;
-  SPDLOG_INFO("loop runtime: {:.3e} (s)", loop_time);
-  SPDLOG_INFO("voxel compute rate {:.3e}",
+  SPDLOG_INFO("loop runtime (s): {:.3e}", loop_time);
+  SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}",
               static_cast<double>(num_cells) / loop_time);
 
   SPDLOG_TRACE("exit FDTDEngine<T>::advance_by");
