@@ -1,7 +1,5 @@
 #include "emengine.h"
 
-#include "numeric.h"
-
 template <std::floating_point T>
 FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
     : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
@@ -35,7 +33,8 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
   nv = {static_cast<size_t>(ceil(static_cast<double>(len.x) / ds)),
         static_cast<size_t>(ceil(static_cast<double>(len.y) / ds)),
         static_cast<size_t>(ceil(static_cast<double>(len.z) / ds))};
-  SPDLOG_DEBUG("FDTD voxels: {} x {} x {}", nv.x, nv.y, nv.z);
+  SPDLOG_DEBUG("FDTD voxels per field: {} x {} x {}", nv.x, nv.y, nv.z);
+  SPDLOG_DEBUG("FDTD voxels to update each step: {}", 6 * nv.x);
 
   // (m) final spatial steps
   d = {len.x / static_cast<T>(nv.x), len.y / static_cast<T>(nv.y),
@@ -120,7 +119,7 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
   SPDLOG_DEBUG("FDTD advance time by {:.3e} (s)", adv_t);
 
   // (s) initial time
-  // only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
+  // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
   [[maybe_unused]] const auto init_time = time;
 
   // number of steps required by CFL condition
@@ -136,6 +135,9 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
   const T hxa = dt * geom.d_inv.x / geom.mu;
   const T hya = dt * geom.d_inv.y / geom.mu;
   const T hza = dt * geom.d_inv.z / geom.mu;
+
+  // loop start time
+  [[maybe_unused]] const spdlog::stopwatch watch;
 
   // main time loop
   SPDLOG_DEBUG("FDTD enter main time loop");
@@ -153,6 +155,13 @@ std::expected<void, std::string> FDTDEngine<T>::advance_by(const T adv_t) {
     return std::unexpected(err.what());
   }
   SPDLOG_DEBUG("FDTD exit main time loop with success");
+
+  // basic loop performance diagnostics
+  [[maybe_unused]] const auto loop_time = watch.elapsed().count();
+  [[maybe_unused]] const auto num_cells = 6 * e.x.size() * steps;
+  SPDLOG_INFO("loop runtime: {:.3e} (s)", loop_time);
+  SPDLOG_INFO("voxel compute rate {:.3e}",
+              static_cast<double>(num_cells) / loop_time);
 
   SPDLOG_TRACE("exit FDTDEngine<T>::advance_by");
   return {};
