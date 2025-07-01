@@ -4,11 +4,13 @@
 #include <algorithm>
 #include <expected>
 #include <spdlog/spdlog.h>
+#include <spdlog/stopwatch.h>
 #include <stdexcept>
 #include <string>
 
 #include "config.h"
 #include "coordinate.h"
+#include "numeric.h"
 #include "physical.h"
 #include "vector.h"
 
