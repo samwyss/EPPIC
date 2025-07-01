@@ -173,6 +173,7 @@ uint64_t FDTDEngine<T>::get_field_num_vox() const {
 template <std::floating_point T>
 void FDTDEngine<T>::update_e(const T ea, const T eb) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_e");
+
   update_ex(ea, eb);
   update_ey(ea, eb);
   update_ez(ea, eb);
@@ -183,6 +184,7 @@ void FDTDEngine<T>::update_e(const T ea, const T eb) {
 template <std::floating_point T>
 void FDTDEngine<T>::update_h(const T hxa, const T hya, const T hza) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_h");
+
   update_hx(hya, hza);
   update_hy(hxa, hza);
   update_hz(hya, hza);
@@ -193,6 +195,7 @@ void FDTDEngine<T>::update_h(const T hxa, const T hya, const T hza) {
 template <std::floating_point T>
 void FDTDEngine<T>::update_ex(const T ea, const T eb) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_ex");
+
   // assumes PEC outer boundary
   for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
@@ -210,6 +213,7 @@ void FDTDEngine<T>::update_ex(const T ea, const T eb) {
 template <std::floating_point T>
 void FDTDEngine<T>::update_ey(const T ea, const T eb) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_ey");
+
   // assumes PEC outer boundary
   for (size_t i = 1; i < e.y.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.y.extent(1) - 1; ++j) {
@@ -227,6 +231,7 @@ void FDTDEngine<T>::update_ey(const T ea, const T eb) {
 template <std::floating_point T>
 void FDTDEngine<T>::update_ez(const T ea, const T eb) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_ez");
+
   // assumes PEC outer boundary
   for (size_t i = 1; i < e.z.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.z.extent(1) - 1; ++j) {
@@ -244,6 +249,7 @@ void FDTDEngine<T>::update_ez(const T ea, const T eb) {
 template <std::floating_point T>
 void FDTDEngine<T>::update_hx(const T hya, const T hza) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_hx");
+
   // todo correctly implement for PEC boundary
   for (size_t i = 1; i < h.x.extent(0) - 1; ++i) {
     for (size_t j = 1; j < h.x.extent(1) - 1; ++j) {
