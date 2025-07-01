@@ -1,5 +1,5 @@
-#ifndef CORE_EMENGINE_H
-#define CORE_EMENGINE_H
+#ifndef CORE_FDTD_ENGINE_H
+#define CORE_FDTD_ENGINE_H
 
 #include <algorithm>
 #include <expected>
@@ -74,20 +74,25 @@ public:
   create(const Config<T> &config);
 
   /*!
-   * advances internal state to an end time
-   *
-   * will do nothing in the event that end_t <= time
-   * @param end_t (s) end time
-   * @return void
+   * calculates the number of steps required to advance engine state by some
+   * time period
+   * @param adv_t (s) time period to advance by
+   * @return uint64_t
    */
-  std::expected<void, std::string> advance_to(T end_t);
+  [[nodiscard]] uint64_t calc_num_steps(T adv_t) const;
 
   /*!
-   * advances internal state by a given time period
-   * @param adv_t (s) time period to advance by
+   * advances internal field state by one time step
+   * @param dt (s) time step
    * @return void
    */
-  std::expected<void, std::string> advance_by(T adv_t);
+  void step(T dt);
+
+  /*!
+   * returns the number of total voxels per field
+   * @return uint64_t
+   */
+  [[nodiscard]] uint64_t get_field_num_vox() const;
 
 private:
   /*!
@@ -102,18 +107,6 @@ private:
    * @return number of steps required by CFL stability condition
    */
   [[nodiscard]] uint64_t calc_cfl_steps(T time_span) const;
-
-  /*!
-   * advances internal field state by one time step
-   * @param dt (s) time step
-   * @param ea electric field a loop constant
-   * @param eb electric field b loop constant
-   * @param hxa magnetic field a loop constant for x-component
-   * @param hya magnetic field a loop constant for y-component
-   * @param hza magnetic field a loop constant for z-component
-   * @return void
-   */
-  void step(T dt, T ea, T eb, T hxa, T hya, T hza);
 
   /*!
    * advances internal electric field state by one time step
@@ -184,4 +177,4 @@ private:
   T time = 0.0;
 };
 
-#endif // CORE_EMENGINE_H
+#endif // CORE_FDTD_ENGINE_H

@@ -131,8 +131,8 @@ add_library(Core
         src/core/world.h
         src/core/config.cpp
         src/core/config.h
-        src/core/emengine.cpp
-        src/core/emengine.h
+        src/core/fdtd_engine.cpp
+        src/core/fdtd_engine.h
 )
 
 target_include_directories(Core
