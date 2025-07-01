@@ -143,7 +143,7 @@ target_include_directories(Core
 target_link_libraries(Core
         PUBLIC Fields
         PUBLIC Constants
-        PUBLIC std::mdspan
+        PUBLIC mdspan::mdspan
         PUBLIC spdlog::spdlog
 )
 
@@ -165,5 +165,5 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE spdlog::spdlog
         PRIVATE Core
         PRIVATE Fields
-        PRIVATE std::mdspan
+        PRIVATE mdspan::mdspan
 )
