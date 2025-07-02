@@ -187,7 +187,7 @@ void FDTDEngine<T>::update_h(const T hxa, const T hya, const T hza) {
 
   update_hx(hya, hza);
   update_hy(hxa, hza);
-  update_hz(hya, hza);
+  update_hz(hxa, hya);
 
   SPDLOG_TRACE("exit FDTDEngine<T>::update_h");
 }
