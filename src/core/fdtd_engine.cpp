@@ -250,12 +250,27 @@ template <std::floating_point T>
 void FDTDEngine<T>::update_hx(const T hya, const T hza) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_hx");
 
-  // todo correctly implement for PEC boundary
-  for (size_t i = 1; i < h.x.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < h.x.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < h.x.extent(2) - 1; ++k) {
-        h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) +
-                        hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
+  // todo remove branches
+  for (size_t i = 0; i < h.x.extent(0); ++i) {
+    for (size_t j = 0; j < h.x.extent(1); ++j) {
+      for (size_t k = 0; k < h.x.extent(2); ++k) {
+        [[likely]] if (j != h.x.extent(1) - 1 && k != h.x.extent(2) - 1) {
+          // j- k-low volume
+          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) +
+                          hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
+        } else if (j != h.x.extent(1) - 1 && k == h.x.extent(2) - 1) {
+          // k-high plane
+          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) +
+                          hza * (0.0 - e.y[i, j, k]);
+        } else if (j == h.x.extent(1) - 1 && k != h.x.extent(2) - 1) {
+          // j-high plane
+          h.x[i, j, k] += -hya * (0.0 - e.z[i, j, k]) +
+                          hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
+        } else {
+          // j- k-high line
+          h.x[i, j, k] +=
+              -hya * (0.0 - e.z[i, j, k]) + hza * (0.0 - e.y[i, j, k]);
+        }
       }
     }
   }
@@ -267,12 +282,27 @@ template <std::floating_point T>
 void FDTDEngine<T>::update_hy(const T hxa, const T hza) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_hy");
 
-  // todo correctly implement for PEC boundary
-  for (size_t i = 1; i < h.y.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < h.y.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < h.y.extent(2) - 1; ++k) {
-        h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) +
-                        hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
+  // todo remove branches
+  for (size_t i = 0; i < h.y.extent(0); ++i) {
+    for (size_t j = 0; j < h.y.extent(1); ++j) {
+      for (size_t k = 0; k < h.y.extent(2); ++k) {
+        [[likely]] if (i != h.y.extent(0) - 1 && k != h.y.extent(2) - 1) {
+          // i- k-low volume
+          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) +
+                          hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
+        } else if (i != h.y.extent(0) - 1 && k == h.y.extent(2) - 1) {
+          // k-high plane
+          h.y[i, j, k] += -hza * (0.0 - e.x[i, j, k]) +
+                          hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
+        } else if (i == h.y.extent(0) - 1 && k != h.y.extent(2) - 1) {
+          // i-high plane
+          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) +
+                          hxa * (0.0 - e.z[i, j, k]);
+        } else {
+          // i- k-high line
+          h.y[i, j, k] +=
+              -hza * (0.0 - e.x[i, j, k]) + hxa * (0.0 - e.z[i, j, k]);
+        }
       }
     }
   }
@@ -285,11 +315,27 @@ void FDTDEngine<T>::update_hz(const T hxa, const T hya) {
   SPDLOG_TRACE("enter FDTDEngine<T>::update_hz");
 
   // todo correctly implement for PEC boundary
-  for (size_t i = 1; i < h.z.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < h.z.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < h.z.extent(2) - 1; ++k) {
-        h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) +
-                        hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
+  // todo remove branches
+  for (size_t i = 0; i < h.z.extent(0); ++i) {
+    for (size_t j = 0; j < h.z.extent(1); ++j) {
+      for (size_t k = 0; k < h.z.extent(2); ++k) {
+        [[likely]] if (i != h.y.extent(0) - 1 && j != h.y.extent(1) - 1) {
+          // i- j-low volume
+          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) +
+                          hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
+        } else if (i != h.y.extent(0) - 1 && j == h.y.extent(1) - 1) {
+          // j-high plane
+          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) +
+                          hya * (0.0 - e.x[i, j, k]);
+        } else if (i == h.y.extent(0) - 1 && j != h.y.extent(1) - 1) {
+          // i-high plane
+          h.z[i, j, k] += -hxa * (0.0 - e.y[i, j, k]) +
+                          hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
+        } else {
+          // i- j-high line
+          h.z[i, j, k] +=
+              -hxa * (0.0 - e.y[i, j, k]) + hya * (0.0 - e.x[i, j, k]);
+        }
       }
     }
   }
