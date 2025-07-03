@@ -15,51 +15,6 @@
 #include "vector.h"
 
 /*!
- * FDTD geometry object
- * @tparam T floating point precision
- */
-template <std::floating_point T> class FDTDGeometry {
-public:
-  /*!
-   * FDTDGeometry static factory method
-   * @param config configuration object
-   * @return FDTDGeometry
-   */
-  [[nodiscard]] static std::expected<FDTDGeometry, std::string>
-  create(const Config<T> &config);
-
-  /// (m) size of bounding box in all directions
-  const Coord3<T> len;
-
-  /// relative diagonally isotropic permittivity of material inside bounding box
-  const T ep_r;
-
-  /// relative diagonally isotropic permeability of material inside bounding box
-  const T mu_r;
-
-  /// (F/m) diagonally isotropic permittivity of material inside bounding box
-  const T ep;
-
-  /// (H/m) diagonally isotropic permeability of material inside bounding box
-  const T mu;
-
-  /// (S/m) diagonally isotropic conductivity of material inside bounding box
-  const T sigma;
-
-  /// (m) spatial increments in all directions
-  Coord3<T> d;
-
-  /// (m) inverse spatial increments in all directions
-  Coord3<T> d_inv;
-
-  /// number of voxels in all directions
-  Coord3<size_t> nv;
-
-private:
-  explicit FDTDGeometry(const Config<T> &config);
-};
-
-/*!
  * FDTD engine object
  * @tparam T floating point precision
  */
@@ -164,8 +119,32 @@ private:
    */
   void update_hz(T hxa, T hya);
 
-  /// FDTD geometry
-  const FDTDGeometry<T> geom;
+  /// (m) size of bounding box in all directions
+  Coord3<T> len;
+
+  /// relative diagonally isotropic permittivity of material inside bounding box
+  T ep_r;
+
+  /// relative diagonally isotropic permeability of material inside bounding box
+  T mu_r;
+
+  /// (F/m) diagonally isotropic permittivity of material inside bounding box
+  T ep;
+
+  /// (H/m) diagonally isotropic permeability of material inside bounding box
+  T mu;
+
+  /// (S/m) diagonally isotropic conductivity of material inside bounding box
+  T sigma;
+
+  /// number of voxels in all directions
+  Coord3<size_t> nv{};
+
+  /// (m) spatial increments in all directions
+  Coord3<T> d;
+
+  /// (m) inverse spatial increments in all directions
+  Coord3<T> d_inv;
 
   /// (V/m) electric field vector
   Vector3<T> e;

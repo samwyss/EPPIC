@@ -1,14 +1,19 @@
 #include "fdtd_engine.h"
 
 template <std::floating_point T>
-FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
-    : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
-      mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY<T>),
-      mu(mu_r * VAC_PERMEABILITY<T>), sigma(config.sigma) {
+FDTDEngine<T>::FDTDEngine(const Config<T> &config) {
+  SPDLOG_TRACE("enter FDTDEngine<T>::FDTDEngine");
 
-  SPDLOG_TRACE("enter FDTDGeometry<T>::FDTDGeometry");
+  len = {config.x_len, config.y_len, config.z_len};
   SPDLOG_DEBUG("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y,
                len.z);
+
+  ep_r = config.ep_r;
+  mu_r = config.mu_r;
+
+  ep = ep_r * VAC_PERMITTIVITY<T>;
+  mu = mu_r * VAC_PERMEABILITY<T>;
+  sigma = config.sigma;
 
   // (m) maximum spatial step based on maximum frequency
   const T ds_min_wavelength =
@@ -46,28 +51,10 @@ FDTDGeometry<T>::FDTDGeometry(const Config<T> &config)
   SPDLOG_DEBUG("inverse voxel size (m) , {:.3e} x {:.3e} x {:.3e}", d_inv.x,
                d_inv.y, d_inv.z);
 
-  SPDLOG_TRACE("exit FDTDGeometry<T>::FDTDGeometry");
-}
+  // initialize fields
+  // e = Vector3<T>(nv, 0.0);
+  // h = Vector3<T>(nv, 0.0);
 
-template <std::floating_point T>
-std::expected<FDTDGeometry<T>, std::string>
-FDTDGeometry<T>::create(const Config<T> &config) {
-  SPDLOG_TRACE("enter FDTDGeometry<T>::create");
-  try {
-    const FDTDGeometry geom(config);
-    SPDLOG_TRACE("exit FDTDGeometry<T>::create with success");
-    return geom;
-  } catch (const std::runtime_error &err) {
-    SPDLOG_CRITICAL("exit FDTDGeometry<T>::create with error: {}", err.what());
-    return std::unexpected(err.what());
-  }
-}
-
-template <std::floating_point T>
-FDTDEngine<T>::FDTDEngine(const Config<T> &config)
-    : geom(FDTDGeometry<T>::create(config).value()), e(geom.nv, 0.0),
-      h(geom.nv, 0.0) {
-  SPDLOG_TRACE("enter FDTDEngine<T>::FDTDEngine");
   SPDLOG_TRACE("exit FDTDEngine<T>::FDTDEngine");
 }
 
@@ -104,9 +91,8 @@ uint64_t FDTDEngine<T>::calc_cfl_steps(const T time_span) const {
   SPDLOG_TRACE("enter FDTDEngine<T>::calc_cfl_steps");
 
   const T maximum_dt =
-      1.0 / (VAC_SPEED_OF_LIGHT<T> / sqrt(geom.ep_r * geom.mu_r) *
-             sqrt(pow(geom.d_inv.x, 2) + pow(geom.d_inv.y, 2) +
-                  pow(geom.d_inv.z, 2)));
+      1.0 / (VAC_SPEED_OF_LIGHT<T> / sqrt(ep_r * mu_r) *
+             sqrt(pow(d_inv.x, 2) + pow(d_inv.y, 2) + pow(d_inv.z, 2)));
   SPDLOG_DEBUG("maximum possible timestep to satisfy CFL condition (s): {:.3e}",
                maximum_dt);
 
@@ -124,23 +110,23 @@ template <std::floating_point T> void FDTDEngine<T>::step(const T dt) {
   // TODO called, the performance penalty of this has yet to be assed however
 
   // electric field a loop constant
-  const T ea = 1.0 / (geom.ep / dt + geom.sigma / 2.0);
+  const T ea = 1.0 / (ep / dt + sigma / 2.0);
   SPDLOG_TRACE("ea loop constant: {:.3e}", ea);
 
   // electric field b loop constant
-  const T eb = geom.ep / dt - geom.sigma / 2.0;
+  const T eb = ep / dt - sigma / 2.0;
   SPDLOG_TRACE("eb loop constant: {:.3e}", eb);
 
   // magnetic field a loop constant for x-component
-  const T hxa = dt * geom.d_inv.x / geom.mu;
+  const T hxa = dt * d_inv.x / mu;
   SPDLOG_TRACE("hxa loop constant: {:.3e}", hxa);
 
   // magnetic field a loop constant for y-component
-  const T hya = dt * geom.d_inv.y / geom.mu;
+  const T hya = dt * d_inv.y / mu;
   SPDLOG_TRACE("hya loop constant: {:.3e}", hya);
 
   // magnetic field a loop constant for z-component
-  const T hza = dt * geom.d_inv.z / geom.mu;
+  const T hza = dt * d_inv.z / mu;
   SPDLOG_TRACE("hza loop constant: {:.3e}", hza);
 
   // half timestep update before updating magnetic fields
@@ -201,8 +187,8 @@ void FDTDEngine<T>::update_ex(const T ea, const T eb) {
     for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
       for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
         e.x[i, j, k] = ea * (eb * e.x[i, j, k] +
-                             geom.d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]) -
-                             geom.d_inv.z * (h.y[i, j, k] - h.y[i, j, k - 1]));
+                             d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]) -
+                             d_inv.z * (h.y[i, j, k] - h.y[i, j, k - 1]));
       }
     }
   }
@@ -219,8 +205,8 @@ void FDTDEngine<T>::update_ey(const T ea, const T eb) {
     for (size_t j = 1; j < e.y.extent(1) - 1; ++j) {
       for (size_t k = 1; k < e.y.extent(2) - 1; ++k) {
         e.y[i, j, k] = ea * (eb * e.y[i, j, k] +
-                             geom.d_inv.z * (h.x[i, j, k] - h.x[i, j, k - 1]) -
-                             geom.d_inv.x * (h.z[i, j, k] - h.z[i - 1, j, k]));
+                             d_inv.z * (h.x[i, j, k] - h.x[i, j, k - 1]) -
+                             d_inv.x * (h.z[i, j, k] - h.z[i - 1, j, k]));
       }
     }
   }
@@ -237,8 +223,8 @@ void FDTDEngine<T>::update_ez(const T ea, const T eb) {
     for (size_t j = 1; j < e.z.extent(1) - 1; ++j) {
       for (size_t k = 1; k < e.z.extent(2) - 1; ++k) {
         e.z[i, j, k] = ea * (eb * e.z[i, j, k] +
-                             geom.d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
-                             geom.d_inv.y * (h.x[i, j, k] - h.x[i, j - 1, k]));
+                             d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
+                             d_inv.y * (h.x[i, j, k] - h.x[i, j - 1, k]));
       }
     }
   }
@@ -344,7 +330,5 @@ void FDTDEngine<T>::update_hz(const T hxa, const T hya) {
 }
 
 // explicit template instantiation
-template class FDTDGeometry<double>;
-template class FDTDGeometry<float>;
 template class FDTDEngine<double>;
 template class FDTDEngine<float>;
