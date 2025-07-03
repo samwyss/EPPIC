@@ -92,6 +92,22 @@ else ()
     message(STATUS "Library `mdspan` found on system.")
 endif ()
 
+find_package(SimpleXdmf QUIET)
+if (NOT SimpleXdmf_FOUND)
+    message(STATUS "Library `SimpleXdmf` not found. Installing locally now.")
+    FetchContent_Declare(SimpleXdmf
+            GIT_REPOSITORY https://github.com/hsimyu/SimpleXdmf.git
+            GIT_TAG master
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
+            GIT_SUBMODULES "" # prevents cloning submodules
+            EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(SimpleXdmf)
+else ()
+    message(STATUS "Library `SimpleXdmf` found on system.")
+endif ()
+
 # testing --------------------------------------------------------------------------------------------------------------
 enable_testing()
 add_subdirectory(tests)
@@ -138,6 +154,7 @@ add_library(Core
 target_include_directories(Core
         PUBLIC src/fields
         PUBLIC src/constants
+        PUBLIC ${simplexdmf_SOURCE_DIR}/include
 )
 
 target_link_libraries(Core
@@ -153,6 +170,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${OPENMP_CXX_INCLUDE_PATH}
         PRIVATE ${HDF5_INCLUDE_DIRS}
         PRIVATE ${PROJECT_BINARY_DIR}
+        PRIVATE ${simplexdmf_SOURCE_DIR}/include
         PRIVATE src/core
         PRIVATE src/fields
 )
