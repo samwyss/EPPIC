@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <expected>
+#include <hdf5/openmpi/hdf5.h>
+#include <simple_xdmf.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/stopwatch.h>
 #include <stdexcept>
