@@ -29,64 +29,68 @@ int main(int argc, char **argv) {
   console->info("EPPIC run begin");
 
   // main io directory setup
-  if (!std::filesystem::is_directory("./out/")) {
-    console->warn("main io directory `./out/` not found ... creating now");
+  const auto out_dir = std::filesystem::path("./out/");
+  if (!is_directory(out_dir)) {
+    console->warn("directory `{}` not found ... creating now",
+                  out_dir.string());
     try {
-      std::filesystem::create_directory("./out/");
+      create_directory(out_dir);
     } catch (const std::filesystem::filesystem_error &err) {
-      err_logger->critical("unable to create `./out/` directory: {} ",
-                           err.what());
+      err_logger->critical("unable to create `{}` directory: {} ",
+                           out_dir.string(), err.what());
       return EXIT_FAILURE;
     }
-    console->info("created main io directory `./out/`");
+    console->info("created directory `{}`", out_dir.string());
   }
 
   // run specific directory setup
-  const auto io_dir = fmt::format("./out/{}", start_time_str);
-  if (!std::filesystem::is_directory(io_dir)) {
-    console->warn("run specific io directory `{}` not found ... creating now",
-                  io_dir);
+  const auto io_dir = std::filesystem::path(
+      fmt::format("{}{}/", out_dir.string(), start_time_str));
+  if (!is_directory(io_dir)) {
+    console->warn("directory `{}` not found ... creating now", io_dir.string());
     try {
-      std::filesystem::create_directory(io_dir);
+      create_directory(io_dir);
     } catch (const std::filesystem::filesystem_error &err) {
-      err_logger->critical(
-          "unable to create run specific io directory `{}`: {} ", io_dir,
-          err.what());
+      err_logger->critical("unable to create directory `{}`: {} ",
+                           io_dir.string(), err.what());
       return EXIT_FAILURE;
     }
-    console->info("created run specific io directory `{}`", io_dir);
+    console->info("created directory `{}`", io_dir.string());
   }
 
   // logging dir setup
-  const auto log_dir = fmt::format("{}/logs", io_dir);
-  if (!std::filesystem::is_directory(log_dir)) {
-    console->warn("logging directory `{}` not found ... creating now", log_dir);
+  const auto log_dir =
+      std::filesystem::path(fmt::format("{}logs/", io_dir.string()));
+  if (!is_directory(log_dir)) {
+    console->warn("directory `{}` not found ... creating now",
+                  log_dir.string());
     try {
-      std::filesystem::create_directory(log_dir);
+      create_directory(log_dir);
     } catch (const std::filesystem::filesystem_error &err) {
-      err_logger->critical("unable to create logging directory `{}`: {} ",
-                           log_dir, err.what());
+      err_logger->critical("unable to create directory `{}`: {} ",
+                           log_dir.string(), err.what());
       return EXIT_FAILURE;
     }
-    console->info("created logging directory `{}`", log_dir);
+    console->info("created directory `{}`", log_dir.string());
   }
 
   // file based default logger
-  const auto logger =
-      spdlog::basic_logger_mt("logger", fmt::format("{}/log.log", log_dir));
+  const auto logger = spdlog::basic_logger_mt(
+      "logger", fmt::format("{}log.log", log_dir.string()));
   spdlog::set_default_logger(logger);
   spdlog::set_level(spdlog::level::trace);
   spdlog::flush_every(std::chrono::seconds(5));
 
   console->info("file based logger successfully initialized ... remaining logs "
-                "will be written to {}/log.log",
-                log_dir);
+                "will be written to {}log.log",
+                log_dir.string());
 
   // floating point precision
   // todo get this from configuration
   const std::string precision = "single";
   SPDLOG_INFO("floating point precision: {}", precision);
 
+  // todo this can likely be improved
   if (precision == "single") {
     // EPPIC configuration
     const auto config = Config<float>();
