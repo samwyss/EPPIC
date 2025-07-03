@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <string>
 #include <type_traits>
 
@@ -43,6 +44,9 @@ template <std::floating_point T> struct Config {
 
   /// (S / m) diagonally isotropic conductivity of material in bounding box
   T sigma = 0.0;
+
+  /// io directory
+  std::filesystem::path io_dir;
 };
 
 #endif // CORE_CONFIG_H
