@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
   // (s) EPPIC start time
   const auto start_time = std::chrono::high_resolution_clock::now();
 
-  // start time as string
+  // start time as std::string
   const auto start_time_str = fmt::format("{:%Y-%m-%d_%H:%M:%S}", start_time);
 
   // temporary logger to stdio
