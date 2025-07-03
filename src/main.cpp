@@ -85,62 +85,26 @@ int main(int argc, char **argv) {
                 "will be written to {}log.log",
                 log_dir.string());
 
-  // floating point precision
-  // todo get this from configuration
-  const std::string precision = "single";
-  SPDLOG_INFO("floating point precision: {}", precision);
+  // EPPIC configuration
+  const auto config = Config<float>();
 
-  // todo this can likely be improved
-  if (precision == "single") {
-    // EPPIC configuration
-    const auto config = Config<float>();
+  // EPPIC world
+  auto world_creation_result = World<float>::create(config);
+  if (!world_creation_result.has_value()) {
+    SPDLOG_CRITICAL("failed to create World object: {}",
+                    world_creation_result.error());
 
-    // EPPIC world
-    auto world_creation_result = World<float>::create(config);
-    if (!world_creation_result.has_value()) {
-      SPDLOG_CRITICAL("failed to create World object: {}",
-                      world_creation_result.error());
+    return EXIT_FAILURE;
+  }
+  auto world = std::move(world_creation_result).value();
 
-      return EXIT_FAILURE;
-    }
-    auto world = std::move(world_creation_result).value();
+  SPDLOG_INFO("configuration successful");
 
-    // run EPPIC
-    if (auto world_run_result = world.advance_to(config.end_time);
-        !world_run_result.has_value()) {
-      SPDLOG_CRITICAL("failed to run EPPIC: {}", world_run_result.error());
+  // run EPPIC
+  if (auto result = world.advance_to(config.end_time); !result.has_value()) {
+    SPDLOG_CRITICAL("failed to run EPPIC: {}", result.error());
 
-      return EXIT_FAILURE;
-    }
-
-  } else {
-    // check for invalid configuration
-    if (precision != "double") {
-      SPDLOG_WARN("floating point precision `{}` is not supported and will "
-                  "default to `double`",
-                  precision);
-    }
-
-    // EPPIC configuration
-    const auto config = Config<double>();
-
-    // EPPIC world
-    auto world_creation_result = World<double>::create(config);
-    if (!world_creation_result.has_value()) {
-      SPDLOG_CRITICAL("failed to create World object: {}",
-                      world_creation_result.error());
-
-      return EXIT_FAILURE;
-    }
-    auto world = std::move(world_creation_result).value();
-
-    // run EPPIC
-    if (auto world_run_result = world.advance_to(config.end_time);
-        !world_run_result.has_value()) {
-      SPDLOG_CRITICAL("failed to run EPPIC: {}", world_run_result.error());
-
-      return EXIT_FAILURE;
-    }
+    return EXIT_FAILURE;
   }
 
   SPDLOG_INFO("EPPIC exiting");
