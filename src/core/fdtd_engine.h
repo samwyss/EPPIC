@@ -120,22 +120,22 @@ private:
   void update_hz(T hxa, T hya);
 
   /// (m) size of bounding box in all directions
-  Coord3<T> len;
+  const Coord3<T> len;
 
   /// relative diagonally isotropic permittivity of material inside bounding box
-  T ep_r;
+  const T ep_r;
 
   /// relative diagonally isotropic permeability of material inside bounding box
-  T mu_r;
+  const T mu_r;
 
   /// (F/m) diagonally isotropic permittivity of material inside bounding box
-  T ep;
+  const T ep;
 
   /// (H/m) diagonally isotropic permeability of material inside bounding box
-  T mu;
+  const T mu;
 
   /// (S/m) diagonally isotropic conductivity of material inside bounding box
-  T sigma;
+  const T sigma;
 
   /// number of voxels in all directions
   Coord3<size_t> nv{};

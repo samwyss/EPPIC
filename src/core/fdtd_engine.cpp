@@ -1,19 +1,13 @@
 #include "fdtd_engine.h"
 
 template <std::floating_point T>
-FDTDEngine<T>::FDTDEngine(const Config<T> &config) {
+FDTDEngine<T>::FDTDEngine(const Config<T> &config)
+    : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
+      mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY<T>),
+      mu(mu_r * VAC_PERMEABILITY<T>), sigma(config.sigma) {
   SPDLOG_TRACE("enter FDTDEngine<T>::FDTDEngine");
-
-  len = {config.x_len, config.y_len, config.z_len};
   SPDLOG_DEBUG("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y,
                len.z);
-
-  ep_r = config.ep_r;
-  mu_r = config.mu_r;
-
-  ep = ep_r * VAC_PERMITTIVITY<T>;
-  mu = mu_r * VAC_PERMEABILITY<T>;
-  sigma = config.sigma;
 
   // (m) maximum spatial step based on maximum frequency
   const T ds_min_wavelength =
