@@ -17,23 +17,15 @@
  */
 int main(int argc, char **argv) {
 
-  // todo
-  // log other constructs
-  // fdtd engine
-  // hdf5 io
-  // particles
-  // configuration
-  // parallelization
-
-  // spdlog setup
+  // io setup
   try {
     // remove old logs
-    if (std::filesystem::is_directory("./logs/")) {
-      std::filesystem::remove_all("./logs/");
+    if (std::filesystem::is_directory("./out/")) {
+      std::filesystem::remove_all("./out/");
     }
 
-    // create empty logging directory
-    std::filesystem::create_directory("./logs/");
+    // create empty io directory
+    std::filesystem::create_directory("./out/");
 
     // file based default logger
     const auto logger = spdlog::basic_logger_mt("logger", "./logs/log.log");
