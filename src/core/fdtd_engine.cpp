@@ -46,8 +46,8 @@ FDTDEngine<T>::FDTDEngine(const Config<T> &config)
                d_inv.y, d_inv.z);
 
   // initialize fields
-  // e = Vector3<T>(nv, 0.0);
-  // h = Vector3<T>(nv, 0.0);
+  e = Vector3<T>(nv, 0.0);
+  h = Vector3<T>(nv, 0.0);
 
   SPDLOG_TRACE("exit FDTDEngine<T>::FDTDEngine");
 }
