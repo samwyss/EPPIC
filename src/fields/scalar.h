@@ -15,6 +15,11 @@ template <typename T>
 class Scalar3 {
 public:
   /*!
+   * Scalar3 default constructor;
+   */
+  Scalar3() = default;
+
+  /*!
    * Scalar3 constructor
    * @param dims field dimensions
    * @param val initial field value

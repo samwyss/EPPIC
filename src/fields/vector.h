@@ -15,6 +15,11 @@ template <typename T>
 class Vector3 {
 public:
   /*!
+   * Vector3 default constructor
+   */
+  Vector3() = default;
+
+  /*!
    * Vector3 constructor
    * @param dims field dimensions
    * @param val initial field value
