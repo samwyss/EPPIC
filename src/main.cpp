@@ -6,6 +6,9 @@
 
 #include "world.h"
 
+// floating point precision (double, float)
+using precision = float;
+
 /*!
  * main driver function and build target
  * @param argc argument count
@@ -86,10 +89,10 @@ int main(int argc, char **argv) {
                 log_dir.string());
 
   // EPPIC configuration
-  const auto config = Config<float>();
+  const auto config = Config<precision>();
 
   // EPPIC world
-  auto world_creation_result = World<float>::create(config);
+  auto world_creation_result = World<precision>::create(config);
   if (!world_creation_result.has_value()) {
     SPDLOG_CRITICAL("failed to create World object: {}",
                     world_creation_result.error());
