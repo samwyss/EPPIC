@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 
   console->info("EPPIC run begin");
 
-  // main io directory setup
+  // main io dir setup
   const auto out_dir = std::filesystem::path("./out/");
   if (!is_directory(out_dir)) {
     console->warn("directory `{}` not found ... creating now",
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     console->info("created directory `{}`", out_dir.string());
   }
 
-  // run specific directory setup
+  // timestamped io dir setup
   const auto io_dir = std::filesystem::path(
       fmt::format("{}{}/", out_dir.string(), start_time_str));
   if (!is_directory(io_dir)) {
