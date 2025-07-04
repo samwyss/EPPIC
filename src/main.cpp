@@ -89,13 +89,14 @@ int main(int argc, char **argv) {
                 log_dir.string());
 
   // EPPIC configuration
+  // todo this will need to be error handled
   auto config = Config<precision>();
   config.io_dir = io_dir;
 
   // EPPIC world
   auto world_creation_result = World<precision>::create(config);
   if (!world_creation_result.has_value()) {
-    SPDLOG_CRITICAL("failed to create World object: {}",
+    SPDLOG_CRITICAL("failed to configure World object: {}",
                     world_creation_result.error());
 
     return EXIT_FAILURE;
