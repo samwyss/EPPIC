@@ -89,7 +89,8 @@ int main(int argc, char **argv) {
                 log_dir.string());
 
   // EPPIC configuration
-  const auto config = Config<precision>();
+  auto config = Config<precision>();
+  config.io_dir = io_dir;
 
   // EPPIC world
   auto world_creation_result = World<precision>::create(config);
