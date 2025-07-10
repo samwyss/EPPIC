@@ -4,8 +4,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include "world.h"
 #include "type.h"
+#include "world.h"
 
 /*!
  * main driver function and build target
