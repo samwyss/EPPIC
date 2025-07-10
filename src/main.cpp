@@ -4,10 +4,8 @@
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
+#include "type.h"
 #include "world.h"
-
-// floating point precision (double, float)
-using precision = float;
 
 /*!
  * main driver function and build target
@@ -90,11 +88,11 @@ int main(int argc, char **argv) {
 
   // EPPIC configuration
   // todo this will need to be error handled
-  auto config = Config<precision>();
+  auto config = Config();
   config.io_dir = io_dir;
 
   // EPPIC world
-  auto world_creation_result = World<precision>::create(config);
+  auto world_creation_result = World::create(config);
   if (!world_creation_result.has_value()) {
     SPDLOG_CRITICAL("failed to configure World object: {}",
                     world_creation_result.error());

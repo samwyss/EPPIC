@@ -1,12 +1,9 @@
 #include "world.h"
 
-template <std::floating_point T>
-World<T>::World(const Config<T> &config)
-    : engine(FDTDEngine<T>::create(config).value()), ds_ratio(config.ds_ratio) {
-}
+World::World(const Config &config)
+    : engine(FDTDEngine::create(config).value()), ds_ratio(config.ds_ratio) {}
 
-template <std::floating_point T>
-std::expected<World<T>, std::string> World<T>::create(const Config<T> &config) {
+std::expected<World, std::string> World::create(const Config &config) {
   try {
     return World(config);
   } catch (const std::runtime_error &err) {
@@ -14,15 +11,14 @@ std::expected<World<T>, std::string> World<T>::create(const Config<T> &config) {
   }
 }
 
-template <std::floating_point T>
-std::expected<void, std::string> World<T>::advance_to(const T end_t) {
-  SPDLOG_TRACE("enter World<T>::advance_to");
+std::expected<void, std::string> World::advance_to(const fpp end_t) {
+  SPDLOG_TRACE("enter World::advance_to");
   SPDLOG_DEBUG("current time is {:.3e} (s)", time);
   SPDLOG_DEBUG("advance time to {:.3e} (s)", end_t);
 
   if (end_t > time) {
     // (s) time difference between current state and end time
-    const T adv_t = end_t - time;
+    const fpp adv_t = end_t - time;
 
     if (const auto adv_by_result = advance_by(adv_t);
         !adv_by_result.has_value()) {
@@ -37,13 +33,12 @@ std::expected<void, std::string> World<T>::advance_to(const T end_t) {
         end_t, time);
   }
 
-  SPDLOG_TRACE("exit World<T>::advance_to");
+  SPDLOG_TRACE("exit World::advance_to");
   return {};
 }
 
-template <std::floating_point T>
-std::expected<void, std::string> World<T>::advance_by(const T adv_t) {
-  SPDLOG_TRACE("enter World<T>::advance_by");
+std::expected<void, std::string> World::advance_by(const fpp adv_t) {
+  SPDLOG_TRACE("enter World::advance_by");
   SPDLOG_DEBUG("advance time by {:.3e} (s)", adv_t);
 
   // (s) initial time
@@ -54,7 +49,7 @@ std::expected<void, std::string> World<T>::advance_by(const T adv_t) {
   const auto steps = engine.calc_num_steps(adv_t);
 
   // (s) time step
-  const T dt = adv_t / static_cast<T>(steps);
+  const fpp dt = adv_t / static_cast<fpp>(steps);
   SPDLOG_DEBUG("timestep: {:.3e} (s)", dt);
 
   // loop start time
@@ -87,11 +82,7 @@ std::expected<void, std::string> World<T>::advance_by(const T adv_t) {
   SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}",
               static_cast<double>(num_cells) / loop_time);
 
-  SPDLOG_TRACE("exit FDTDEngine<T>::advance_by");
+  SPDLOG_TRACE("exit FDTDEngine::advance_by");
 
   return {};
 }
-
-// explicit template instantiation
-template class World<float>;
-template class World<double>;
