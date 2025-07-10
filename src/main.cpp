@@ -29,8 +29,25 @@ int main(int argc, char **argv) {
 
   console->info("EPPIC run begin");
 
+  // ensure io prefix is provided
+  if (argc < 2) {
+    err_logger->critical(
+        "io prefix not provided ... please rerun as `EPPIC <io_prefix>`");
+    return EXIT_FAILURE;
+  }
+
+  // ensure io prefix is a valid path on the filesystem
+  const auto io_prefix = std::filesystem::path(argv[1]);
+  if (!is_directory(io_prefix)) {
+    err_logger->critical("io prefix `{}` is not a valid path on this "
+                         "filesystem ... please correct and rerun");
+    return EXIT_FAILURE;
+  }
+  console->info("valid io prefix found `{}`", io_prefix.string());
+
   // main io dir setup
-  const auto out_dir = std::filesystem::path("./out/");
+  const auto out_dir =
+      std::filesystem::path(fmt::format("{}/out/", io_prefix.string()));
   if (!is_directory(out_dir)) {
     console->warn("directory `{}` not found ... creating now",
                   out_dir.string());
