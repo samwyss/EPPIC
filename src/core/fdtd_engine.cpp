@@ -42,7 +42,7 @@ FDTDEngine::FDTDEngine(const Config &config)
   // (m^-1) inverse spatial steps
   d_inv = {static_cast<fpp>(1.0) / d.x, static_cast<fpp>(1.0) / d.y,
            static_cast<fpp>(1.0) / d.z};
-  SPDLOG_DEBUG("inverse voxel size (m) , {:.3e} x {:.3e} x {:.3e}", d_inv.x,
+  SPDLOG_DEBUG("inverse voxel size (m^-1) , {:.3e} x {:.3e} x {:.3e}", d_inv.x,
                d_inv.y, d_inv.z);
 
   // initialize fields
