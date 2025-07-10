@@ -283,7 +283,6 @@ void FDTDEngine::update_hy(const fpp hxa, const fpp hza) const {
 void FDTDEngine::update_hz(const fpp hxa, const fpp hya) const {
   SPDLOG_TRACE("enter FDTDEngine::update_hz");
 
-  // todo correctly implement for PEC boundary
   // todo remove branches
   for (size_t i = 0; i < h.z.extent(0); ++i) {
     for (size_t j = 0; j < h.z.extent(1); ++j) {
