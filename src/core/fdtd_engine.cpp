@@ -11,8 +11,9 @@ FDTDEngine::FDTDEngine(const Config &config)
   // (m) maximum spatial step based on maximum frequency
   const fpp ds_min_wavelength =
       VAC_SPEED_OF_LIGHT /
-      (sqrt(ep_r * mu_r) * static_cast<fpp>(config.num_vox_min_wavelength) *
-       config.max_frequency);
+      static_cast<fpp>(sqrt(ep_r * mu_r) *
+                       static_cast<fpp>(config.num_vox_min_wavelength) *
+                       config.max_frequency);
   SPDLOG_DEBUG("maximum spatial step based on maximum frequency (m): {:.3e}",
                ds_min_wavelength);
 
@@ -80,13 +81,13 @@ uint64_t FDTDEngine::calc_num_steps(const fpp adv_t) const {
 uint64_t FDTDEngine::calc_cfl_steps(const fpp time_span) const {
   SPDLOG_TRACE("enter FDTDEngine::calc_cfl_steps");
 
-  const fpp maximum_dt =
+  const fpp maximum_dt = static_cast<fpp>(
       1.0 / (VAC_SPEED_OF_LIGHT / sqrt(ep_r * mu_r) *
-             sqrt(pow(d_inv.x, 2) + pow(d_inv.y, 2) + pow(d_inv.z, 2)));
+             sqrt(pow(d_inv.x, 2) + pow(d_inv.y, 2) + pow(d_inv.z, 2))));
   SPDLOG_DEBUG("maximum possible timestep to satisfy CFL condition (s): {:.3e}",
                maximum_dt);
 
-  const fpp num_steps = static_cast<uint64_t>(ceil(time_span / maximum_dt));
+  const auto num_steps = static_cast<uint64_t>(ceil(time_span / maximum_dt));
   SPDLOG_DEBUG("steps required to satisfy CFL condition: {}", num_steps);
 
   SPDLOG_TRACE("exit FDTDEngine::calc_cfl_steps");
@@ -100,23 +101,23 @@ void FDTDEngine::step(const fpp dt) {
   // TODO called, the performance penalty of this has yet to be assed however
 
   // electric field a loop constant
-  const fpp ea = 1.0 / (ep / dt + sigma / 2.0);
+  const auto ea = static_cast<fpp>(1.0 / (ep / dt + sigma / 2.0));
   SPDLOG_TRACE("ea loop constant: {:.3e}", ea);
 
   // electric field b loop constant
-  const fpp eb = ep / dt - sigma / 2.0;
+  const auto eb = static_cast<fpp>(ep / dt - sigma / 2.0);
   SPDLOG_TRACE("eb loop constant: {:.3e}", eb);
 
   // magnetic field a loop constant for x-component
-  const fpp hxa = dt * d_inv.x / mu;
+  const auto hxa = dt * d_inv.x / mu;
   SPDLOG_TRACE("hxa loop constant: {:.3e}", hxa);
 
   // magnetic field a loop constant for y-component
-  const fpp hya = dt * d_inv.y / mu;
+  const auto hya = dt * d_inv.y / mu;
   SPDLOG_TRACE("hya loop constant: {:.3e}", hya);
 
   // magnetic field a loop constant for z-component
-  const fpp hza = dt * d_inv.z / mu;
+  const auto hza = dt * d_inv.z / mu;
   SPDLOG_TRACE("hza loop constant: {:.3e}", hza);
 
   // half timestep update before updating magnetic fields
@@ -230,15 +231,15 @@ void FDTDEngine::update_hx(const fpp hya, const fpp hza) const {
         } else if (j != h.x.extent(1) - 1 && k == h.x.extent(2) - 1) {
           // k-high plane
           h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) +
-                          hza * (0.0 - e.y[i, j, k]);
+                          hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
         } else if (j == h.x.extent(1) - 1 && k != h.x.extent(2) - 1) {
           // j-high plane
-          h.x[i, j, k] += -hya * (0.0 - e.z[i, j, k]) +
+          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) +
                           hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
         } else {
           // j- k-high line
-          h.x[i, j, k] +=
-              -hya * (0.0 - e.z[i, j, k]) + hza * (0.0 - e.y[i, j, k]);
+          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) +
+                          hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
         }
       }
     }
@@ -260,16 +261,16 @@ void FDTDEngine::update_hy(const fpp hxa, const fpp hza) const {
                           hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
         } else if (i != h.y.extent(0) - 1 && k == h.y.extent(2) - 1) {
           // k-high plane
-          h.y[i, j, k] += -hza * (0.0 - e.x[i, j, k]) +
+          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) +
                           hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
         } else if (i == h.y.extent(0) - 1 && k != h.y.extent(2) - 1) {
           // i-high plane
           h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) +
-                          hxa * (0.0 - e.z[i, j, k]);
+                          hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
         } else {
           // i- k-high line
-          h.y[i, j, k] +=
-              -hza * (0.0 - e.x[i, j, k]) + hxa * (0.0 - e.z[i, j, k]);
+          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) +
+                          hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
         }
       }
     }
@@ -293,15 +294,15 @@ void FDTDEngine::update_hz(const fpp hxa, const fpp hya) const {
         } else if (i != h.y.extent(0) - 1 && j == h.y.extent(1) - 1) {
           // j-high plane
           h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) +
-                          hya * (0.0 - e.x[i, j, k]);
+                          hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
         } else if (i == h.y.extent(0) - 1 && j != h.y.extent(1) - 1) {
           // i-high plane
-          h.z[i, j, k] += -hxa * (0.0 - e.y[i, j, k]) +
+          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) +
                           hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
         } else {
           // i- j-high line
-          h.z[i, j, k] +=
-              -hxa * (0.0 - e.y[i, j, k]) + hya * (0.0 - e.x[i, j, k]);
+          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) +
+                          hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
         }
       }
     }
