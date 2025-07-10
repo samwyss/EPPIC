@@ -60,13 +60,17 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   SPDLOG_DEBUG("enter main time loop");
   try {
     for (uint64_t i = 0; i < steps; ++i) {
+      SPDLOG_DEBUG("step: {}/{} elapsed time (s): {:.5e}/{:.5e}", i + 1, steps,
+                   time, init_time + adv_t);
 
       // advance by one step
       engine.step(dt);
       time += dt;
 
-      SPDLOG_TRACE("step: {}/{} elapsed time (s): {:.5e}/{:.5e}", i + 1, steps,
-                   time, init_time + adv_t);
+      if (0 == i % ds_ratio || i == steps - 1) [[unlikely]] {
+        SPDLOG_DEBUG("begin data logging");
+        SPDLOG_DEBUG("end data logging");
+      }
     }
   } catch (const std::runtime_error &err) {
     SPDLOG_CRITICAL("main time loop returned with error: {}", err.what());
