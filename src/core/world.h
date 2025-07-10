@@ -5,10 +5,78 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 #include "config.h"
 #include "fdtd_engine.h"
 #include "type.h"
+
+/*!
+ * RAII HDF5 object wrapper
+ * @tparam CloseFunc function that releases HDF5 object
+ */
+template <typename CloseFunc> class HDF5Mgr {
+public:
+  /*!
+   * HDF5 object wrapper constructor
+   * @param handle HDF5 object handle
+   * @param release HDF5 object release function
+   */
+  HDF5Mgr(const hid_t handle, const CloseFunc release)
+      : handle(handle), close(release) {}
+
+  /*!
+   * HDF5 object wrapper destructor
+   */
+  ~HDF5Mgr() noexcept {
+    if (handle >= 0) {
+      close(handle);
+    }
+  }
+
+  /*!
+   * deleted HDF5 object wrapper copy constructor
+   */
+  HDF5Mgr(const HDF5Mgr &) = delete;
+
+  /*!
+   * deleted HDF5 object wrapper copy assignment operator
+   */
+  HDF5Mgr &operator=(const HDF5Mgr &) = delete;
+
+  /*!
+   * HDF5 object wrapper move constructor
+   * @param other other HDF5 object wrapper
+   */
+  HDF5Mgr(const HDF5Mgr &&other) noexcept
+      : handle(std::exchange(other.handle, -1)),
+        close(std::move(other.close)) {};
+
+  /*!
+   * HDF5 object wrapper move assignment operator
+   * @param other other HDF5 object wrapper
+   * @return HDF5 obbject wrapper
+   */
+  HDF5Mgr &operator=(HDF5Mgr &&other) noexcept {
+    if (this != &other) {
+      if (handle >= 0) {
+        close(handle);
+      }
+
+      handle = std::exchange(other.handle, -1);
+
+      close = std::move(other.close);
+    }
+    return *this;
+  }
+
+private:
+  /// HDF5 object handle
+  const hid_t handle;
+
+  /// HDF5 object release function
+  const CloseFunc close;
+};
 
 /*!
  * world object
