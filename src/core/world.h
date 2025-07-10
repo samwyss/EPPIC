@@ -58,6 +58,9 @@ private:
 
   /// output HDF5 file
   HDF5Obj file;
+
+  // todo remove me
+  std::string io_dir_str;
 };
 
 #endif // CORE_WORLD_H

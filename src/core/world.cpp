@@ -4,7 +4,8 @@ World::World(const Config &config)
     : engine(FDTDEngine::create(config).value()), ds_ratio(config.ds_ratio),
       file(H5Fcreate(fmt::format("{}data.h5", config.io_dir.string()).c_str(),
                      H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT),
-           H5Fclose) {}
+           H5Fclose),
+      io_dir_str(config.io_dir.string()) {}
 
 std::expected<World, std::string> World::create(const Config &config) {
   try {
@@ -59,6 +60,13 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const spdlog::stopwatch watch;
 
+  // todo move me somewhere more logical along with hdf5 file creation maybe
+  SimpleXdmf xdmf;
+  xdmf.setVersion("3.0");
+  xdmf.setNewLineCodeLF();
+  xdmf.setIndentSpaceSize(4);
+  xdmf.beginDomain();
+
   // main time loop
   SPDLOG_DEBUG("enter main time loop");
   try {
@@ -82,6 +90,41 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         // write field data
         engine.write_h5(group);
 
+        // todo move me
+        xdmf.beginGrid(fmt::format("Step{}", i + 1));
+
+        xdmf.beginTime();
+        xdmf.setValue(fmt::to_string(time));
+        xdmf.endTime();
+
+        xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
+        xdmf.setDimensions("5 5 5"); // number of points not cells
+        xdmf.endStructuredTopology();
+        xdmf.beginGeometory("FieldMesh", "ORIGIN_DXDYDZ");
+        xdmf.beginDataItem();
+        xdmf.setDimensions("3");
+        xdmf.setFormat("XML");
+        xdmf.addItem("0 0 0");
+        xdmf.endDataItem();
+        xdmf.beginDataItem();
+        xdmf.setDimensions("3");
+        xdmf.setFormat("XML");
+        xdmf.addItem("1 1 1");
+        xdmf.endDataItem();
+        xdmf.endGeometory();
+
+        xdmf.beginAttribute("ex");
+        xdmf.setCenter("Cell");
+        xdmf.beginDataItem();
+        xdmf.setDimensions("4 4 4");
+        xdmf.setPrecision("4");
+        xdmf.setFormat("HDF");
+        xdmf.addItem(fmt::format("data.h5:/{}/ex", i));
+        xdmf.endDataItem();
+        xdmf.endAttribute();
+
+        xdmf.endGrid();
+
         SPDLOG_DEBUG("end data logging");
       }
     }
@@ -90,6 +133,10 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
     return std::unexpected(err.what());
   }
   SPDLOG_DEBUG("exit main time loop with success");
+
+  // todo do something with me
+  xdmf.endDomain();
+  xdmf.generate(fmt::format("{}/data.xdmf", io_dir_str));
 
   // basic loop performance diagnostics
   [[maybe_unused]] const auto loop_time = watch.elapsed().count();
