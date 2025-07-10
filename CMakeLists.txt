@@ -150,6 +150,7 @@ add_library(Core
         src/core/config.h
         src/core/fdtd_engine.cpp
         src/core/fdtd_engine.h
+        src/core/hdf5_wrapper.h
 )
 
 target_include_directories(Core
