@@ -2,7 +2,8 @@
 
 template <std::floating_point T>
 World<T>::World(const Config<T> &config)
-    : engine(FDTDEngine<T>::create(config).value()) {}
+    : engine(FDTDEngine<T>::create(config).value()), ds_ratio(config.ds_ratio) {
+}
 
 template <std::floating_point T>
 std::expected<World<T>, std::string> World<T>::create(const Config<T> &config) {

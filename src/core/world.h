@@ -51,6 +51,9 @@ private:
 
   /// (s) elapsed time
   T time = 0.0;
+
+  /// data output downsampling ratio, number of steps between logged timesteps
+  uint64_t ds_ratio;
 };
 
 #endif // CORE_WORLD_H
