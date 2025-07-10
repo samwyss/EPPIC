@@ -8,12 +8,12 @@
 
 #include "config.h"
 #include "fdtd_engine.h"
+#include "type.h"
 
 /*!
  * world object
- * @tparam T floating point precision
  */
-template <std::floating_point T> class World {
+class World {
 public:
   /*!
    * World static factory method
@@ -21,7 +21,7 @@ public:
    * @return void
    */
   [[nodiscard]] static std::expected<World, std::string>
-  create(const Config<T> &config);
+  create(const Config &config);
 
   /*!
    * advances internal state to an end time
@@ -30,27 +30,27 @@ public:
    * @param end_t (s) end time
    * @return void
    */
-  [[nodiscard]] std::expected<void, std::string> advance_to(T end_t);
+  [[nodiscard]] std::expected<void, std::string> advance_to(fpp end_t);
 
   /*!
    * advances internal state by a given time period
    * @param adv_t (s) time period to advance by
    * @return void
    */
-  [[nodiscard]] std::expected<void, std::string> advance_by(T adv_t);
+  [[nodiscard]] std::expected<void, std::string> advance_by(fpp adv_t);
 
 private:
   /*!
    * World constructor
    * @param config configuration object
    */
-  explicit World(const Config<T> &config);
+  explicit World(const Config &config);
 
   /// electromagnetic engine
-  FDTDEngine<T> engine;
+  FDTDEngine engine;
 
   /// (s) elapsed time
-  T time = 0.0;
+  fpp time = 0.0;
 
   /// data output downsampling ratio, number of steps between logged timesteps
   uint64_t ds_ratio;
