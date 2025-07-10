@@ -78,6 +78,9 @@ private:
   const CloseFunc close;
 };
 
+/// type alias for HDF5Mgr
+using HDF5Obj = HDF5Mgr<herr_t (*)(hid_t)>;
+
 /*!
  * world object
  */
