@@ -97,6 +97,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         xdmf.setValue(fmt::to_string(time));
         xdmf.endTime();
 
+        // todo the meshes and otherthings are very wrong, look into vector
+        // fields as well
         xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
         xdmf.setDimensions("5 5 5"); // number of points not cells
         xdmf.endStructuredTopology();
