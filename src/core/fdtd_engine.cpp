@@ -147,6 +147,15 @@ uint64_t FDTDEngine::get_field_num_vox() const {
   return num_vox;
 }
 
+void FDTDEngine::write_h5(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5");
+
+  write_h5_e(group);
+  write_h5_h(group);
+
+  SPDLOG_TRACE("exit FDTDEngine::write_h5");
+}
+
 void FDTDEngine::update_e(const fpp ea, const fpp eb) const {
   SPDLOG_TRACE("enter FDTDEngine::update_e");
 
@@ -307,6 +316,239 @@ void FDTDEngine::update_hz(const fpp hxa, const fpp hya) const {
       }
     }
   }
-
   SPDLOG_TRACE("exit FDTDEngine::update_hz");
+}
+
+void FDTDEngine::write_h5_e(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_e");
+
+  write_h5_ex(group);
+  write_h5_ey(group);
+  write_h5_ez(group);
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_e");
+}
+
+void FDTDEngine::write_h5_h(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_h");
+
+  write_h5_hx(group);
+  write_h5_hy(group);
+  write_h5_hz(group);
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_h");
+}
+
+void FDTDEngine::write_h5_ex(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_ex");
+
+  // field dimensions
+  const hsize_t dims[3] = {e.x.extent(0), e.x.extent(1), e.x.extent(2)};
+
+  // HDF5 dataspace
+  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
+
+  // compile time switch on fpp
+  if constexpr (std::is_same_v<fpp, double>) {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "ex", H5T_NATIVE_DOUBLE, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             e.x.data_handle());
+
+  } else {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "ex", H5T_NATIVE_FLOAT, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             e.x.data_handle());
+  }
+
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_ex");
+}
+
+void FDTDEngine::write_h5_ey(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_ey");
+
+  // field dimensions
+  const hsize_t dims[3] = {e.y.extent(0), e.y.extent(1), e.y.extent(2)};
+
+  // HDF5 dataspace
+  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
+
+  // compile time switch on fpp
+  if constexpr (std::is_same_v<fpp, double>) {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "ey", H5T_NATIVE_DOUBLE, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             e.y.data_handle());
+
+  } else {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "ey", H5T_NATIVE_FLOAT, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             e.y.data_handle());
+  }
+
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_ey");
+}
+
+void FDTDEngine::write_h5_ez(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_ez");
+
+  // field dimensions
+  const hsize_t dims[3] = {e.z.extent(0), e.z.extent(1), e.z.extent(2)};
+
+  // HDF5 dataspace
+  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
+
+  // compile time switch on fpp
+  if constexpr (std::is_same_v<fpp, double>) {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "ez", H5T_NATIVE_DOUBLE, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             e.z.data_handle());
+
+  } else {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "ez", H5T_NATIVE_FLOAT, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             e.z.data_handle());
+  }
+
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_ez");
+}
+
+void FDTDEngine::write_h5_hx(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_hx");
+
+  // field dimensions
+  const hsize_t dims[3] = {h.x.extent(0), h.x.extent(1), h.x.extent(2)};
+
+  // HDF5 dataspace
+  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
+
+  // compile time switch on fpp
+  if constexpr (std::is_same_v<fpp, double>) {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "hx", H5T_NATIVE_DOUBLE, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             h.x.data_handle());
+
+  } else {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "hx", H5T_NATIVE_FLOAT, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             h.x.data_handle());
+  }
+
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_hx");
+}
+
+void FDTDEngine::write_h5_hy(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_hy");
+
+  // field dimensions
+  const hsize_t dims[3] = {h.y.extent(0), h.y.extent(1), h.y.extent(2)};
+
+  // HDF5 dataspace
+  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
+
+  // compile time switch on fpp
+  if constexpr (std::is_same_v<fpp, double>) {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "hy", H5T_NATIVE_DOUBLE, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             h.y.data_handle());
+
+  } else {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "hy", H5T_NATIVE_FLOAT, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             h.y.data_handle());
+  }
+
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_hy");
+}
+
+void FDTDEngine::write_h5_hz(const HDF5Obj &group) const {
+  SPDLOG_TRACE("enter FDTDEngine::write_h5_hz");
+
+  // field dimensions
+  const hsize_t dims[3] = {h.z.extent(0), h.z.extent(1), h.z.extent(2)};
+
+  // HDF5 dataspace
+  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
+
+  // compile time switch on fpp
+  if constexpr (std::is_same_v<fpp, double>) {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "hz", H5T_NATIVE_DOUBLE, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             h.z.data_handle());
+
+  } else {
+    // HDF5 dataset
+    const auto dset =
+        HDF5Obj(H5Dcreate(group.get(), "hz", H5T_NATIVE_FLOAT, dspace.get(),
+                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                H5Dclose);
+
+    // write field data
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             h.z.data_handle());
+  }
+
+  SPDLOG_TRACE("exit FDTDEngine::write_h5_hz");
 }

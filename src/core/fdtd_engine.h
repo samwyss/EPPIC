@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <expected>
-#include <hdf5/openmpi/hdf5.h>
 #include <simple_xdmf.hpp>
 #include <spdlog/spdlog.h>
 #include <spdlog/stopwatch.h>
@@ -12,6 +11,7 @@
 
 #include "config.h"
 #include "coordinate.h"
+#include "hdf5_wrapper.h"
 #include "numeric.h"
 #include "physical.h"
 #include "type.h"
@@ -50,6 +50,12 @@ public:
    * @return uint64_t
    */
   [[nodiscard]] uint64_t get_field_num_vox() const;
+
+  /*!
+   * writes internal field state to hdf5 group
+   * @param group HDF5 group to write to
+   */
+  void write_h5(const HDF5Obj &group) const;
 
 private:
   /*!
@@ -120,6 +126,54 @@ private:
    * @param hya magnetic field a loop constant for y-component
    */
   void update_hz(fpp hxa, fpp hya) const;
+
+  /*!
+   * writes all electric field data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_e(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_h(const HDF5Obj &group) const;
+
+  /*!
+   * writes all electric field x-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_ex(const HDF5Obj &group) const;
+
+  /*!
+   * writes all electric field y-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_ey(const HDF5Obj &group) const;
+
+  /*!
+   * writes all electric field z-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_ez(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field x-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_hx(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field y-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_hy(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field z-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_hz(const HDF5Obj &group) const;
 
   /// (m) size of bounding box in all directions
   const Coord3<fpp> len;
