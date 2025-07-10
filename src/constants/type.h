@@ -4,4 +4,4 @@
 // floating point precision (e.g., double or float)
 using fpp = float;
 
-#endif //CONSTANTS_TYPE_H
+#endif // CONSTANTS_TYPE_H
