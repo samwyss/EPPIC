@@ -70,6 +70,12 @@ public:
     return *this;
   }
 
+  /*!
+   * HDF5 object handle getter
+   * @return HDF5 object handle
+   */
+  hid_t get() const noexcept { return handle; }
+
 private:
   /// HDF5 object handle
   hid_t handle;
