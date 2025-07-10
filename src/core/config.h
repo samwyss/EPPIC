@@ -17,8 +17,8 @@ template <std::floating_point T> struct Config {
   /// number of voxels per minimum feature dimension for FDTD engine
   size_t num_vox_min_feature = 4;
 
-  /// number of timesteps at which to take a snapshot of selected data streams
-  uint64_t num_snapshots = 100;
+  /// data output downsampling ratio, number of steps between logged timesteps
+  uint64_t ds_ratio = 10;
 
   /// (s) end time of simulation
   /// todo revert back to 25e-9
