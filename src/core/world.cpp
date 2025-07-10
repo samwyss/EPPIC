@@ -72,6 +72,11 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
       if (0 == i % ds_ratio || i == steps - 1) [[unlikely]] {
         SPDLOG_DEBUG("begin data logging");
+        const auto group =
+            HDF5Obj(H5Gcreate(file.get(), fmt::to_string(i).c_str(),
+                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                    H5Gclose);
+
         SPDLOG_DEBUG("end data logging");
       }
     }
