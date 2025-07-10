@@ -48,7 +48,7 @@ public:
    * HDF5 object wrapper move constructor
    * @param other other HDF5 object wrapper
    */
-  HDF5Mgr(const HDF5Mgr &&other) noexcept
+  HDF5Mgr(HDF5Mgr &&other) noexcept
       : handle(std::exchange(other.handle, -1)),
         close(std::move(other.close)) {};
 
@@ -72,7 +72,7 @@ public:
 
 private:
   /// HDF5 object handle
-  const hid_t handle;
+  hid_t handle;
 
   /// HDF5 object release function
   const CloseFunc close;
@@ -125,6 +125,9 @@ private:
 
   /// data output downsampling ratio, number of steps between logged timesteps
   uint64_t ds_ratio;
+
+  /// output HDF5 file
+  HDF5Obj file;
 };
 
 #endif // CORE_WORLD_H

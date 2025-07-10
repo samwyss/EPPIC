@@ -1,7 +1,10 @@
 #include "world.h"
 
 World::World(const Config &config)
-    : engine(FDTDEngine::create(config).value()), ds_ratio(config.ds_ratio) {}
+    : engine(FDTDEngine::create(config).value()), ds_ratio(config.ds_ratio),
+      file(H5Fcreate(fmt::format("{}data.h5", config.io_dir.string()).c_str(),
+                     H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT),
+           H5Fclose) {}
 
 std::expected<World, std::string> World::create(const Config &config) {
   try {
