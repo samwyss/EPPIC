@@ -101,11 +101,12 @@ void FDTDEngine::step(const fpp dt) {
   // TODO called, the performance penalty of this has yet to be assed however
 
   // electric field a loop constant
-  const auto ea = static_cast<fpp>(1.0 / (ep / dt + sigma / 2.0));
+  const auto ea =
+      static_cast<fpp>(1.0) / (ep / dt + sigma / static_cast<fpp>(2.0));
   SPDLOG_TRACE("ea loop constant: {:.3e}", ea);
 
   // electric field b loop constant
-  const auto eb = static_cast<fpp>(ep / dt - sigma / 2.0);
+  const auto eb = ep / dt - sigma / static_cast<fpp>(2.0);
   SPDLOG_TRACE("eb loop constant: {:.3e}", eb);
 
   // magnetic field a loop constant for x-component
