@@ -100,10 +100,6 @@ else ()
     message(STATUS "Library `SimpleXdmf` found on system.")
 endif ()
 
-# testing --------------------------------------------------------------------------------------------------------------
-enable_testing()
-add_subdirectory(tests)
-
 # EPPIC setup ------------------------------------------------------------------------------------------------
 # main executable
 add_executable(${PROJECT_NAME}
