@@ -18,7 +18,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(-O3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -flto)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    add_compile_options(-O3 -g3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -fno-omit-frame-pointer -flto)
+    add_compile_options(-O2 -g3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -fno-omit-frame-pointer)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 endif ()
 
@@ -42,7 +42,7 @@ if (NOT fmt_FOUND)
     message(STATUS "Library `{fmt}` not found. Installing locally now.")
     FetchContent_Declare(fmt
             GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-            GIT_TAG 11.1.4
+            GIT_TAG 11.2.0
             GIT_PROGRESS TRUE
             GIT_SHALLOW TRUE
             EXCLUDE_FROM_ALL
