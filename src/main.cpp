@@ -77,6 +77,7 @@ int main(int argc, char **argv) {
   }
 
   // logging dir setup
+  #if SPDLOG_ACTIVE_LEVEL != SPDLOG_LEVEL_OFF
   const auto log_dir =
       std::filesystem::path(fmt::format("{}logs/", io_dir.string()));
   if (!is_directory(log_dir)) {
@@ -102,6 +103,8 @@ int main(int argc, char **argv) {
   console->info("file based logger successfully initialized ... remaining logs "
                 "will be written to {}log.log",
                 log_dir.string());
+#endif
+
 
   // EPPIC configuration
   // todo this will need to be error handled
