@@ -18,7 +18,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(-O3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -flto)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    add_compile_options(-O3 -g3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -fno-omit-frame-pointer)
+    add_compile_options(-O3 -g3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -fno-omit-frame-pointer -flto)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 endif ()
 
