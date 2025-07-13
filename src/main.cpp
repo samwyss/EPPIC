@@ -28,6 +28,8 @@ int main(int argc, char **argv) {
         "io prefix not provided ... please rerun as `EPPIC <io_prefix>`");
     return EXIT_FAILURE;
   }
+
+  // io prefix dir
   std::filesystem::path io_prefix;
   try {
     io_prefix = std::filesystem::canonical(argv[1]);
@@ -39,39 +41,37 @@ int main(int argc, char **argv) {
   console->info("successfully canonicalized io prefix `{}`",
                 io_prefix.string());
 
-  const auto out_dir = io_prefix.concat("/out/");
-  const auto io_dir = io_prefix.concat(start_time_str);
-
-  // directory setup
-  if (!is_directory(out_dir)) {
+  // root io dir
+  const auto root_dir = io_prefix / "out";
+  if (!is_directory(root_dir)) {
     console->warn("directory `{}` not found ... creating now",
-                  out_dir.string());
+                  root_dir.string());
     try {
-      create_directory(out_dir);
+      create_directory(root_dir);
     } catch (const std::filesystem::filesystem_error &err) {
       err_logger->critical("unable to create `{}` directory: {} ",
-                           out_dir.string(), err.what());
+                           root_dir.string(), err.what());
       return EXIT_FAILURE;
     }
-    console->info("created directory `{}`", out_dir.string());
+    console->info("created directory `{}`", root_dir.string());
   }
 
-  // timestamped io dir setup
+  // io dir for this run
+  const auto io_dir = root_dir / start_time_str;
   if (!is_directory(io_dir)) {
     console->warn("directory `{}` not found ... creating now", io_dir.string());
     try {
       create_directory(io_dir);
     } catch (const std::filesystem::filesystem_error &err) {
-      err_logger->critical("unable to create directory `{}`: {} ",
+      err_logger->critical("unable to create `{}` directory: {} ",
                            io_dir.string(), err.what());
       return EXIT_FAILURE;
     }
     console->info("created directory `{}`", io_dir.string());
   }
 
-  // logging dir setup
-  const auto log_dir =
-      std::filesystem::path(fmt::format("{}logs/", io_dir.string()));
+  // log dir
+  const auto log_dir = io_dir / "logs";
   if (!is_directory(log_dir)) {
     console->warn("directory `{}` not found ... creating now",
                   log_dir.string());
