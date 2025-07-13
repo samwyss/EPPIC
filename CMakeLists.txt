@@ -11,27 +11,15 @@ project(EPPIC
 )
 
 # compiler settings ----------------------------------------------------------------------------------------------------
-message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "C Compiler: ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_VERSION}")
-message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
-
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-O0 -Wall -g3)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_compile_options(-O3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -flto)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
-endif ()
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        add_compile_options(-O0 -Wall -g3)
-    elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-        add_compile_options(-O3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -flto)
-    elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-        add_compile_options(-O3 -g3 -Wall -march=native -mtune=native -ffast-math)
-    endif ()
-    message(STATUS "Build flags are not explicitly set for this compiler.")
+    add_compile_options(-O3 -g3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -fno-omit-frame-pointer)
+    add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 endif ()
 
 # dependencies ---------------------------------------------------------------------------------------------------------
@@ -125,6 +113,9 @@ add_executable(${PROJECT_NAME}
 )
 
 # diagnostics
+message(STATUS "C Compiler: ${CMAKE_C_COMPILER} ${CMAKE_C_COMPILER_VERSION}")
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
 get_target_property(EPPIC_COMPILE_OPTIONS ${PROJECT_NAME} COMPILE_OPTIONS)
 message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 
