@@ -20,23 +20,19 @@ struct Config {
   size_t num_vox_min_feature = 4;
 
   /// data output downsampling ratio, number of steps between logged timesteps
-  uint64_t ds_ratio = 10;
+  uint64_t ds_ratio = 100000;
 
   /// (s) end time of simulation
-  /// todo revert back to 25e-9
-  fpp end_time = 1e-9;
+  fpp end_time = 5e-9;
 
   /// (m) length of bounding box in the x-direction
-  /// todo revert back to 0.1
-  fpp x_len = 0.001;
+  fpp x_len = 0.1;
 
   /// (m) length of bounding box in the y-direction
-  /// todo revert back to 0.1
-  fpp y_len = 0.001;
+  fpp y_len = 0.1;
 
   /// (m) length of bounding box in the z-direction
-  /// todo revert back to 0.1
-  fpp z_len = 0.001;
+  fpp z_len = 0.1;
 
   /// diagonally isotropic relative permittivity inside bounding box
   fpp ep_r = 1.0;
