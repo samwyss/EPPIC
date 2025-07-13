@@ -1,8 +1,6 @@
 #ifndef CONSTANTS_TYPE_H
 #define CONSTANTS_TYPE_H
 
-#include <hdf5/openmpi/hdf5.h>
-
 /// floating point precision (e.g., double or float)
 using fpp = float;
 
