@@ -15,39 +15,34 @@
  */
 int main(int argc, char **argv) {
 
-  // (s) EPPIC start time
   const auto start_time = std::chrono::high_resolution_clock::now();
-
-  // start time as std::string
   const auto start_time_str = fmt::format("{:%Y-%m-%d_%H:%M:%S}", start_time);
 
-  // temporary logger to stdio
-  const auto console = spdlog::stdout_color_mt("console");
-
-  // temporary logger to stderr
+  const auto console = spdlog::stdout_color_mt("stdout");
   const auto err_logger = spdlog::stderr_color_mt("stderr");
-
   console->info("EPPIC run begin");
 
-  // ensure io prefix is provided
+  // io prefix validation
   if (argc < 2) {
     err_logger->critical(
         "io prefix not provided ... please rerun as `EPPIC <io_prefix>`");
     return EXIT_FAILURE;
   }
-
-  // ensure io prefix is a valid path on the filesystem
-  const auto io_prefix = std::filesystem::path(argv[1]);
-  if (!is_directory(io_prefix)) {
-    err_logger->critical("io prefix `{}` is not a valid path on this "
-                         "filesystem ... please correct and rerun");
+  std::filesystem::path io_prefix;
+  try {
+    io_prefix = std::filesystem::canonical(argv[1]);
+  } catch (const std::filesystem::filesystem_error &err) {
+    err_logger->critical("could not canonicalize io prefix `{}`: {}", argv[1],
+                         err.what());
     return EXIT_FAILURE;
   }
-  console->info("valid io prefix found `{}`", io_prefix.string());
+  console->info("successfully canonicalized io prefix `{}`",
+                io_prefix.string());
 
-  // main io dir setup
-  const auto out_dir =
-      std::filesystem::path(fmt::format("{}/out/", io_prefix.string()));
+  const auto out_dir = io_prefix.concat("/out/");
+  const auto io_dir = io_prefix.concat(start_time_str);
+
+  // directory setup
   if (!is_directory(out_dir)) {
     console->warn("directory `{}` not found ... creating now",
                   out_dir.string());
@@ -62,8 +57,6 @@ int main(int argc, char **argv) {
   }
 
   // timestamped io dir setup
-  const auto io_dir = std::filesystem::path(
-      fmt::format("{}{}/", out_dir.string(), start_time_str));
   if (!is_directory(io_dir)) {
     console->warn("directory `{}` not found ... creating now", io_dir.string());
     try {
@@ -76,7 +69,6 @@ int main(int argc, char **argv) {
     console->info("created directory `{}`", io_dir.string());
   }
 
-#if SPDLOG_ACTIVE_LEVEL != SPDLOG_LEVEL_OFF
   // logging dir setup
   const auto log_dir =
       std::filesystem::path(fmt::format("{}logs/", io_dir.string()));
@@ -103,7 +95,6 @@ int main(int argc, char **argv) {
   console->info("file based logger successfully initialized ... remaining logs "
                 "will be written to {}log.log",
                 log_dir.string());
-#endif
 
   // EPPIC configuration
   // todo this will need to be error handled
