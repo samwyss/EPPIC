@@ -73,14 +73,14 @@ public:
    * HDF5 object handle getter
    * @return HDF5 object handle
    */
-  hid_t get() const noexcept { return handle; }
+  [[nodiscard]] hid_t get() const noexcept { return handle; }
 
 private:
   /// HDF5 object handle
   hid_t handle;
 
   /// HDF5 object release function
-  const CloseFunc close;
+  CloseFunc close;
 };
 
 /// type alias for HDF5Mgr
