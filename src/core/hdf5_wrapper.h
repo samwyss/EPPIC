@@ -20,6 +20,11 @@ public:
       : handle(handle), close(release) {}
 
   /*!
+   * HDF5 object wrapper default constructor
+   */
+  HDF5Mgr() : handle(-1), close(nullptr) {};
+
+  /*!
    * HDF5 object wrapper destructor
    */
   ~HDF5Mgr() noexcept {
