@@ -22,7 +22,7 @@ public:
    * @return void
    */
   [[nodiscard]] static std::expected<World, std::string>
-  create(const Config &config);
+  create(Config &&config);
 
   /*!
    * advances internal state to an end time
@@ -45,7 +45,7 @@ private:
    * World constructor
    * @param config configuration object
    */
-  explicit World(const Config &config);
+  explicit World(Config &&config);
 
   /// electromagnetic engine
   FDTDEngine engine;
@@ -57,10 +57,10 @@ private:
   uint64_t ds_ratio;
 
   /// output HDF5 file
-  HDF5Obj file;
+  HDF5Obj h5;
 
-  // todo remove me
-  std::string io_dir_str;
+  /// xdmf writer
+  SimpleXdmf xdmf;
 };
 
 #endif // CORE_WORLD_H

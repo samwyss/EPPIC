@@ -1,15 +1,13 @@
 #include "world.h"
 
-World::World(const Config &config)
+World::World(Config &&config)
     : engine(FDTDEngine::create(config).value()), ds_ratio(config.ds_ratio),
-      file(H5Fcreate(fmt::format("{}data.h5", config.io_dir.string()).c_str(),
-                     H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT),
-           H5Fclose),
-      io_dir_str(config.io_dir.string()) {}
+      h5(std::move(config.h5)) {}
 
-std::expected<World, std::string> World::create(const Config &config) {
+std::expected<World, std::string> World::create(Config &&config) {
+  // todo add tracing
   try {
-    return World(config);
+    return World(std::move(config));
   } catch (const std::runtime_error &err) {
     return std::unexpected(err.what());
   }
@@ -61,7 +59,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   [[maybe_unused]] const spdlog::stopwatch watch;
 
   // todo move me somewhere more logical along with hdf5 file creation maybe
-  SimpleXdmf xdmf;
   xdmf.setVersion("3.0");
   xdmf.setNewLineCodeLF();
   xdmf.setIndentSpaceSize(4);
@@ -83,8 +80,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
         // HDF5 group for this particular step
         const auto group =
-            HDF5Obj(H5Gcreate(file.get(), fmt::to_string(i).c_str(),
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+            HDF5Obj(H5Gcreate(h5.get(), fmt::to_string(i).c_str(), H5P_DEFAULT,
+                              H5P_DEFAULT, H5P_DEFAULT),
                     H5Gclose);
 
         // write field data
@@ -138,7 +135,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
   // todo do something with me
   xdmf.endDomain();
-  xdmf.generate(fmt::format("{}/data.xdmf", io_dir_str));
+  // xdmf.generate(fmt::format("{}/data.xdmf", io_dir_str)); todo uncomment me
 
   // basic loop performance diagnostics
   [[maybe_unused]] const auto loop_time = watch.elapsed().count();
