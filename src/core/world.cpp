@@ -1,8 +1,7 @@
 #include "world.h"
 
 World::World(Config &&config)
-    : engine(FDTDEngine::create(config).value()), ds_ratio(config.ds_ratio),
-      h5(std::move(config.h5)) {}
+    : engine(FDTDEngine::create(config).value()), ds_ratio(config.ds_ratio), h5(std::move(config.h5)) {}
 
 std::expected<World, std::string> World::create(Config &&config) {
   // todo add tracing
@@ -22,17 +21,13 @@ std::expected<void, std::string> World::advance_to(const fpp end_t) {
     // (s) time difference between current state and end time
     const fpp adv_t = end_t - time;
 
-    if (const auto adv_by_result = advance_by(adv_t);
-        !adv_by_result.has_value()) {
-      SPDLOG_CRITICAL("advance time by advance_by returned with error: {}",
-                      adv_by_result.error());
+    if (const auto adv_by_result = advance_by(adv_t); !adv_by_result.has_value()) {
+      SPDLOG_CRITICAL("advance time by advance_by returned with error: {}", adv_by_result.error());
       return std::unexpected(adv_by_result.error());
     }
 
   } else {
-    SPDLOG_WARN(
-        "end time of {:.3e} (s) is not greater than current time of {:.3e} (s)",
-        end_t, time);
+    SPDLOG_WARN("end time of {:.3e} (s) is not greater than current time of {:.3e} (s)", end_t, time);
   }
 
   SPDLOG_TRACE("exit World::advance_to");
@@ -68,8 +63,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   SPDLOG_DEBUG("enter main time loop");
   try {
     for (uint64_t i = 0; i < steps; ++i) {
-      SPDLOG_DEBUG("step: {}/{} elapsed time (s): {:.5e}/{:.5e}", i + 1, steps,
-                   time, init_time + adv_t);
+      SPDLOG_DEBUG("step: {}/{} elapsed time (s): {:.5e}/{:.5e}", i + 1, steps, time, init_time + adv_t);
 
       // advance by one step
       engine.step(dt);
@@ -80,9 +74,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
         // HDF5 group for this particular step
         const auto group =
-            HDF5Obj(H5Gcreate(h5.get(), fmt::to_string(i).c_str(), H5P_DEFAULT,
-                              H5P_DEFAULT, H5P_DEFAULT),
-                    H5Gclose);
+            HDF5Obj(H5Gcreate(h5.get(), fmt::to_string(i).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
 
         // write field data
         engine.write_h5(group);
@@ -139,11 +131,9 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
   // basic loop performance diagnostics
   [[maybe_unused]] const auto loop_time = watch.elapsed().count();
-  [[maybe_unused]] const auto num_cells =
-      6 * engine.get_field_num_vox() * steps;
+  [[maybe_unused]] const auto num_cells = 6 * engine.get_field_num_vox() * steps;
   SPDLOG_INFO("loop runtime (s): {:.3e}", loop_time);
-  SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}",
-              static_cast<double>(num_cells) / loop_time);
+  SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}", static_cast<double>(num_cells) / loop_time);
 
   SPDLOG_TRACE("exit FDTDEngine::advance_by");
 

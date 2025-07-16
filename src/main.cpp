@@ -27,8 +27,7 @@ int main(const int argc, char **argv) {
   // io prefix validation
   if (argc < 2) {
 #if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
-    err_logger->critical(
-        "io prefix not provided ... please rerun as `EPPIC <io_prefix>`");
+    err_logger->critical("io prefix not provided ... please rerun as `EPPIC <io_prefix>`");
 #endif
     return EXIT_FAILURE;
   }
@@ -55,24 +54,20 @@ int main(const int argc, char **argv) {
       create_directory(log_dir);
     }
 
-    const auto logger =
-        spdlog::basic_logger_mt("logger", (log_dir / "log.log").string());
+    const auto logger = spdlog::basic_logger_mt("logger", (log_dir / "log.log").string());
 
     spdlog::set_default_logger(logger);
-    spdlog::set_level(
-        spdlog::level::trace); // needed even for compile time logs
+    spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
     spdlog::flush_every(std::chrono::seconds(5));
 
-    console->info(
-        "file based logger successfully initialized ... remaining logs "
-        "will be written to {}log.log",
-        log_dir.string());
+    console->info("file based logger successfully initialized ... remaining logs "
+                  "will be written to {}log.log",
+                  log_dir.string());
 #endif
 
   } catch (const std::exception &err) {
 #if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
-    err_logger->critical("could not setup directory structure and logger: {}",
-                         err.what());
+    err_logger->critical("could not setup directory structure and logger: {}", err.what());
 #endif
 
     return EXIT_FAILURE;
@@ -80,15 +75,12 @@ int main(const int argc, char **argv) {
 
   // todo this will need to be error handled once config is implemented
   auto config = Config();
-  config.h5 =
-      HDF5Obj(H5Fcreate((io_dir / "data.h5").c_str(), H5F_ACC_TRUNC,
-                        H5P_DEFAULT, H5P_DEFAULT),
-              H5Fclose); // todo move to config and create XDMF object elsewhere
+  config.h5 = HDF5Obj(H5Fcreate((io_dir / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT),
+                      H5Fclose); // todo move to config and create XDMF object elsewhere
 
   auto world_creation_result = World::create(std::move(config));
   if (!world_creation_result.has_value()) {
-    SPDLOG_CRITICAL("failed to configure World object: {}",
-                    world_creation_result.error());
+    SPDLOG_CRITICAL("failed to configure World object: {}", world_creation_result.error());
 
     return EXIT_FAILURE;
   }
@@ -97,8 +89,7 @@ int main(const int argc, char **argv) {
 
   SPDLOG_INFO("configuration successful");
 
-  if (const auto result = world.advance_to(config.end_time);
-      !result.has_value()) {
+  if (const auto result = world.advance_to(config.end_time); !result.has_value()) {
     SPDLOG_CRITICAL("failed to run EPPIC: {}", result.error());
 
     return EXIT_FAILURE;

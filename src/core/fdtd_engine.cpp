@@ -1,27 +1,20 @@
 #include "fdtd_engine.h"
 
 FDTDEngine::FDTDEngine(const Config &config)
-    : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r),
-      mu_r(config.mu_r), ep(ep_r * VAC_PERMITTIVITY),
-      mu(mu_r * VAC_PERMEABILITY), sigma(config.sigma) {
+    : len({config.x_len, config.y_len, config.z_len}), ep_r(config.ep_r), mu_r(config.mu_r),
+      ep(ep_r * VAC_PERMITTIVITY), mu(mu_r * VAC_PERMEABILITY), sigma(config.sigma) {
   SPDLOG_TRACE("enter FDTDEngine::FDTDEngine");
-  SPDLOG_DEBUG("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y,
-               len.z);
+  SPDLOG_DEBUG("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
 
   // (m) maximum spatial step based on maximum frequency
   const fpp ds_min_wavelength =
       VAC_SPEED_OF_LIGHT /
-      static_cast<fpp>(sqrt(ep_r * mu_r) *
-                       static_cast<fpp>(config.num_vox_min_wavelength) *
-                       config.max_frequency);
-  SPDLOG_DEBUG("maximum spatial step based on maximum frequency (m): {:.3e}",
-               ds_min_wavelength);
+      static_cast<fpp>(sqrt(ep_r * mu_r) * static_cast<fpp>(config.num_vox_min_wavelength) * config.max_frequency);
+  SPDLOG_DEBUG("maximum spatial step based on maximum frequency (m): {:.3e}", ds_min_wavelength);
 
   // (m) maximum spatial step based on minimum feature size
-  const fpp ds_min_feature_size = std::min({len.x, len.y, len.z}) /
-                                  static_cast<fpp>(config.num_vox_min_feature);
-  SPDLOG_DEBUG("maximum spatial step based on feature size (m): {:.3e}",
-               ds_min_feature_size);
+  const fpp ds_min_feature_size = std::min({len.x, len.y, len.z}) / static_cast<fpp>(config.num_vox_min_feature);
+  SPDLOG_DEBUG("maximum spatial step based on feature size (m): {:.3e}", ds_min_feature_size);
 
   // (m) maximum required spatial step
   const fpp ds = std::min({ds_min_wavelength, ds_min_feature_size});
@@ -35,15 +28,12 @@ FDTDEngine::FDTDEngine(const Config &config)
   SPDLOG_DEBUG("voxels to update each step: {}", 6 * nv.x);
 
   // (m) final spatial steps
-  d = {len.x / static_cast<fpp>(nv.x), len.y / static_cast<fpp>(nv.y),
-       len.z / static_cast<fpp>(nv.z)};
+  d = {len.x / static_cast<fpp>(nv.x), len.y / static_cast<fpp>(nv.y), len.z / static_cast<fpp>(nv.z)};
   SPDLOG_DEBUG("voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
 
   // (m^-1) inverse spatial steps
-  d_inv = {static_cast<fpp>(1.0) / d.x, static_cast<fpp>(1.0) / d.y,
-           static_cast<fpp>(1.0) / d.z};
-  SPDLOG_DEBUG("inverse voxel size (m^-1) , {:.3e} x {:.3e} x {:.3e}", d_inv.x,
-               d_inv.y, d_inv.z);
+  d_inv = {static_cast<fpp>(1.0) / d.x, static_cast<fpp>(1.0) / d.y, static_cast<fpp>(1.0) / d.z};
+  SPDLOG_DEBUG("inverse voxel size (m^-1) , {:.3e} x {:.3e} x {:.3e}", d_inv.x, d_inv.y, d_inv.z);
 
   // initialize fields
   e = Vector3<fpp>(nv, 0.0);
@@ -52,8 +42,7 @@ FDTDEngine::FDTDEngine(const Config &config)
   SPDLOG_TRACE("exit FDTDEngine::FDTDEngine");
 }
 
-std::expected<FDTDEngine, std::string>
-FDTDEngine::create(const Config &config) {
+std::expected<FDTDEngine, std::string> FDTDEngine::create(const Config &config) {
   SPDLOG_TRACE("enter FDTDEngine::create");
   try {
     // todo why not const like FDTDGeometry?
@@ -71,8 +60,7 @@ uint64_t FDTDEngine::calc_num_steps(const fpp adv_t) const {
 
   // find maximum number of timesteps required for any solver
   const uint64_t max_num_steps = calc_cfl_steps(adv_t);
-  SPDLOG_DEBUG("maximum number of steps required by any solver: {}",
-               max_num_steps);
+  SPDLOG_DEBUG("maximum number of steps required by any solver: {}", max_num_steps);
 
   SPDLOG_TRACE("exit FDTDEngine::calc_num_steps");
   return max_num_steps;
@@ -82,10 +70,8 @@ uint64_t FDTDEngine::calc_cfl_steps(const fpp time_span) const {
   SPDLOG_TRACE("enter FDTDEngine::calc_cfl_steps");
 
   const fpp maximum_dt = static_cast<fpp>(
-      1.0 / (VAC_SPEED_OF_LIGHT / sqrt(ep_r * mu_r) *
-             sqrt(pow(d_inv.x, 2) + pow(d_inv.y, 2) + pow(d_inv.z, 2))));
-  SPDLOG_DEBUG("maximum possible timestep to satisfy CFL condition (s): {:.3e}",
-               maximum_dt);
+      1.0 / (VAC_SPEED_OF_LIGHT / sqrt(ep_r * mu_r) * sqrt(pow(d_inv.x, 2) + pow(d_inv.y, 2) + pow(d_inv.z, 2))));
+  SPDLOG_DEBUG("maximum possible timestep to satisfy CFL condition (s): {:.3e}", maximum_dt);
 
   const auto num_steps = static_cast<uint64_t>(ceil(time_span / maximum_dt));
   SPDLOG_DEBUG("steps required to satisfy CFL condition: {}", num_steps);
@@ -101,8 +87,7 @@ void FDTDEngine::step(const fpp dt) {
   // TODO called, the performance penalty of this has yet to be assed however
 
   // electric field a loop constant
-  const auto ea =
-      static_cast<fpp>(1.0) / (ep / dt + sigma / static_cast<fpp>(2.0));
+  const auto ea = static_cast<fpp>(1.0) / (ep / dt + sigma / static_cast<fpp>(2.0));
   SPDLOG_TRACE("ea loop constant: {:.3e}", ea);
 
   // electric field b loop constant
@@ -183,8 +168,7 @@ void FDTDEngine::update_ex(const fpp ea, const fpp eb) const {
   for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
       for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
-        e.x[i, j, k] = ea * (eb * e.x[i, j, k] +
-                             d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]) -
+        e.x[i, j, k] = ea * (eb * e.x[i, j, k] + d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]) -
                              d_inv.z * (h.y[i, j, k] - h.y[i, j, k - 1]));
       }
     }
@@ -200,8 +184,7 @@ void FDTDEngine::update_ey(const fpp ea, const fpp eb) const {
   for (size_t i = 1; i < e.y.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.y.extent(1) - 1; ++j) {
       for (size_t k = 1; k < e.y.extent(2) - 1; ++k) {
-        e.y[i, j, k] = ea * (eb * e.y[i, j, k] +
-                             d_inv.z * (h.x[i, j, k] - h.x[i, j, k - 1]) -
+        e.y[i, j, k] = ea * (eb * e.y[i, j, k] + d_inv.z * (h.x[i, j, k] - h.x[i, j, k - 1]) -
                              d_inv.x * (h.z[i, j, k] - h.z[i - 1, j, k]));
       }
     }
@@ -217,8 +200,7 @@ void FDTDEngine::update_ez(const fpp ea, const fpp eb) const {
   for (size_t i = 1; i < e.z.extent(0) - 1; ++i) {
     for (size_t j = 1; j < e.z.extent(1) - 1; ++j) {
       for (size_t k = 1; k < e.z.extent(2) - 1; ++k) {
-        e.z[i, j, k] = ea * (eb * e.z[i, j, k] +
-                             d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
+        e.z[i, j, k] = ea * (eb * e.z[i, j, k] + d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
                              d_inv.y * (h.x[i, j, k] - h.x[i, j - 1, k]));
       }
     }
@@ -236,20 +218,16 @@ void FDTDEngine::update_hx(const fpp hya, const fpp hza) const {
       for (size_t k = 0; k < h.x.extent(2); ++k) {
         [[likely]] if (j != h.x.extent(1) - 1 && k != h.x.extent(2) - 1) {
           // j- k-low volume
-          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) +
-                          hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
+          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) + hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
         } else if (j != h.x.extent(1) - 1 && k == h.x.extent(2) - 1) {
           // k-high plane
-          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) +
-                          hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
+          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) + hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
         } else if (j == h.x.extent(1) - 1 && k != h.x.extent(2) - 1) {
           // j-high plane
-          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) +
-                          hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
+          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) + hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
         } else {
           // j- k-high line
-          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) +
-                          hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
+          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) + hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
         }
       }
     }
@@ -267,20 +245,16 @@ void FDTDEngine::update_hy(const fpp hxa, const fpp hza) const {
       for (size_t k = 0; k < h.y.extent(2); ++k) {
         [[likely]] if (i != h.y.extent(0) - 1 && k != h.y.extent(2) - 1) {
           // i- k-low volume
-          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) +
-                          hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
+          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) + hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
         } else if (i != h.y.extent(0) - 1 && k == h.y.extent(2) - 1) {
           // k-high plane
-          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) +
-                          hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
+          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) + hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
         } else if (i == h.y.extent(0) - 1 && k != h.y.extent(2) - 1) {
           // i-high plane
-          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) +
-                          hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
+          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) + hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
         } else {
           // i- k-high line
-          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) +
-                          hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
+          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) + hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
         }
       }
     }
@@ -298,20 +272,16 @@ void FDTDEngine::update_hz(const fpp hxa, const fpp hya) const {
       for (size_t k = 0; k < h.z.extent(2); ++k) {
         [[likely]] if (i != h.y.extent(0) - 1 && j != h.y.extent(1) - 1) {
           // i- j-low volume
-          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) +
-                          hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
+          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) + hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
         } else if (i != h.y.extent(0) - 1 && j == h.y.extent(1) - 1) {
           // j-high plane
-          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) +
-                          hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
+          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) + hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
         } else if (i == h.y.extent(0) - 1 && j != h.y.extent(1) - 1) {
           // i-high plane
-          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) +
-                          hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
+          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) + hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
         } else {
           // i- j-high line
-          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) +
-                          hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
+          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) + hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
         }
       }
     }
@@ -349,25 +319,19 @@ void FDTDEngine::write_h5_ex(const HDF5Obj &group) const {
   // compile time switch on fpp
   if constexpr (std::is_same_v<fpp, double>) {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "ex", H5T_NATIVE_DOUBLE, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "ex", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             e.x.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.x.data_handle());
 
   } else {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "ex", H5T_NATIVE_FLOAT, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "ex", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             e.x.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.x.data_handle());
   }
 
   SPDLOG_TRACE("exit FDTDEngine::write_h5_ex");
@@ -385,25 +349,19 @@ void FDTDEngine::write_h5_ey(const HDF5Obj &group) const {
   // compile time switch on fpp
   if constexpr (std::is_same_v<fpp, double>) {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "ey", H5T_NATIVE_DOUBLE, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "ey", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             e.y.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.y.data_handle());
 
   } else {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "ey", H5T_NATIVE_FLOAT, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "ey", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             e.y.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.y.data_handle());
   }
 
   SPDLOG_TRACE("exit FDTDEngine::write_h5_ey");
@@ -421,25 +379,19 @@ void FDTDEngine::write_h5_ez(const HDF5Obj &group) const {
   // compile time switch on fpp
   if constexpr (std::is_same_v<fpp, double>) {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "ez", H5T_NATIVE_DOUBLE, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "ez", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             e.z.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.z.data_handle());
 
   } else {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "ez", H5T_NATIVE_FLOAT, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "ez", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             e.z.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.z.data_handle());
   }
 
   SPDLOG_TRACE("exit FDTDEngine::write_h5_ez");
@@ -457,25 +409,19 @@ void FDTDEngine::write_h5_hx(const HDF5Obj &group) const {
   // compile time switch on fpp
   if constexpr (std::is_same_v<fpp, double>) {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "hx", H5T_NATIVE_DOUBLE, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "hx", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             h.x.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.x.data_handle());
 
   } else {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "hx", H5T_NATIVE_FLOAT, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "hx", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             h.x.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.x.data_handle());
   }
 
   SPDLOG_TRACE("exit FDTDEngine::write_h5_hx");
@@ -493,25 +439,19 @@ void FDTDEngine::write_h5_hy(const HDF5Obj &group) const {
   // compile time switch on fpp
   if constexpr (std::is_same_v<fpp, double>) {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "hy", H5T_NATIVE_DOUBLE, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "hy", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             h.y.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.y.data_handle());
 
   } else {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "hy", H5T_NATIVE_FLOAT, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "hy", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             h.y.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.y.data_handle());
   }
 
   SPDLOG_TRACE("exit FDTDEngine::write_h5_hy");
@@ -529,25 +469,19 @@ void FDTDEngine::write_h5_hz(const HDF5Obj &group) const {
   // compile time switch on fpp
   if constexpr (std::is_same_v<fpp, double>) {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "hz", H5T_NATIVE_DOUBLE, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "hz", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             h.z.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.z.data_handle());
 
   } else {
     // HDF5 dataset
-    const auto dset =
-        HDF5Obj(H5Dcreate(group.get(), "hz", H5T_NATIVE_FLOAT, dspace.get(),
-                          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                H5Dclose);
+    const auto dset = HDF5Obj(
+        H5Dcreate(group.get(), "hz", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
     // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
-             h.z.data_handle());
+    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.z.data_handle());
   }
 
   SPDLOG_TRACE("exit FDTDEngine::write_h5_hz");

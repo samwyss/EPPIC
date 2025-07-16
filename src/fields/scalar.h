@@ -11,7 +11,7 @@
  * @tparam T arithmetic type
  */
 template <typename T>
-  requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T>
 class Scalar3 {
 public:
   /*!

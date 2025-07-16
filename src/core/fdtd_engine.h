@@ -27,8 +27,7 @@ public:
    * @param config configuration object
    * @return FDTDEngine
    */
-  [[nodiscard]] static std::expected<FDTDEngine, std::string>
-  create(const Config &config);
+  [[nodiscard]] static std::expected<FDTDEngine, std::string> create(const Config &config);
 
   /*!
    * calculates the number of steps required to advance engine state by some

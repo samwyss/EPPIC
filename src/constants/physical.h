@@ -13,8 +13,7 @@ constexpr fpp VAC_PERMITTIVITY = 8.8541878188e-12;
 constexpr fpp VAC_PERMEABILITY = 4.0 * std::numbers::pi * 1e-7;
 
 /// (m/s) vacuum speed of light
-constexpr fpp VAC_SPEED_OF_LIGHT =
-    static_cast<fpp>(1.0 / sqrt(VAC_PERMITTIVITY * VAC_PERMEABILITY));
+constexpr fpp VAC_SPEED_OF_LIGHT = static_cast<fpp>(1.0 / sqrt(VAC_PERMITTIVITY * VAC_PERMEABILITY));
 
 /// (C) electron charge https://en.wikipedia.org/wiki/Elementary_charge
 constexpr fpp ELEC_CHARGE = 1.602176634e-19;

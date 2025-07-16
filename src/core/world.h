@@ -21,8 +21,7 @@ public:
    * @param config configuration object
    * @return void
    */
-  [[nodiscard]] static std::expected<World, std::string>
-  create(Config &&config);
+  [[nodiscard]] static std::expected<World, std::string> create(Config &&config);
 
   /*!
    * advances internal state to an end time
