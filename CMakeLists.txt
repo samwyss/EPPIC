@@ -100,6 +100,21 @@ else ()
     message(STATUS "Library `SimpleXdmf` found on system.")
 endif ()
 
+find_package(toml11 QUIET)
+if (NOT toml11_FOUND)
+    message(STATUS "Library `toml11` not found. Installing locally now.")
+    FetchContent_Declare(toml11
+            GIT_REPOSITORY https://github.com/ToruNiina/toml11.git
+            GIT_TAG v4.4.0
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
+            EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(toml11)
+else ()
+    message(STATUS "Library `toml11` found on system.")
+endif ()
+
 # EPPIC setup ------------------------------------------------------------------------------------------------
 # main executable
 add_executable(${PROJECT_NAME}
