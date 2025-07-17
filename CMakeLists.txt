@@ -170,6 +170,7 @@ target_link_libraries(Core
         PUBLIC Constants
         PUBLIC mdspan::mdspan
         PUBLIC spdlog::spdlog
+        PUBLIC toml11::toml11
 )
 
 # main executable
