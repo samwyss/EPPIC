@@ -3,15 +3,27 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <filesystem>
 #include <simple_xdmf.hpp>
+#include <spdlog/spdlog.h>
 #include <string>
+#include <toml11/find.hpp>
+#include <toml11/parser.hpp>
+#include <toml11/serializer.hpp>
 #include <type.h>
 #include <type_traits>
 
 #include "hdf5_wrapper.h"
 
 struct Config {
+  /*!
+   * Config static factory method
+   * @param input_file_path
+   * @return FDTDEngine
+   */
+  [[nodiscard]] static std::expected<Config, std::string> create(const std::string &input_file_path);
+
   /// (s) end time of simulation
   fpp end_time;
 
@@ -31,7 +43,7 @@ struct Config {
   size_t num_vox_min_wavelength;
 
   /// number of voxels per minimum feature dimension for FDTD engine
-  size_t num_vox_min_featur;
+  size_t num_vox_min_feature;
 
   /// diagonally isotropic relative permittivity inside bounding box
   fpp ep_r;
@@ -53,6 +65,20 @@ struct Config {
 
   /// xdmf writer
   SimpleXdmf xdmf;
+
+private:
+  /*!
+   * Config constructor
+   */
+  explicit Config(const std::string &input_file_path);
+
+  void parse_time();
+
+  void parse_geometry();
+
+  void parse_material();
+
+  void parse_data();
 };
 
 #endif // CORE_CONFIG_H
