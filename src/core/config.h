@@ -19,10 +19,12 @@
 struct Config {
   /*!
    * Config static factory method
-   * @param input_file_path
+   * @param input_file_path todo document
+   * @param id todo document
    * @return FDTDEngine
    */
-  [[nodiscard]] static std::expected<Config, std::string> create(const std::string &input_file_path);
+  [[nodiscard]] static std::expected<Config, std::string> create(const std::string &input_file_path,
+                                                                 const std::string &id);
 
   /// (s) end time of simulation
   fpp end_time;
@@ -70,7 +72,7 @@ private:
   /*!
    * Config constructor
    */
-  explicit Config(const std::string &input_file_path);
+  explicit Config(const std::string &input_file_path, const std::string &id);
 
   [[nodiscard]] std::expected<void, std::string> parse_time(const toml::basic_value<toml::type_config> &config);
 
@@ -79,6 +81,8 @@ private:
   [[nodiscard]] std::expected<void, std::string> parse_material(const toml::basic_value<toml::type_config> &config);
 
   [[nodiscard]] std::expected<void, std::string> parse_data(const toml::basic_value<toml::type_config> &config);
+
+  [[nodiscard]] std::expected<void, std::string> setup_dirs();
 };
 
 #endif // CORE_CONFIG_H

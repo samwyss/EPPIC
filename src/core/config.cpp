@@ -1,6 +1,6 @@
 #include "config.h"
 
-Config::Config(const std::string &input_file_path) {
+Config::Config(const std::string &input_file_path, const std::string &id) {
   SPDLOG_TRACE("enter Config::Config");
 
   const std::filesystem::path input_file = std::filesystem::canonical(input_file_path);
@@ -67,10 +67,10 @@ Config::Config(const std::string &input_file_path) {
   SPDLOG_TRACE("exit Config::Config");
 }
 
-std::expected<Config, std::string> Config::create(const std::string &input_file_path) {
+std::expected<Config, std::string> Config::create(const std::string &input_file_path, const std::string &id) {
   SPDLOG_TRACE("enter Config::create");
   try {
-    Config config(input_file_path);
+    Config config(input_file_path, id);
     SPDLOG_TRACE("exit Config::create with success");
     return config;
   } catch (const std::runtime_error &err) {
@@ -216,3 +216,5 @@ std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml
   SPDLOG_TRACE("exit Config::parse_data with success");
   return {};
 }
+
+std::expected<void, std::string> Config::setup_dirs() { return {}; }
