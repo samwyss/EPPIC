@@ -72,13 +72,13 @@ private:
    */
   explicit Config(const std::string &input_file_path);
 
-  void parse_time();
+  [[nodiscard]] std::expected<void, std::string> parse_time(const toml::basic_value<toml::type_config> &config);
 
-  void parse_geometry();
+  [[nodiscard]] std::expected<void, std::string> parse_geometry(const toml::basic_value<toml::type_config> &config);
 
-  void parse_material();
+  [[nodiscard]] std::expected<void, std::string> parse_material(const toml::basic_value<toml::type_config> &config);
 
-  void parse_data();
+  [[nodiscard]] std::expected<void, std::string> parse_data(const toml::basic_value<toml::type_config> &config);
 };
 
 #endif // CORE_CONFIG_H
