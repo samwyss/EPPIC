@@ -226,20 +226,28 @@ std::expected<std::filesystem::path, std::string> Config::setup_dirs(const std::
                                                                      const std::string &id) {
   SPDLOG_TRACE("enter Config::setup_dirs");
 
-  // todo add logging
-
   std::filesystem::path io_dir;
+
   try {
     const auto root_dir = out_dir / "out";
     if (!is_directory(root_dir)) {
+      SPDLOG_DEBUG("directory `{}` not found ... creating now", root_dir);
       create_directory(root_dir);
+    } else {
+      SPDLOG_DEBUG("directory `{}` already exists", root_dir);
     }
 
     io_dir = root_dir / id;
     if (!is_directory(io_dir)) {
+      SPDLOG_DEBUG("directory `{}` not found ... creating now", io_dir);
       create_directory(io_dir);
+    } else {
+      SPDLOG_DEBUG("directory `{}` already exists", io_dir);
     }
+
   } catch (const std::filesystem::filesystem_error &err) {
+    SPDLOG_CRITICAL("exit Config::create_dirs with failure: {}", err.what());
+    return std::unexpected<std::string>(err.what());
   }
 
   SPDLOG_TRACE("exit Config::setup_dirs");
