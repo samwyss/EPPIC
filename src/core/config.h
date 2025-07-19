@@ -11,10 +11,10 @@
 #include <toml11/find.hpp>
 #include <toml11/parser.hpp>
 #include <toml11/serializer.hpp>
-#include <type.h>
 #include <type_traits>
 
 #include "hdf5_wrapper.h"
+#include "type.h"
 
 struct Config {
   /*!
