@@ -119,8 +119,6 @@ endif ()
 # main executable
 add_executable(${PROJECT_NAME}
         src/main.cpp
-        src/core/coordinate.h
-        src/core/scalar.h
 )
 
 # diagnostics
@@ -145,6 +143,8 @@ add_library(Core
         src/core/coordinate.h
         src/core/scalar.h
         src/core/vector.h
+        src/core/eppic.cpp
+        src/core/eppic.h
 )
 
 target_include_directories(Core
