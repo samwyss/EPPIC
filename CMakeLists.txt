@@ -119,8 +119,8 @@ endif ()
 # main executable
 add_executable(${PROJECT_NAME}
         src/main.cpp
-        src/fields/coordinate.h
-        src/fields/scalar.h
+        src/core/coordinate.h
+        src/core/scalar.h
 )
 
 # diagnostics
@@ -129,15 +129,6 @@ message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER} ${CMAKE_CXX_COMPILER_VERSION
 message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
 get_target_property(EPPIC_COMPILE_OPTIONS ${PROJECT_NAME} COMPILE_OPTIONS)
 message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
-
-# Fields library
-add_library(Fields
-        src/fields/coordinate.h
-        src/fields/scalar.h
-        src/fields/vector.h
-)
-
-set_target_properties(Fields PROPERTIES LINKER_LANGUAGE CXX)
 
 # Core library
 add_library(Core
@@ -151,6 +142,9 @@ add_library(Core
         src/core/physical.h
         src/core/numeric.h
         src/core/type.h
+        src/core/coordinate.h
+        src/core/scalar.h
+        src/core/vector.h
 )
 
 target_include_directories(Core
@@ -159,8 +153,6 @@ target_include_directories(Core
 )
 
 target_link_libraries(Core
-        PUBLIC Fields
-        PUBLIC Constants
         PUBLIC mdspan::mdspan
         PUBLIC spdlog::spdlog
         PUBLIC toml11::toml11
@@ -174,7 +166,6 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE ${PROJECT_BINARY_DIR}
         PRIVATE ${simplexdmf_SOURCE_DIR}/include
         PRIVATE src/core
-        PRIVATE src/fields
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -184,6 +175,5 @@ target_link_libraries(${PROJECT_NAME}
         PRIVATE fmt::fmt
         PRIVATE spdlog::spdlog
         PRIVATE Core
-        PRIVATE Fields
         PRIVATE mdspan::mdspan
 )

@@ -1,5 +1,5 @@
-#ifndef FIELDS_SCALAR_H
-#define FIELDS_SCALAR_H
+#ifndef CORE_SCALAR_H
+#define CORE_SCALAR_H
 
 #include <mdspan/mdspan.hpp>
 #include <memory>
@@ -44,4 +44,4 @@ private:
   std::unique_ptr<T[]> data_arr;
 };
 
-#endif // FIELDS_SCALAR_H
+#endif // CORE_SCALAR_H
