@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_PHYSICAL_H
-#define CONSTANTS_PHYSICAL_H
+#ifndef CORE_PHYSICAL_H
+#define CORE_PHYSICAL_H
 
 #include <cmath>
 #include <numbers>
@@ -30,4 +30,4 @@ constexpr fpp BOLTZMANN = 1.380649e-23;
 /// (K) electron volt temperature
 constexpr fpp EV_TEMP = ELEC_CHARGE / BOLTZMANN;
 
-#endif // CONSTANTS_PHYSICAL_HP
+#endif // CORE_PHYSICAL_H

@@ -130,15 +130,6 @@ message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
 get_target_property(EPPIC_COMPILE_OPTIONS ${PROJECT_NAME} COMPILE_OPTIONS)
 message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 
-# Constants library
-add_library(Constants
-        src/constants/physical.h
-        src/constants/numeric.h
-        src/constants/type.h
-)
-
-set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
-
 # Fields library
 add_library(Fields
         src/fields/coordinate.h
@@ -157,11 +148,13 @@ add_library(Core
         src/core/fdtd_engine.cpp
         src/core/fdtd_engine.h
         src/core/hdf5_wrapper.h
+        src/core/physical.h
+        src/core/numeric.h
+        src/core/type.h
 )
 
 target_include_directories(Core
         PUBLIC src/fields
-        PUBLIC src/constants
         PUBLIC ${simplexdmf_SOURCE_DIR}/include
 )
 
