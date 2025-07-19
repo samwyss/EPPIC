@@ -225,7 +225,8 @@ std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml
     SPDLOG_DEBUG("`ds_ratio` successfully parsed as uint64_t with value `{}`", ds_ratio);
     if (ds_ratio <= 0) {
       SPDLOG_CRITICAL("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio);
-      throw std::invalid_argument(fmt::format("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio));
+      throw std::invalid_argument(
+          fmt::format("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio));
     }
     SPDLOG_DEBUG("`ds_ratio` passed all checks");
 
