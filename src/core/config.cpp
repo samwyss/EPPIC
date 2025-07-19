@@ -110,7 +110,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
       SPDLOG_CRITICAL("`x_len` must be non-zero and non-negative ... value was `{}`", x_len);
       throw std::invalid_argument(fmt::format("`x_len` must be non-zero and non-negative ... value was `{}`", x_len));
     }
-    SPDLOG_DEBUG("`x_len passed all checks");
+    SPDLOG_DEBUG("`x_len` passed all checks");
 
     y_len = toml::find<fpp>(config, "geometry", "y_len");
     SPDLOG_DEBUG("`y_len` successfully parsed as fpp with value `{}`", y_len);
@@ -118,7 +118,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
       SPDLOG_CRITICAL("`y_len` must be non-zero and non-negative ... value was `{}`", y_len);
       throw std::invalid_argument(fmt::format("`y_len` must be non-zero and non-negative ... value was `{}`", y_len));
     }
-    SPDLOG_DEBUG("`y_len passed all checks");
+    SPDLOG_DEBUG("`y_len` passed all checks");
 
     z_len = toml::find<fpp>(config, "geometry", "z_len");
     SPDLOG_DEBUG("`z_len` successfully parsed as fpp with value `{}`", z_len);
@@ -126,7 +126,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
       SPDLOG_CRITICAL("`z_len` must be non-zero and non-negative ... value was `{}`", z_len);
       throw std::invalid_argument(fmt::format("`z_len` must be non-zero and non-negative ... value was `{}`", z_len));
     }
-    SPDLOG_DEBUG("`z_len passed all checks");
+    SPDLOG_DEBUG("`z_len` passed all checks");
 
     max_frequency = toml::find<fpp>(config, "geometry", "max_frequency");
     SPDLOG_DEBUG("`max_frequency` successfully parsed as fpp with value `{}`", max_frequency);
@@ -135,7 +135,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
       throw std::invalid_argument(
           fmt::format("`max_frequency` must be non-zero and non-negative ... value was `{}`", max_frequency));
     }
-    SPDLOG_DEBUG("`max_frequency passed all checks");
+    SPDLOG_DEBUG("`max_frequency` passed all checks");
 
     num_vox_min_wavelength = toml::find<size_t>(config, "geometry", "num_vox_min_wavelength");
     SPDLOG_DEBUG("`num_vox_min_wavelength` successfully parsed as size_t with value `{}`", num_vox_min_wavelength);
@@ -145,7 +145,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
       throw std::invalid_argument(fmt::format(
           "`num_vox_min_wavelength` must be non-zero and non-negative ... value was `{}`", num_vox_min_wavelength));
     }
-    SPDLOG_DEBUG("`num_vox_min_wavelength passed all checks");
+    SPDLOG_DEBUG("`num_vox_min_wavelength` passed all checks");
 
     num_vox_min_feature = toml::find<size_t>(config, "geometry", "num_vox_min_feature");
     SPDLOG_DEBUG("`num_vox_min_feature` successfully parsed as size_t with value `{}`", num_vox_min_feature);
@@ -155,7 +155,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
       throw std::invalid_argument(fmt::format(
           "`num_vox_min_feature` must be non-zero and non-negative ... value was `{}`", num_vox_min_feature));
     }
-    SPDLOG_DEBUG("`num_vox_min_feature passed all checks");
+    SPDLOG_DEBUG("`num_vox_min_feature` passed all checks");
 
   } catch (const std::exception &err) {
     SPDLOG_CRITICAL("parsing [geometry] section failed: {}", err.what());
@@ -176,7 +176,7 @@ std::expected<void, std::string> Config::parse_material(const toml::basic_value<
       SPDLOG_CRITICAL("`ep_r` must be non-zero and non-negative ... value was `{}`", ep_r);
       throw std::invalid_argument(fmt::format("`ep_r` must be non-zero and non-negative ... value was `{}`", ep_r));
     }
-    SPDLOG_DEBUG("`ep_r passed all checks");
+    SPDLOG_DEBUG("`ep_r` passed all checks");
 
     mu_r = toml::find<fpp>(config, "material", "mu_r");
     SPDLOG_DEBUG("`mu_r` successfully parsed as fpp with value `{}`", mu_r);
@@ -184,7 +184,7 @@ std::expected<void, std::string> Config::parse_material(const toml::basic_value<
       SPDLOG_CRITICAL("`mu_r` must be non-zero and non-negative ... value was `{}`", mu_r);
       throw std::invalid_argument(fmt::format("`mu_r` must be non-zero and non-negative ... value was `{}`", mu_r));
     }
-    SPDLOG_DEBUG("`mu_r passed all checks");
+    SPDLOG_DEBUG("`mu_r` passed all checks");
 
     sigma = toml::find<fpp>(config, "material", "sigma");
     SPDLOG_DEBUG("`sigma successfully parsed as fpp with value `{}`", sigma);
@@ -192,7 +192,7 @@ std::expected<void, std::string> Config::parse_material(const toml::basic_value<
       SPDLOG_CRITICAL("`sigma` must be non-zero and non-negative ... value was `{}`", sigma);
       throw std::invalid_argument(fmt::format("`sigma` must be non-zero and non-negative ... value was `{}`", sigma));
     }
-    SPDLOG_DEBUG("`sigma passed all checks");
+    SPDLOG_DEBUG("`sigma` passed all checks");
 
   } catch (const std::exception &err) {
     SPDLOG_CRITICAL("parsing [material] section failed: {}", err.what());
@@ -203,15 +203,31 @@ std::expected<void, std::string> Config::parse_material(const toml::basic_value<
   return {};
 }
 
-std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml::type_config> &config) {
+std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml::type_config> &config,
+                                                    const std::string &id) {
   SPDLOG_TRACE("enter Config::parse_data");
 
   try {
     const auto out_dir_str = toml::find<std::string>(config, "data", "out_dir");
-    SPDLOG_DEBUG("`out_dir successfully parsed as std::string with value `{}`", out_dir_str);
+    SPDLOG_DEBUG("`out_dir` successfully parsed as std::string with value `{}`", out_dir_str);
     const auto out_dir = std::filesystem::canonical(out_dir_str);
-    SPDLOG_DEBUG("`out_dir successfully canonicalized with value`{}`", out_dir.string());
-    setup_dirs(out_dir);
+    SPDLOG_DEBUG("`out_dir` successfully canonicalized with value`{}`", out_dir.string());
+    if (const auto result = setup_dirs(out_dir, id); result.has_value()) {
+      out = result.value();
+      SPDLOG_DEBUG("`out_dir` passed all checks");
+      SPDLOG_INFO("created output directory structure at `{}`", out.string());
+    } else {
+      SPDLOG_CRITICAL("unable to create output directory structure: {}", result.error());
+      return std::unexpected(result.error());
+    }
+
+    ds_ratio = toml::find<uint64_t>(config, "data", "ds_ratio");
+    SPDLOG_DEBUG("`ds_ratio` successfully parsed as uint64_t with value `{}`", ds_ratio);
+    if (ds_ratio <= 0) {
+      SPDLOG_CRITICAL("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio);
+      throw std::invalid_argument(fmt::format("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio));
+    }
+    SPDLOG_DEBUG("`ds_ratio` passed all checks");
 
   } catch (const std::exception &err) {
     SPDLOG_CRITICAL("parsing [data] section failed: {}", err.what());
@@ -250,6 +266,6 @@ std::expected<std::filesystem::path, std::string> Config::setup_dirs(const std::
     return std::unexpected<std::string>(err.what());
   }
 
-  SPDLOG_TRACE("exit Config::setup_dirs");
+  SPDLOG_TRACE("exit Config::setup_dirs with success");
   return io_dir;
 }

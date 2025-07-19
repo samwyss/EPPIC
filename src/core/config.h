@@ -80,7 +80,8 @@ private:
 
   [[nodiscard]] std::expected<void, std::string> parse_material(const toml::basic_value<toml::type_config> &config);
 
-  [[nodiscard]] std::expected<void, std::string> parse_data(const toml::basic_value<toml::type_config> &config);
+  [[nodiscard]] std::expected<void, std::string> parse_data(const toml::basic_value<toml::type_config> &config,
+                                                            const std::string &id);
 
   [[nodiscard]] std::expected<std::filesystem::path, std::string> setup_dirs(const std::filesystem::path &out_dir,
                                                                              const std::string &id);
