@@ -70,6 +70,7 @@ int main(const int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
+  // todo need to rewrite world to be composed of moved config
   auto world_creation_result = World::create(std::move(config));
   if (!world_creation_result.has_value()) {
     SPDLOG_CRITICAL("failed to configure World object: {}", world_creation_result.error());
