@@ -230,6 +230,9 @@ std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml
     }
     SPDLOG_DEBUG("`ds_ratio` passed all checks");
 
+    HDF5Obj(H5Fcreate((out / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT), H5Fclose);
+    SPDLOG_DEBUG("created output HDF5 file: {}", out / "data.h5");
+
   } catch (const std::exception &err) {
     SPDLOG_CRITICAL("parsing [data] section failed: {}", err.what());
     return std::unexpected(err.what());
