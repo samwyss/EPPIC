@@ -207,6 +207,11 @@ std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml
   SPDLOG_TRACE("enter Config::parse_data");
 
   try {
+    const auto out_dir_str = toml::find<std::string>(config, "data", "out_dir");
+    SPDLOG_DEBUG("`out_dir successfully parsed as std::string with value `{}`", out_dir_str);
+    const auto out_dir = std::filesystem::canonical(out_dir_str);
+    SPDLOG_DEBUG("`out_dir successfully canonicalized with value`{}`", out_dir.string());
+    setup_dirs(out_dir);
 
   } catch (const std::exception &err) {
     SPDLOG_CRITICAL("parsing [data] section failed: {}", err.what());
@@ -217,4 +222,26 @@ std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml
   return {};
 }
 
-std::expected<void, std::string> Config::setup_dirs() { return {}; }
+std::expected<std::filesystem::path, std::string> Config::setup_dirs(const std::filesystem::path &out_dir,
+                                                                     const std::string &id) {
+  SPDLOG_TRACE("enter Config::setup_dirs");
+
+  // todo add logging
+
+  std::filesystem::path io_dir;
+  try {
+    const auto root_dir = out_dir / "out";
+    if (!is_directory(root_dir)) {
+      create_directory(root_dir);
+    }
+
+    io_dir = root_dir / id;
+    if (!is_directory(io_dir)) {
+      create_directory(io_dir);
+    }
+  } catch (const std::filesystem::filesystem_error &err) {
+  }
+
+  SPDLOG_TRACE("exit Config::setup_dirs");
+  return io_dir;
+}
