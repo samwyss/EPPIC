@@ -62,11 +62,13 @@ struct Config {
   /// data output downsampling ratio, number of steps between logged timesteps
   uint64_t ds_ratio;
 
+  /* todo move to world
   /// output HDF5 file
   HDF5Obj h5;
 
   /// xdmf writer
   SimpleXdmf xdmf;
+  */
 
 private:
   /*!
