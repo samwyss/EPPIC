@@ -174,23 +174,11 @@ private:
    */
   void write_h5_hz(const HDF5Obj &group) const;
 
-  /// (m) size of bounding box in all directions
-  const Coord3<fpp> len;
-
-  /// relative diagonally isotropic permittivity of material inside bounding box
-  const fpp ep_r;
-
-  /// relative diagonally isotropic permeability of material inside bounding box
-  const fpp mu_r;
-
   /// (F/m) diagonally isotropic permittivity of material inside bounding box
   const fpp ep;
 
   /// (H/m) diagonally isotropic permeability of material inside bounding box
   const fpp mu;
-
-  /// (S/m) diagonally isotropic conductivity of material inside bounding box
-  const fpp sigma;
 
   /// number of voxels in all directions
   Coord3<size_t> nv{};

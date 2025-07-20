@@ -14,6 +14,7 @@
 #include <toml11/serializer.hpp>
 #include <type_traits>
 
+#include "coordinate.h"
 #include "type.h"
 
 struct Config {
@@ -29,14 +30,8 @@ struct Config {
   /// (s) end time of simulation
   fpp end_time;
 
-  /// (m) length of bounding box in the x-direction
-  fpp x_len;
-
-  /// (m) length of bounding box in the y-direction
-  fpp y_len;
-
-  /// (m) length of bounding box in the z-direction
-  fpp z_len;
+  /// (m) size of bounding box in all directions
+  const Coord3<fpp> len;
 
   /// (Hz) maximum frequency to resolve with FDTD engine
   fpp max_frequency;
@@ -47,10 +42,10 @@ struct Config {
   /// number of voxels per minimum feature dimension for FDTD engine
   size_t num_vox_min_feature;
 
-  /// diagonally isotropic relative permittivity inside bounding box
+  /// relative diagonally isotropic permittivity of material inside bounding box
   fpp ep_r;
 
-  /// diagonally isotropic relative permeability inside bounding box
+  /// relative diagonally isotropic permeability of material inside bounding box
   fpp mu_r;
 
   /// (S / m) diagonally isotropic conductivity of material in bounding box
