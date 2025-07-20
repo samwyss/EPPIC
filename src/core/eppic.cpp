@@ -8,7 +8,7 @@ World::World(Config &&config)
 std::expected<World, std::string> World::create(Config &&config) {
   SPDLOG_TRACE("enter World::create");
   try {
-    //auto world = std::expected<World, std::string>(std::in_place, std::move(config));
+    // auto world = std::expected<World, std::string>(std::in_place, std::move(config));
     SPDLOG_TRACE("exit World::create with success");
     return std::expected<World, std::string>(std::in_place, std::move(config)); // todo come back to this
   } catch (const std::exception &err) {
