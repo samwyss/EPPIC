@@ -1,6 +1,7 @@
 #ifndef CORE_CONFIG_H
 #define CORE_CONFIG_H
 
+// todo clean these up
 #include <cstddef>
 #include <cstdint>
 #include <expected>
@@ -13,7 +14,6 @@
 #include <toml11/serializer.hpp>
 #include <type_traits>
 
-#include "hdf5_wrapper.h"
 #include "type.h"
 
 struct Config {
@@ -61,14 +61,6 @@ struct Config {
 
   /// data output downsampling ratio, number of steps between logged timesteps
   uint64_t ds_ratio;
-
-  /* todo move to world
-  /// output HDF5 file
-  HDF5Obj h5;
-
-  /// xdmf writer
-  SimpleXdmf xdmf;
-  */
 
 private:
   /*!

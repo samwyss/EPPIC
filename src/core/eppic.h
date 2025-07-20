@@ -1,8 +1,16 @@
 #ifndef CORE_EPPIC_H
 #define CORE_EPPIC_H
 
+#include <expected>
+#include <simple_xdmf.hpp>
+#include <spdlog/spdlog.h>
+#include <string>
+
+#include "config.h"
+#include "hdf5_wrapper.h"
+
 /*!
- * world object
+ * World object
  */
 class World {
 public:
@@ -36,20 +44,17 @@ private:
    */
   explicit World(Config &&config);
 
-  /// electromagnetic engine
-  FDTDEngine engine;
-
-  /// (s) elapsed time
-  fpp time = 0.0;
-
-  /// data output downsampling ratio, number of steps between logged timesteps
-  uint64_t ds_ratio;
+  /// run configuration
+  const Config config;
 
   /// output HDF5 file
-  HDF5Obj h5;
+  const HDF5Obj h5;
 
   /// xdmf writer
   SimpleXdmf xdmf;
+
+  /// (s) elapsed time
+  fpp time = 0.0;
 };
 
 #endif // CORE_EPPIC_H
