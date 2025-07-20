@@ -130,8 +130,6 @@ message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 
 # Core library
 add_library(Core
-        src/core/world.cpp
-        src/core/world.h
         src/core/config.cpp
         src/core/config.h
         src/core/fdtd_engine.cpp
