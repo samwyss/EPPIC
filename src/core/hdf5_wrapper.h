@@ -51,7 +51,7 @@ public:
   /*!
    * HDF5 object wrapper move assignment operator
    * @param other other HDF5 object wrapper
-   * @return HDF5 obbject wrapper
+   * @return HDF5 object wrapper
    */
   HDF5Mgr &operator=(HDF5Mgr &&other) noexcept {
     if (this != &other) {
