@@ -31,7 +31,7 @@ struct Config {
   fpp end_time;
 
   /// (m) size of bounding box in all directions
-  const Coord3<fpp> len;
+  Coord3<fpp> len;
 
   /// (Hz) maximum frequency to resolve with FDTD engine
   fpp max_frequency;
