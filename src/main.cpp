@@ -41,7 +41,7 @@ int main(const int argc, char **argv) {
   }
   SPDLOG_DEBUG("created temporary logging directory `{}`", tmp_log_dir.string());
 
-  const auto tmp_logger = spdlog::basic_logger_mt("logger", (tmp_log_dir / "log.log").string());
+  const auto tmp_logger = spdlog::basic_logger_mt("tmp_logger", (tmp_log_dir / "log.log").string());
   spdlog::set_default_logger(tmp_logger);
   spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
   SPDLOG_DEBUG("created temporary logging directory and logger at `{}`", tmp_log_dir.string());
@@ -62,7 +62,7 @@ int main(const int argc, char **argv) {
     std::filesystem::rename(tmp_log_dir, log_dir);
     SPDLOG_DEBUG("moved {} to {}", tmp_log_dir.string(), log_dir.string());
 
-    const auto logger = spdlog::basic_logger_mt("logger", (log_dir / "logs.log").string(), true);
+    const auto logger = spdlog::basic_logger_mt("logger", (log_dir / "log.log").string(), false);
     spdlog::set_default_logger(logger);
     spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
     spdlog::flush_every(std::chrono::seconds(5));
