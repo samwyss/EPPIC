@@ -16,4 +16,4 @@ sigma = 0.0
 
 [data]
 out_dir = "."
-downsampling_ratio = 100000
+ds_ratio = 100000
