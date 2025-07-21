@@ -50,7 +50,7 @@ Config::Config(const std::string &input_file_path, const std::string &id) {
           fmt::format("cannot parse [material] section in `{}`: {}", input_file.string(), result.error()));
     }
 
-    if (const auto result = parse_time(config); result.has_value()) {
+    if (const auto result = parse_data(config, id); result.has_value()) {
       SPDLOG_DEBUG("successfully parsed [data] section in `{}`", input_file.string());
     } else {
       SPDLOG_CRITICAL("cannot parse [data] section in `{}`: {}", input_file.string(), result.error());
