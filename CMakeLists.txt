@@ -132,8 +132,6 @@ message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 add_library(Core
         src/core/config.cpp
         src/core/config.h
-        src/core/fdtd_engine.cpp
-        src/core/fdtd_engine.h
         src/core/hdf5_wrapper.h
         src/core/physical.h
         src/core/numeric.h
