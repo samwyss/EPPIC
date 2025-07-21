@@ -59,9 +59,9 @@ Config::Config(const std::string &input_file_path, const std::string &id) {
     }
 
   } else {
-    SPDLOG_CRITICAL("failed to parse config file `{}`: {}", input_file.string(), parse_result.unwrap_err());
+    SPDLOG_CRITICAL("failed to parse config file `{}` ... provided file contains invalid toml", input_file.string());
     throw std::runtime_error(
-        fmt::format("failed to parse config file `{}`: {}", input_file.string(), parse_result.unwrap_err()));
+        fmt::format("failed to parse config file `{}` ... provided file contains invalid toml", input_file.string()));
   }
 
   SPDLOG_TRACE("exit Config::Config");
@@ -239,22 +239,22 @@ std::expected<std::filesystem::path, std::string> Config::setup_dirs(const std::
   try {
     const auto root_dir = out_dir / "out";
     if (!is_directory(root_dir)) {
-      SPDLOG_DEBUG("directory `{}` not found ... creating now", root_dir);
+      SPDLOG_DEBUG("directory `{}` not found ... creating now", root_dir.string());
       create_directory(root_dir);
     } else {
-      SPDLOG_DEBUG("directory `{}` already exists", root_dir);
+      SPDLOG_DEBUG("directory `{}` already exists", root_dir.string());
     }
 
     io_dir = root_dir / id;
     if (!is_directory(io_dir)) {
-      SPDLOG_DEBUG("directory `{}` not found ... creating now", io_dir);
+      SPDLOG_DEBUG("directory `{}` not found ... creating now", io_dir.string());
       create_directory(io_dir);
     } else {
-      SPDLOG_DEBUG("directory `{}` already exists", io_dir);
+      SPDLOG_DEBUG("directory `{}` already exists", io_dir.string());
     }
 
   } catch (const std::filesystem::filesystem_error &err) {
-    SPDLOG_CRITICAL("exit Config::create_dirs with failure: {}", err.what());
+    SPDLOG_CRITICAL("unable to create output directory structure: {}", err.what());
     return std::unexpected<std::string>(err.what());
   }
 

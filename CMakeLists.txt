@@ -144,7 +144,11 @@ add_library(Core
 )
 
 target_include_directories(Core
-        PUBLIC src/fields
+        PUBLIC ${simplexdmf_SOURCE_DIR}/include
+        PUBLIC ${MPI_CXX_INCLUDE_PATH}
+        PUBLIC ${OPENMP_CXX_INCLUDE_PATH}
+        PUBLIC ${HDF5_INCLUDE_DIRS}
+        PUBLIC ${PROJECT_BINARY_DIR}
         PUBLIC ${simplexdmf_SOURCE_DIR}/include
 )
 
@@ -152,6 +156,13 @@ target_link_libraries(Core
         PUBLIC mdspan::mdspan
         PUBLIC spdlog::spdlog
         PUBLIC toml11::toml11
+        PUBLIC MPI::MPI_CXX
+        PUBLIC OpenMP::OpenMP_CXX
+        PUBLIC HDF5::HDF5
+        PUBLIC fmt::fmt
+        PUBLIC spdlog::spdlog
+        PUBLIC mdspan::mdspan
+
 )
 
 # main executable

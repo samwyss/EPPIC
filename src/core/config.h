@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <expected>
 #include <filesystem>
+#include <fmt/chrono.h>
 #include <simple_xdmf.hpp>
 #include <spdlog/spdlog.h>
 #include <string>

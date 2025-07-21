@@ -26,7 +26,7 @@ int main(const int argc, char **argv) {
   }
 
 #if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
-  const auto tmp_log_dir = std::filesystem::canonical("./log");
+  const auto tmp_log_dir = std::filesystem::current_path() / "logs";
 
   try {
     if (!is_directory(tmp_log_dir)) {
@@ -55,6 +55,7 @@ int main(const int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
+#if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
   try {
     const auto log_dir = world->get_output_dir() / "log";
 
@@ -73,19 +74,22 @@ int main(const int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  const auto config_time = std::chrono::high_resolution_clock::now();
+  [[maybe_unused]] const auto config_time = std::chrono::high_resolution_clock::now();
   SPDLOG_INFO("EPPIC successfully configured: {}", config_time);
   SPDLOG_INFO("elapsed time: {}", config_time - start_time);
+#endif
 
   if (const auto result = world.value().run(); !result.has_value()) {
     SPDLOG_CRITICAL("EPPIC run failed: {}", result.error());
     return EXIT_FAILURE;
   }
 
-  const auto run_time = std::chrono::high_resolution_clock::now();
+#if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
+  [[maybe_unused]] const auto run_time = std::chrono::high_resolution_clock::now();
   SPDLOG_INFO("EPPIC run successfully completed: {}", run_time);
   SPDLOG_INFO("elapsed time: {}", run_time - config_time);
   SPDLOG_INFO("total time: {}", run_time - start_time);
+#endif
 
   return EXIT_SUCCESS;
 }

@@ -52,7 +52,7 @@ std::expected<World, std::string> World::create(const std::string &input_file_pa
     SPDLOG_TRACE("exit World::create with success");
     return world;
   } catch (const std::exception &err) {
-    SPDLOG_CRITICAL("exit World::create with failure: {}", err.what());
+    SPDLOG_CRITICAL("failed to configure World object: {}", err.what());
     return std::unexpected(err.what());
   }
 }

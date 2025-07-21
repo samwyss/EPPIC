@@ -2,6 +2,7 @@
 #define CORE_EPPIC_H
 
 #include <expected>
+#include <fmt/chrono.h>
 #include <simple_xdmf.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
