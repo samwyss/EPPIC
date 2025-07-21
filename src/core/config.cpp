@@ -67,18 +67,6 @@ Config::Config(const std::string &input_file_path, const std::string &id) {
   SPDLOG_TRACE("exit Config::Config");
 }
 
-std::expected<Config, std::string> Config::create(const std::string &input_file_path, const std::string &id) {
-  SPDLOG_TRACE("enter Config::create");
-  try {
-    Config config(input_file_path, id);
-    SPDLOG_TRACE("exit Config::create with success");
-    return config;
-  } catch (const std::runtime_error &err) {
-    SPDLOG_CRITICAL("exit Config::create with error: {}", err.what());
-    return std::unexpected(err.what());
-  }
-}
-
 std::expected<void, std::string> Config::parse_time(const toml::basic_value<toml::type_config> &config) {
   SPDLOG_TRACE("enter Config::parse_time");
   try {

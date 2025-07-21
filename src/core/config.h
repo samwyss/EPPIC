@@ -17,15 +17,12 @@
 #include "coordinate.h"
 #include "type.h"
 
-struct Config {
+class Config {
+public:
   /*!
-   * Config static factory method
-   * @param input_file_path todo document
-   * @param id todo document
-   * @return FDTDEngine
+   * Config constructor
    */
-  [[nodiscard]] static std::expected<Config, std::string> create(const std::string &input_file_path,
-                                                                 const std::string &id);
+  explicit Config(const std::string &input_file_path, const std::string &id);
 
   /// (s) end time of simulation
   fpp end_time;
@@ -58,11 +55,6 @@ struct Config {
   uint64_t ds_ratio;
 
 private:
-  /*!
-   * Config constructor
-   */
-  explicit Config(const std::string &input_file_path, const std::string &id);
-
   [[nodiscard]] std::expected<void, std::string> parse_time(const toml::basic_value<toml::type_config> &config);
 
   [[nodiscard]] std::expected<void, std::string> parse_geometry(const toml::basic_value<toml::type_config> &config);
