@@ -1,4 +1,4 @@
-#include "eppic.h"
+#include "world.h"
 
 World::World(const std::string &input_file_path, const std::string &id)
     : cfg(input_file_path, id), ep(cfg.ep_r * VAC_PERMITTIVITY), mu(cfg.mu_r * VAC_PERMEABILITY) {

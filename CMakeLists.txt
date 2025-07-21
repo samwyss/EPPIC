@@ -139,8 +139,8 @@ add_library(Core
         src/core/coordinate.h
         src/core/scalar.h
         src/core/vector.h
-        src/core/eppic.cpp
-        src/core/eppic.h
+        src/core/world.cpp
+        src/core/world.h
 )
 
 target_include_directories(Core
