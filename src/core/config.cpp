@@ -179,7 +179,7 @@ std::expected<void, std::string> Config::parse_material(const toml::basic_value<
 
     sigma = toml::find<fpp>(config, "material", "sigma");
     SPDLOG_DEBUG("`sigma successfully parsed as fpp with value `{}`", sigma);
-    if (sigma <= 0.0) {
+    if (sigma < 0.0) {
       SPDLOG_CRITICAL("`sigma` must be non-zero and non-negative ... value was `{}`", sigma);
       throw std::invalid_argument(fmt::format("`sigma` must be non-zero and non-negative ... value was `{}`", sigma));
     }
