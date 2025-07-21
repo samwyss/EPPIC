@@ -57,6 +57,19 @@ std::expected<World, std::string> World::create(const std::string &input_file_pa
   }
 }
 
+std::expected<void, std::string> World::run() {
+  SPDLOG_TRACE("enter World::run");
+  SPDLOG_DEBUG("running EPPIC to end time of {:.3e} (s)", cfg.end_time);
+
+  if (const auto result = advance_to(cfg.end_time); !result.has_value()) {
+    SPDLOG_CRITICAL("failed to run EPPIC to desired end time: {}", result.error());
+    return std::unexpected(result.error());
+  }
+
+  SPDLOG_TRACE("exit World::run with success");
+  return {};
+}
+
 std::expected<void, std::string> World::advance_to(const fpp end_t) {
   SPDLOG_TRACE("enter World::advance_to");
   SPDLOG_DEBUG("current time is {:.3e} (s)", time);
@@ -65,16 +78,16 @@ std::expected<void, std::string> World::advance_to(const fpp end_t) {
   if (end_t > time) {
     const fpp adv_t = end_t - time;
 
-    if (const auto adv_by_result = advance_by(adv_t); !adv_by_result.has_value()) {
-      SPDLOG_CRITICAL("advance time by advance_by returned with error: {}", adv_by_result.error());
-      return std::unexpected(adv_by_result.error());
+    if (const auto result = advance_by(adv_t); !result.has_value()) {
+      SPDLOG_CRITICAL("failed to advance time to {} (s): {}", adv_t, result.error());
+      return std::unexpected(result.error());
     }
 
   } else {
     SPDLOG_WARN("end time of {:.3e} (s) is not greater than current time of {:.3e} (s)", end_t, time);
   }
 
-  SPDLOG_TRACE("exit World::advance_to");
+  SPDLOG_TRACE("exit World::advance_to with success");
   return {};
 }
 
@@ -173,16 +186,19 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto end_time = std::chrono::high_resolution_clock::now();
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
-  [[maybe_unused]] const auto num_cells = 6 * nv.x() * steps; // assumes number of voxels in all fields is the same as x
+  [[maybe_unused]] const auto num_cells = 6 * nv.x * steps; // assumes number of voxels in all fields is the same as x
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
-  [[maybe_unused]] const auto loop_time = std::chrono::duration_cast<std::chrono::seconds>(end_time - start_time);
-  SPDLOG_INFO("loop runtime (s): {:.3e}", loop_time);
-  SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}", static_cast<double>(num_cells) / loop_time);
+  [[maybe_unused]] const auto loop_time = end_time - start_time;
+  SPDLOG_INFO("loop runtime: {}", loop_time);
+  SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}",
+              static_cast<double>(num_cells) / std::chrono::duration_cast<std::chrono::seconds>(loop_time).count());
 
   SPDLOG_TRACE("exit World::advance_by");
 
   return {};
 }
+
+std::filesystem::path World::get_output_dir() const { return cfg.out; }
 
 uint64_t World::calc_num_steps(const fpp adv_t) const {
   SPDLOG_TRACE("enter World::calc_num_steps");

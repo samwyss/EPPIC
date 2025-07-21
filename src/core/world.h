@@ -27,6 +27,12 @@ public:
                                                                 const std::string &id);
 
   /*!
+   * advances internal state to `end_time` parameter as defined in configuration file
+   * @return void
+   */
+  [[nodiscard]] std::expected<void, std::string> run();
+
+  /*!
    * advances internal state to an end time
    *
    * will do nothing in the event that end_t <= time
@@ -41,6 +47,14 @@ public:
    * @return void
    */
   [[nodiscard]] std::expected<void, std::string> advance_by(fpp adv_t);
+
+  /*!
+   * returns configured output directory
+   *
+   * useful for setting a logging directory
+   * @return std::filesystem::path
+   */
+  std::filesystem::path get_output_dir() const;
 
 private:
   /*!
