@@ -44,45 +44,40 @@ int main(const int argc, char **argv) {
   const auto tmp_logger = spdlog::basic_logger_mt("logger", (tmp_log_dir / "log.log").string());
   spdlog::set_default_logger(tmp_logger);
   spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
+  SPDLOG_DEBUG("created temporary logging directory and logger at `{}`", tmp_log_dir.string());
 #endif
 
   SPDLOG_INFO("EPPIC run begin: {}", start_time);
 
-  auto config_result = Config::create(argv[1], id);
-  if (!config_result.has_value()) {
-    SPDLOG_CRITICAL("failed to configure EPPIC: {}", config_result.error());
+  auto world = World::create(argv[1], id);
+  if (!world.has_value()) {
+    SPDLOG_CRITICAL("failed to configure World object: {}", world.error());
     return EXIT_FAILURE;
   }
-  auto config = std::move(config_result.value());
 
   try {
-    std::filesystem::rename(tmp_log_dir, config.out / "log");
-    SPDLOG_DEBUG("moved {} to {}", tmp_log_dir.string(), (config.out / "log").string());
+    const auto log_dir = world->get_output_dir() / "log";
 
-    const auto logger = spdlog::basic_logger_mt("logger", (config.out / "logs/log.log").string(), true);
+    std::filesystem::rename(tmp_log_dir, log_dir);
+    SPDLOG_DEBUG("moved {} to {}", tmp_log_dir.string(), log_dir.string());
+
+    const auto logger = spdlog::basic_logger_mt("logger", (log_dir / "logs.log").string(), true);
     spdlog::set_default_logger(logger);
     spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
     spdlog::flush_every(std::chrono::seconds(5));
-    SPDLOG_DEBUG("reset default logger to write to `{}`", (config.out / "logs/log.log").string());
-  } catch (const std::filesystem::filesystem_error &err) {
-    SPDLOG_CRITICAL("unable to move `{}` directory to `{}`: {}", tmp_log_dir.string(), (config.out / "log").string(),
-                    err.what());
-    return EXIT_FAILURE;
-  }
+    SPDLOG_DEBUG("reset default logger to write to `{}`", (log_dir / "logs.log").string());
 
-  // todo need to rewrite world to be composed of moved config
-  auto world_creation_result = World::create(std::move(config));
-  if (!world_creation_result.has_value()) {
-    SPDLOG_CRITICAL("failed to configure World object: {}", world_creation_result.error());
+  } catch (const std::filesystem::filesystem_error &err) {
+    SPDLOG_CRITICAL("unable to move `{}` directory to `{}`: {}", tmp_log_dir.string(),
+                    (world->get_output_dir() / "log").string(), err.what());
     return EXIT_FAILURE;
   }
-  auto world = std::move(world_creation_result).value();
 
   const auto config_time = std::chrono::high_resolution_clock::now();
   SPDLOG_INFO("EPPIC successfully configured: {}", config_time);
-  SPDLOG_INFO("elapsed time (s): {}", config_time - start_time);
+  SPDLOG_INFO("elapsed time: {}", config_time - start_time);
 
-  if (const auto result = world.advance_to(config.end_time); !result.has_value()) {
+  if (const auto result = world.value().run(); !result.has_value()) {
     SPDLOG_CRITICAL("EPPIC run failed: {}", result.error());
     return EXIT_FAILURE;
   }
