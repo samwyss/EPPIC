@@ -104,7 +104,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
   SPDLOG_TRACE("enter Config::parse_geometry");
 
   try {
-    x_len = toml::find<fpp>(config, "geometry", "x_len");
+    const auto x_len = toml::find<fpp>(config, "geometry", "x_len");
     SPDLOG_DEBUG("`x_len` successfully parsed as fpp with value `{}`", x_len);
     if (x_len <= 0.0) {
       SPDLOG_CRITICAL("`x_len` must be non-zero and non-negative ... value was `{}`", x_len);
@@ -112,7 +112,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
     }
     SPDLOG_DEBUG("`x_len` passed all checks");
 
-    y_len = toml::find<fpp>(config, "geometry", "y_len");
+    const auto y_len = toml::find<fpp>(config, "geometry", "y_len");
     SPDLOG_DEBUG("`y_len` successfully parsed as fpp with value `{}`", y_len);
     if (y_len <= 0.0) {
       SPDLOG_CRITICAL("`y_len` must be non-zero and non-negative ... value was `{}`", y_len);
@@ -120,13 +120,16 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
     }
     SPDLOG_DEBUG("`y_len` passed all checks");
 
-    z_len = toml::find<fpp>(config, "geometry", "z_len");
+    const auto z_len = toml::find<fpp>(config, "geometry", "z_len");
     SPDLOG_DEBUG("`z_len` successfully parsed as fpp with value `{}`", z_len);
     if (z_len <= 0.0) {
       SPDLOG_CRITICAL("`z_len` must be non-zero and non-negative ... value was `{}`", z_len);
       throw std::invalid_argument(fmt::format("`z_len` must be non-zero and non-negative ... value was `{}`", z_len));
     }
     SPDLOG_DEBUG("`z_len` passed all checks");
+
+    len = {x_len, y_len, z_len};
+    SPDLOG_INFO("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
 
     max_frequency = toml::find<fpp>(config, "geometry", "max_frequency");
     SPDLOG_DEBUG("`max_frequency` successfully parsed as fpp with value `{}`", max_frequency);
