@@ -89,8 +89,8 @@ int main(const int argc, char **argv) {
 
   const auto run_time = std::chrono::high_resolution_clock::now();
   SPDLOG_INFO("EPPIC run successfully completed: {}", run_time);
-  SPDLOG_INFO("elapsed time (s): {}", run_time - config_time);
-  SPDLOG_INFO("total time (s): {}", run_time - start_time);
+  SPDLOG_INFO("elapsed time: {}", run_time - config_time);
+  SPDLOG_INFO("total time: {}", run_time - start_time);
 
   return EXIT_SUCCESS;
 }
