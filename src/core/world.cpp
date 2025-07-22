@@ -38,7 +38,7 @@ World::World(const std::string &input_file_path, const std::string &id)
 
   // (m^-1) inverse spatial steps
   d_inv = {static_cast<fpp>(1.0) / d.x, static_cast<fpp>(1.0) / d.y, static_cast<fpp>(1.0) / d.z};
-  SPDLOG_DEBUG("inverse voxel size (m^-1) , {:.3e} x {:.3e} x {:.3e}", d_inv.x, d_inv.y, d_inv.z);
+  SPDLOG_DEBUG("inverse voxel size (m^-1): {:.3e} x {:.3e} x {:.3e}", d_inv.x, d_inv.y, d_inv.z);
 
   // initialize fields
   e = Vector3<fpp>(nv, 0.0);
@@ -72,8 +72,8 @@ std::expected<void, std::string> World::run() {
 
 std::expected<void, std::string> World::advance_to(const fpp end_t) {
   SPDLOG_TRACE("enter World::advance_to");
-  SPDLOG_DEBUG("current time is {:.3e} (s)", time);
-  SPDLOG_DEBUG("advance time to {:.3e} (s)", end_t);
+  SPDLOG_DEBUG("current time (s): {:.3e}", time);
+  SPDLOG_DEBUG("advance time to (s):  {:.3e} (s)", end_t);
 
   if (end_t > time) {
     const fpp adv_t = end_t - time;
@@ -93,7 +93,7 @@ std::expected<void, std::string> World::advance_to(const fpp end_t) {
 
 std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   SPDLOG_TRACE("enter World::advance_by");
-  SPDLOG_DEBUG("advance time by {:.3e} (s)", adv_t);
+  SPDLOG_DEBUG("advance time by (s): {:.3e}", adv_t);
 
   // (s) initial time
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
