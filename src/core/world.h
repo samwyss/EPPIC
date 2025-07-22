@@ -55,7 +55,7 @@ public:
    * useful for setting a logging directory
    * @return std::filesystem::path
    */
-  std::filesystem::path get_output_dir() const;
+  [[nodiscard]] std::filesystem::path get_output_dir() const;
 
 private:
   /*!
