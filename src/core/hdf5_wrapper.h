@@ -7,7 +7,7 @@
 
 /*!
  * RAII HDF5 object wrapper
- * @tparam CloseFunc function that releases HDF5 object
+ * @tparam CloseFunc function that closes HDF5 object
  */
 template <typename CloseFunc> class HDF5Mgr {
 public:
@@ -60,7 +60,6 @@ public:
       }
 
       handle = std::exchange(other.handle, -1);
-
       close = std::move(other.close);
     }
     return *this;
