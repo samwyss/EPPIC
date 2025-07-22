@@ -22,7 +22,7 @@ Config::Config(const std::string &input_file_path, const std::string &id) {
   SPDLOG_DEBUG("input file path `{}` successfully verified", input_file.string());
 
   if (const auto parse_result = toml::try_parse(input_file); parse_result.is_ok()) {
-    SPDLOG_INFO("input file `{}` is valid toml");
+    SPDLOG_DEBUG("input file `{}` is valid toml");
 
     const auto &config = parse_result.unwrap();
 
@@ -117,7 +117,7 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
     SPDLOG_DEBUG("`z_len` passed all checks");
 
     len = {x_len, y_len, z_len};
-    SPDLOG_INFO("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
+    SPDLOG_DEBUG("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
 
     max_frequency = toml::find<fpp>(config, "geometry", "max_frequency");
     SPDLOG_DEBUG("`max_frequency` successfully parsed as fpp with value `{}`", max_frequency);
