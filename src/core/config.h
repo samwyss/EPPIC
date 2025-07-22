@@ -52,15 +52,42 @@ public:
   uint64_t ds_ratio;
 
 private:
+  /*!
+   * parses and validates [time] section of config
+   * @param config toml configuration
+   * @return std::expected<void, std::string>
+   */
   [[nodiscard]] std::expected<void, std::string> parse_time(const toml::basic_value<toml::type_config> &config);
 
+  /*!
+   * parses and validates [geometry] section of config
+   * @param config toml configuration
+   * @return std::expected<void, std::string>
+   */
   [[nodiscard]] std::expected<void, std::string> parse_geometry(const toml::basic_value<toml::type_config> &config);
 
+  /*!
+   * parses and validates [material] section of config
+   * @param config toml configuration
+   * @return std::expected<void, std::string>
+   */
   [[nodiscard]] std::expected<void, std::string> parse_material(const toml::basic_value<toml::type_config> &config);
 
+  /*!
+   * parses and validates [data] section of config
+   * @param config toml configuration
+   * @param id unique run identifier
+   * @return std::expected<void, std::string>
+   */
   [[nodiscard]] std::expected<void, std::string> parse_data(const toml::basic_value<toml::type_config> &config,
                                                             const std::string &id);
 
+  /*!
+   * sets up output file structure
+   * @param out_dir directory to create filestructure in
+   * @param id unique run identifier
+   * @return std::expected<std::filesystem::path, std::string>
+   */
   [[nodiscard]] std::expected<std::filesystem::path, std::string> setup_dirs(const std::filesystem::path &out_dir,
                                                                              const std::string &id);
 };
