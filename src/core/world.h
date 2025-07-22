@@ -14,7 +14,7 @@
 #include "vector.h"
 
 /*!
- * World object
+ * EPPIC World object
  */
 class World {
 public:
