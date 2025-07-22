@@ -14,6 +14,9 @@
 #include "coordinate.h"
 #include "type.h"
 
+/*!
+ * EPPIC configuration
+ */
 class Config {
 public:
   /*!
