@@ -88,8 +88,8 @@ private:
    * @param id unique run identifier
    * @return std::expected<std::filesystem::path, std::string>
    */
-  [[nodiscard]] std::expected<std::filesystem::path, std::string> setup_dirs(const std::filesystem::path &out_dir,
-                                                                             const std::string &id);
+  [[nodiscard]] static std::expected<std::filesystem::path, std::string>
+  setup_dirs(const std::filesystem::path &out_dir, const std::string &id);
 };
 
 #endif // CORE_CONFIG_H
