@@ -22,7 +22,7 @@ Config::Config(const std::string &input_file_path, const std::string &id) {
   SPDLOG_DEBUG("input file path `{}` successfully verified", input_file.string());
 
   if (const auto parse_result = toml::try_parse(input_file); parse_result.is_ok()) {
-    SPDLOG_DEBUG("input file `{}` is valid toml");
+    SPDLOG_DEBUG("input file `{}` is valid toml", input_file.string());
 
     const auto &config = parse_result.unwrap();
 
