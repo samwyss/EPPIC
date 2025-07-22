@@ -100,12 +100,25 @@ else ()
     message(STATUS "Library `SimpleXdmf` found on system.")
 endif ()
 
+find_package(toml11 QUIET)
+if (NOT toml11_FOUND)
+    message(STATUS "Library `toml11` not found. Installing locally now.")
+    FetchContent_Declare(toml11
+            GIT_REPOSITORY https://github.com/ToruNiina/toml11.git
+            GIT_TAG v4.4.0
+            GIT_PROGRESS TRUE
+            GIT_SHALLOW TRUE
+            EXCLUDE_FROM_ALL
+    )
+    FetchContent_MakeAvailable(toml11)
+else ()
+    message(STATUS "Library `toml11` found on system.")
+endif ()
+
 # EPPIC setup ------------------------------------------------------------------------------------------------
 # main executable
 add_executable(${PROJECT_NAME}
         src/main.cpp
-        src/fields/coordinate.h
-        src/fields/scalar.h
 )
 
 # diagnostics
@@ -115,66 +128,48 @@ message(STATUS "CMake Build Type: ${CMAKE_BUILD_TYPE}")
 get_target_property(EPPIC_COMPILE_OPTIONS ${PROJECT_NAME} COMPILE_OPTIONS)
 message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 
-# Constants library
-add_library(Constants
-        src/constants/physical.h
-        src/constants/numeric.h
-        src/constants/type.h
-)
-
-set_target_properties(Constants PROPERTIES LINKER_LANGUAGE CXX)
-
-# Fields library
-add_library(Fields
-        src/fields/coordinate.h
-        src/fields/scalar.h
-        src/fields/vector.h
-)
-
-set_target_properties(Fields PROPERTIES LINKER_LANGUAGE CXX)
-
 # Core library
 add_library(Core
-        src/core/world.cpp
-        src/core/world.h
         src/core/config.cpp
         src/core/config.h
-        src/core/fdtd_engine.cpp
-        src/core/fdtd_engine.h
         src/core/hdf5_wrapper.h
+        src/core/physical.h
+        src/core/numeric.h
+        src/core/type.h
+        src/core/coordinate.h
+        src/core/scalar.h
+        src/core/vector.h
+        src/core/world.cpp
+        src/core/world.h
 )
 
 target_include_directories(Core
-        PUBLIC src/fields
-        PUBLIC src/constants
         PUBLIC ${simplexdmf_SOURCE_DIR}/include
+        PUBLIC ${MPI_CXX_INCLUDE_PATH}
+        PUBLIC ${OPENMP_CXX_INCLUDE_PATH}
+        PUBLIC ${HDF5_INCLUDE_DIRS}
+        PUBLIC ${PROJECT_BINARY_DIR}
 )
 
 target_link_libraries(Core
-        PUBLIC Fields
-        PUBLIC Constants
         PUBLIC mdspan::mdspan
+        PUBLIC spdlog::spdlog
+        PUBLIC toml11::toml11
+        PUBLIC MPI::MPI_CXX
+        PUBLIC OpenMP::OpenMP_CXX
+        PUBLIC HDF5::HDF5
+        PUBLIC fmt::fmt
         PUBLIC spdlog::spdlog
 )
 
 # main executable
 target_include_directories(${PROJECT_NAME}
-        PRIVATE ${MPI_CXX_INCLUDE_PATH}
-        PRIVATE ${OPENMP_CXX_INCLUDE_PATH}
-        PRIVATE ${HDF5_INCLUDE_DIRS}
-        PRIVATE ${PROJECT_BINARY_DIR}
-        PRIVATE ${simplexdmf_SOURCE_DIR}/include
         PRIVATE src/core
-        PRIVATE src/fields
+        PRIVATE ${PROJECT_BINARY_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME}
-        PRIVATE MPI::MPI_CXX
-        PRIVATE OpenMP::OpenMP_CXX
-        PRIVATE HDF5::HDF5
+        PRIVATE Core
         PRIVATE fmt::fmt
         PRIVATE spdlog::spdlog
-        PRIVATE Core
-        PRIVATE Fields
-        PRIVATE mdspan::mdspan
 )

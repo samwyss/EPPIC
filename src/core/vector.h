@@ -1,5 +1,5 @@
-#ifndef FIELDS_VECTOR_H
-#define FIELDS_VECTOR_H
+#ifndef CORE_VECTOR_H
+#define CORE_VECTOR_H
 
 #include <mdspan/mdspan.hpp>
 #include <memory>
@@ -11,7 +11,7 @@
  * @tparam T arithmetic type
  */
 template <typename T>
-  requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T>
 class Vector3 {
 public:
   /*!
@@ -62,4 +62,4 @@ private:
   std::unique_ptr<T[]> z_data;
 };
 
-#endif // FIELDS_VECTOR_H
+#endif // CORE_VECTOR_H

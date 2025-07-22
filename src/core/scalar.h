@@ -1,5 +1,5 @@
-#ifndef FIELDS_SCALAR_H
-#define FIELDS_SCALAR_H
+#ifndef CORE_SCALAR_H
+#define CORE_SCALAR_H
 
 #include <mdspan/mdspan.hpp>
 #include <memory>
@@ -11,7 +11,7 @@
  * @tparam T arithmetic type
  */
 template <typename T>
-  requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T>
 class Scalar3 {
 public:
   /*!
@@ -28,7 +28,6 @@ public:
     const size_t nelems = dims.x * dims.y * dims.z;
 
     data_arr = std::make_unique<T[]>(nelems);
-
     data = Kokkos::mdspan(data_arr.get(), dims.x, dims.y, dims.z);
 
     for (size_t i = 0; i < nelems; ++i) {
@@ -44,4 +43,4 @@ private:
   std::unique_ptr<T[]> data_arr;
 };
 
-#endif // FIELDS_SCALAR_H
+#endif // CORE_SCALAR_H

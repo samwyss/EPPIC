@@ -2,27 +2,36 @@
 #define CORE_WORLD_H
 
 #include <expected>
-#include <stdexcept>
+#include <fmt/chrono.h>
+#include <simple_xdmf.hpp>
+#include <spdlog/spdlog.h>
 #include <string>
-#include <type_traits>
 
 #include "config.h"
-#include "fdtd_engine.h"
 #include "hdf5_wrapper.h"
-#include "type.h"
+#include "numeric.h"
+#include "physical.h"
+#include "vector.h"
 
 /*!
- * world object
+ * EPPIC World object
  */
 class World {
 public:
   /*!
    * World static factory method
-   * @param config configuration object
+   * @param input_file_path todo document
+   * @param id todo document
    * @return void
    */
-  [[nodiscard]] static std::expected<World, std::string>
-  create(Config &&config);
+  [[nodiscard]] static std::expected<World, std::string> create(const std::string &input_file_path,
+                                                                const std::string &id);
+
+  /*!
+   * advances internal state to `end_time` parameter as defined in configuration file
+   * @return void
+   */
+  [[nodiscard]] std::expected<void, std::string> run();
 
   /*!
    * advances internal state to an end time
@@ -40,27 +49,186 @@ public:
    */
   [[nodiscard]] std::expected<void, std::string> advance_by(fpp adv_t);
 
+  /*!
+   * returns configured output directory
+   *
+   * useful for setting a logging directory
+   * @return std::filesystem::path
+   */
+  [[nodiscard]] std::filesystem::path get_output_dir() const;
+
 private:
   /*!
    * World constructor
-   * @param config configuration object
+   * @param input_file_path todo document
+   * @param id todo document
    */
-  explicit World(Config &&config);
+  explicit World(const std::string &input_file_path, const std::string &id);
 
-  /// electromagnetic engine
-  FDTDEngine engine;
+  /*!
+   * calculates the number of steps required to advance engine state by some
+   * time period
+   * @param adv_t (s) time period to advance by
+   * @return uint64_t
+   */
+  [[nodiscard]] uint64_t calc_num_steps(fpp adv_t) const;
 
-  /// (s) elapsed time
-  fpp time = 0.0;
+  /*!
+   * calculates the number of steps required to model a given time span
+   * @param time_span (s) time span to be modeled
+   * @return number of steps required by CFL stability condition
+   */
+  [[nodiscard]] uint64_t calc_cfl_steps(fpp time_span) const;
 
-  /// data output downsampling ratio, number of steps between logged timesteps
-  uint64_t ds_ratio;
+  /*!
+   * advances internal field state by one time step
+   * @param dt (s) time step
+   * @return void
+   */
+  void step(fpp dt);
+
+  /*!
+   * advances internal electric field state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
+  void update_e(fpp ea, fpp eb) const;
+
+  /*!
+   * advances internal magnetic field state by one time step
+   * @param hxa magnetic field a loop constant for x-component
+   * @param hya magnetic field a loop constant for y-component
+   * @param hza magnetic field a loop constant for z-component
+   */
+  void update_h(fpp hxa, fpp hya, fpp hza) const;
+
+  /*!
+   * advances internal electric field x-component state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
+  void update_ex(fpp ea, fpp eb) const;
+  /*!
+   * advances internal electric field y-component state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
+  void update_ey(fpp ea, fpp eb) const;
+
+  /*!
+   * advances internal electric field z-component state by one time step
+   * @param ea electric field a loop constant
+   * @param eb electric field b loop constant
+   */
+  void update_ez(fpp ea, fpp eb) const;
+
+  /*!
+   * advances internal magnetic field x-component state by one time step
+   * @param hya magnetic field a loop constant for y-component
+   * @param hza magnetic field a loop constant for z-component
+   */
+  void update_hx(fpp hya, fpp hza) const;
+
+  /*!
+   * advances internal magnetic field y-component state by one time step
+   * @param hxa magnetic field a loop constant for x-component
+   * @param hza magnetic field a loop constant for z-component
+   */
+  void update_hy(fpp hxa, fpp hza) const;
+
+  /*!
+   * advances internal magnetic field z-component state by one time step
+   * @param hxa magnetic field a loop constant for x-component
+   * @param hya magnetic field a loop constant for y-component
+   */
+  void update_hz(fpp hxa, fpp hya) const;
+
+  /*!
+   * writes internal field state to hdf5 group
+   * @param group HDF5 group to write to
+   */
+  void write_h5(const HDF5Obj &group) const;
+
+  /*!
+   * writes all electric field data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_e(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_h(const HDF5Obj &group) const;
+
+  /*!
+   * writes all electric field x-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_ex(const HDF5Obj &group) const;
+
+  /*!
+   * writes all electric field y-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_ey(const HDF5Obj &group) const;
+
+  /*!
+   * writes all electric field z-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_ez(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field x-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_hx(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field y-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_hy(const HDF5Obj &group) const;
+
+  /*!
+   * writes all magnetic field z-component data to HDF5 group
+   * @param group HDF5 group
+   */
+  void write_h5_hz(const HDF5Obj &group) const;
+
+  /// configuration from file
+  const Config cfg;
 
   /// output HDF5 file
   HDF5Obj h5;
 
   /// xdmf writer
   SimpleXdmf xdmf;
+
+  /// (s) elapsed time
+  fpp time = 0.0;
+
+  /// (F/m) diagonally isotropic permittivity of material inside bounding box
+  const fpp ep;
+
+  /// (H/m) diagonally isotropic permeability of material inside bounding box
+  const fpp mu;
+
+  /// number of voxels in all directions
+  Coord3<size_t> nv;
+
+  /// (m) spatial increments in all directions
+  Coord3<fpp> d;
+
+  /// (m) inverse spatial increments in all directions
+  Coord3<fpp> d_inv;
+
+  /// (V/m) electric field vector
+  Vector3<fpp> e;
+
+  /// (A/m) magnetic field vector
+  Vector3<fpp> h;
 };
 
 #endif // CORE_WORLD_H

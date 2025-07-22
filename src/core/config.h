@@ -1,55 +1,98 @@
 #ifndef CORE_CONFIG_H
 #define CORE_CONFIG_H
 
-#include <cstddef>
 #include <cstdint>
+#include <expected>
 #include <filesystem>
-#include <simple_xdmf.hpp>
+#include <fmt/chrono.h>
+#include <spdlog/spdlog.h>
 #include <string>
-#include <type.h>
-#include <type_traits>
+#include <toml11/find.hpp>
+#include <toml11/parser.hpp>
+#include <toml11/serializer.hpp>
 
-#include "hdf5_wrapper.h"
+#include "coordinate.h"
+#include "type.h"
 
-struct Config {
-  /// (Hz) maximum frequency to resolve with FDTD engine
-  fpp max_frequency = 15e9;
-
-  /// number of voxels per minimum wavelength for FDTD engine
-  size_t num_vox_min_wavelength = 20;
-
-  /// number of voxels per minimum feature dimension for FDTD engine
-  size_t num_vox_min_feature = 4;
-
-  /// data output downsampling ratio, number of steps between logged timesteps
-  uint64_t ds_ratio = 100000;
+/*!
+ * EPPIC configuration
+ */
+class Config {
+public:
+  /*!
+   * Config constructor
+   */
+  explicit Config(const std::string &input_file_path, const std::string &id);
 
   /// (s) end time of simulation
-  fpp end_time = 5e-9;
+  fpp end_time;
 
-  /// (m) length of bounding box in the x-direction
-  fpp x_len = 0.001;
+  /// (m) size of bounding box in all directions
+  Coord3<fpp> len;
 
-  /// (m) length of bounding box in the y-direction
-  fpp y_len = 0.001;
+  /// (Hz) maximum frequency to resolve with FDTD engine
+  fpp max_frequency;
 
-  /// (m) length of bounding box in the z-direction
-  fpp z_len = 0.001;
+  /// number of voxels per minimum wavelength for FDTD engine
+  size_t num_vox_min_wavelength;
 
-  /// diagonally isotropic relative permittivity inside bounding box
-  fpp ep_r = 1.0;
+  /// number of voxels per minimum feature dimension for FDTD engine
+  size_t num_vox_min_feature;
 
-  /// diagonally isotropic relative permeability inside bounding box
-  fpp mu_r = 1.0;
+  /// relative diagonally isotropic permittivity of material inside bounding box
+  fpp ep_r;
+
+  /// relative diagonally isotropic permeability of material inside bounding box
+  fpp mu_r;
 
   /// (S / m) diagonally isotropic conductivity of material in bounding box
-  fpp sigma = 0.0;
+  fpp sigma;
 
-  /// output HDF5 file
-  HDF5Obj h5;
+  /// output directory
+  std::filesystem::path out;
 
-  /// xdmf writer
-  SimpleXdmf xdmf;
+  /// data output downsampling ratio, number of steps between logged timesteps
+  uint64_t ds_ratio;
+
+private:
+  /*!
+   * parses and validates [time] section of config
+   * @param config toml configuration
+   * @return std::expected<void, std::string>
+   */
+  [[nodiscard]] std::expected<void, std::string> parse_time(const toml::basic_value<toml::type_config> &config);
+
+  /*!
+   * parses and validates [geometry] section of config
+   * @param config toml configuration
+   * @return std::expected<void, std::string>
+   */
+  [[nodiscard]] std::expected<void, std::string> parse_geometry(const toml::basic_value<toml::type_config> &config);
+
+  /*!
+   * parses and validates [material] section of config
+   * @param config toml configuration
+   * @return std::expected<void, std::string>
+   */
+  [[nodiscard]] std::expected<void, std::string> parse_material(const toml::basic_value<toml::type_config> &config);
+
+  /*!
+   * parses and validates [data] section of config
+   * @param config toml configuration
+   * @param id unique run identifier
+   * @return std::expected<void, std::string>
+   */
+  [[nodiscard]] std::expected<void, std::string> parse_data(const toml::basic_value<toml::type_config> &config,
+                                                            const std::string &id);
+
+  /*!
+   * sets up output file structure
+   * @param out_dir directory to create filestructure in
+   * @param id unique run identifier
+   * @return std::expected<std::filesystem::path, std::string>
+   */
+  [[nodiscard]] static std::expected<std::filesystem::path, std::string>
+  setup_dirs(const std::filesystem::path &out_dir, const std::string &id);
 };
 
 #endif // CORE_CONFIG_H

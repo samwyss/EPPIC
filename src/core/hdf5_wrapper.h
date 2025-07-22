@@ -7,7 +7,7 @@
 
 /*!
  * RAII HDF5 object wrapper
- * @tparam CloseFunc function that releases HDF5 object
+ * @tparam CloseFunc function that closes HDF5 object
  */
 template <typename CloseFunc> class HDF5Mgr {
 public:
@@ -16,8 +16,7 @@ public:
    * @param handle HDF5 object handle
    * @param release HDF5 object release function
    */
-  HDF5Mgr(const hid_t handle, const CloseFunc release)
-      : handle(handle), close(release) {}
+  HDF5Mgr(const hid_t handle, const CloseFunc release) : handle(handle), close(release) {}
 
   /*!
    * HDF5 object wrapper default constructor
@@ -47,14 +46,12 @@ public:
    * HDF5 object wrapper move constructor
    * @param other other HDF5 object wrapper
    */
-  HDF5Mgr(HDF5Mgr &&other) noexcept
-      : handle(std::exchange(other.handle, -1)),
-        close(std::move(other.close)) {};
+  HDF5Mgr(HDF5Mgr &&other) noexcept : handle(std::exchange(other.handle, -1)), close(std::move(other.close)) {};
 
   /*!
    * HDF5 object wrapper move assignment operator
    * @param other other HDF5 object wrapper
-   * @return HDF5 obbject wrapper
+   * @return HDF5 object wrapper
    */
   HDF5Mgr &operator=(HDF5Mgr &&other) noexcept {
     if (this != &other) {
@@ -63,7 +60,6 @@ public:
       }
 
       handle = std::exchange(other.handle, -1);
-
       close = std::move(other.close);
     }
     return *this;

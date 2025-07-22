@@ -1,5 +1,5 @@
-#ifndef FIELDS_COORDINATE_H
-#define FIELDS_COORDINATE_H
+#ifndef CORE_COORDINATE_H
+#define CORE_COORDINATE_H
 
 #include <type_traits>
 
@@ -8,7 +8,7 @@
  * @tparam T arithmetic type
  */
 template <typename T>
-  requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T>
 struct Coord3 {
   T x;
   T y;
@@ -20,7 +20,7 @@ struct Coord3 {
  * @tparam T arithmetic type
  */
 template <typename T>
-  requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T>
 struct Coord2 {
   T x;
   T y;
@@ -31,9 +31,9 @@ struct Coord2 {
  * @tparam T arithmetic type
  */
 template <typename T>
-  requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T>
 struct Coord1 {
   T x;
 };
 
-#endif // FIELDS_COORDINATE_H
+#endif // CORE_COORDINATE_H
