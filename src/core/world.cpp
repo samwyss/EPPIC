@@ -190,7 +190,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   [[maybe_unused]] const auto loop_time = end_time - start_time;
   SPDLOG_INFO("loop runtime: {:%H:%M:%S}", loop_time);
   SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}",
-              static_cast<double>(num_cells) / std::chrono::duration_cast<std::chrono::seconds>(loop_time).count());
+              static_cast<double>(num_cells) / std::chrono::duration<double>(loop_time).count());
 
   SPDLOG_TRACE("exit World::advance_by");
 
