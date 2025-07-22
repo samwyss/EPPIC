@@ -216,7 +216,7 @@ private:
   const fpp mu;
 
   /// number of voxels in all directions
-  Coord3<size_t> nv{};
+  Coord3<size_t> nv;
 
   /// (m) spatial increments in all directions
   Coord3<fpp> d;
