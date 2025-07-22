@@ -104,7 +104,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
   // (s) time step
   const fpp dt = adv_t / static_cast<fpp>(steps);
-  SPDLOG_DEBUG("timestep: {:.3e} (s)", dt);
+  SPDLOG_DEBUG("timestep (s): {:.3e}", dt);
 
   // loop start time
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
