@@ -149,7 +149,6 @@ target_include_directories(Core
         PUBLIC ${OPENMP_CXX_INCLUDE_PATH}
         PUBLIC ${HDF5_INCLUDE_DIRS}
         PUBLIC ${PROJECT_BINARY_DIR}
-        PUBLIC ${simplexdmf_SOURCE_DIR}/include
 )
 
 target_link_libraries(Core
@@ -161,15 +160,16 @@ target_link_libraries(Core
         PUBLIC HDF5::HDF5
         PUBLIC fmt::fmt
         PUBLIC spdlog::spdlog
-        PUBLIC mdspan::mdspan
-
 )
 
 # main executable
 target_include_directories(${PROJECT_NAME}
         PRIVATE src/core
+        PRIVATE ${PROJECT_BINARY_DIR}
 )
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE Core
+        PRIVATE fmt::fmt
+        PRIVATE spdlog::spdlog
 )
