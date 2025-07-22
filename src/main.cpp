@@ -1,13 +1,10 @@
+#include <chrono>
 #include <filesystem>
 #include <fmt/chrono.h>
 #include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include "type.h"
 #include "world.h"
-
-#include <sys/stat.h>
 
 /*!
  * main driver function and build target
