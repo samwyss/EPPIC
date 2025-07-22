@@ -1,19 +1,15 @@
 #ifndef CORE_CONFIG_H
 #define CORE_CONFIG_H
 
-// todo clean these up
-#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <filesystem>
 #include <fmt/chrono.h>
-#include <simple_xdmf.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <toml11/find.hpp>
 #include <toml11/parser.hpp>
 #include <toml11/serializer.hpp>
-#include <type_traits>
 
 #include "coordinate.h"
 #include "type.h"
