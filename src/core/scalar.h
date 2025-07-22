@@ -28,7 +28,6 @@ public:
     const size_t nelems = dims.x * dims.y * dims.z;
 
     data_arr = std::make_unique<T[]>(nelems);
-
     data = Kokkos::mdspan(data_arr.get(), dims.x, dims.y, dims.z);
 
     for (size_t i = 0; i < nelems; ++i) {
