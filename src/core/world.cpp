@@ -109,7 +109,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // loop start time
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto start_time = std::chrono::high_resolution_clock::now();
-  ;
 
   xdmf.beginDomain();
 
