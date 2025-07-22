@@ -1,5 +1,5 @@
-#ifndef CORE_EPPIC_H
-#define CORE_EPPIC_H
+#ifndef CORE_WORLD_H
+#define CORE_WORLD_H
 
 #include <expected>
 #include <fmt/chrono.h>
@@ -231,4 +231,4 @@ private:
   Vector3<fpp> h;
 };
 
-#endif // CORE_EPPIC_H
+#endif // CORE_WORLD_H
