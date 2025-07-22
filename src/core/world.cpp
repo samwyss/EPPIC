@@ -178,9 +178,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   }
   SPDLOG_DEBUG("exit main time loop with success");
 
-  // todo do something with me
   xdmf.endDomain();
-  // xdmf.generate(fmt::format("{}/data.xdmf", io_dir_str)); todo uncomment me
+  xdmf.generate(fmt::format("{}/data.xdmf", cfg.out.string()));
 
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto end_time = std::chrono::high_resolution_clock::now();
