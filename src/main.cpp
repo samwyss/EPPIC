@@ -75,6 +75,7 @@ int main(const int argc, char **argv) {
   [[maybe_unused]] const auto config_time = std::chrono::high_resolution_clock::now();
   SPDLOG_INFO("EPPIC successfully configured: {}", config_time);
   SPDLOG_INFO("elapsed time: {:%H:%M:%S}", config_time - start_time);
+  SPDLOG_INFO("begin EPPIC run");
 #endif
 
   if (const auto result = world.value().run(); !result.has_value()) {
