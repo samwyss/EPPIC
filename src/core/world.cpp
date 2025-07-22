@@ -188,7 +188,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   [[maybe_unused]] const auto num_cells = 6 * nv.x * steps; // assumes number of voxels in all fields is the same as x
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto loop_time = end_time - start_time;
-  SPDLOG_INFO("loop runtime: {}", loop_time);
+  SPDLOG_INFO("loop runtime: {:%H:%M:%S}", loop_time);
   SPDLOG_INFO("voxel compute rate (vox/s): {:.3e}",
               static_cast<double>(num_cells) / std::chrono::duration_cast<std::chrono::seconds>(loop_time).count());
 
