@@ -167,20 +167,9 @@ target_link_libraries(Core
 
 # main executable
 target_include_directories(${PROJECT_NAME}
-        PRIVATE ${MPI_CXX_INCLUDE_PATH}
-        PRIVATE ${OPENMP_CXX_INCLUDE_PATH}
-        PRIVATE ${HDF5_INCLUDE_DIRS}
-        PRIVATE ${PROJECT_BINARY_DIR}
-        PRIVATE ${simplexdmf_SOURCE_DIR}/include
         PRIVATE src/core
 )
 
 target_link_libraries(${PROJECT_NAME}
-        PRIVATE MPI::MPI_CXX
-        PRIVATE OpenMP::OpenMP_CXX
-        PRIVATE HDF5::HDF5
-        PRIVATE fmt::fmt
-        PRIVATE spdlog::spdlog
         PRIVATE Core
-        PRIVATE mdspan::mdspan
 )
