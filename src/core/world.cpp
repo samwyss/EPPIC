@@ -134,7 +134,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         // todo move me
         xdmf.beginGrid(fmt::format("{}", i + 1));
 
-        // todo temporally offset E and H? may require writing xdmf for both E and H at half timesteps but only updating the changed field
+        // todo temporally offset E and H? may require writing xdmf for both E and H at half timesteps but only updating
+        // the changed field
         xdmf.beginTime();
         xdmf.setValue(fmt::to_string(time));
         xdmf.endTime();
