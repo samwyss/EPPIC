@@ -407,6 +407,7 @@ void World::update_hz(const fpp hxa, const fpp hya) const {
       }
     }
   }
+
   SPDLOG_TRACE("exit World::update_hz");
 }
 
