@@ -130,7 +130,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
             HDF5Obj(H5Gcreate(h5.get(), fmt::to_string(i).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
 
         // write field data
-        write_h5(group);
+        h5_write_field(group, e, EMField::E);
+        h5_write_field(group, h, EMField::H);
 
         // todo move me
         xdmf.beginGrid(fmt::format("Step{}", i + 1));
@@ -139,8 +140,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         xdmf.setValue(fmt::to_string(time));
         xdmf.endTime();
 
-        // todo the meshes and otherthings are very wrong, look into vector
-        // fields as well
         xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
         xdmf.setDimensions("5 5 5"); // number of points not cells
         xdmf.endStructuredTopology();
@@ -414,209 +413,49 @@ void World::update_hz(const fpp hxa, const fpp hya) const {
   SPDLOG_TRACE("exit World::update_hz");
 }
 
-void World::write_h5(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5");
+void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, const EMField type) {
+  SPDLOG_TRACE("enter World::h5_write_field");
 
-  write_h5_e(group);
-  write_h5_h(group);
+  std::string name;
+  hsize_t dims[3];
 
-  SPDLOG_TRACE("exit World::write_h5");
-}
-
-void World::write_h5_e(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_e");
-
-  write_h5_ex(group);
-  write_h5_ey(group);
-  write_h5_ez(group);
-  SPDLOG_TRACE("exit World::write_h5_e");
-}
-
-void World::write_h5_h(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_h");
-
-  write_h5_hx(group);
-  write_h5_hy(group);
-  write_h5_hz(group);
-  SPDLOG_TRACE("exit World::write_h5_h");
-}
-
-void World::write_h5_ex(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_ex");
-
-  // field dimensions
-  const hsize_t dims[3] = {e.x.extent(0), e.x.extent(1), e.x.extent(2)};
-
-  // HDF5 dataspace
-  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
-
-  // compile time switch on fpp
-  if constexpr (std::is_same_v<fpp, double>) {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "ex", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.x.data_handle());
-
-  } else {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "ex", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.x.data_handle());
+  // assumes all components of electric and magnetic fields are equivalent to their x-component
+  switch (type) {
+  case EMField::E:
+    name = "e";
+    dims[0] = e.x.extent(0);
+    dims[1] = e.x.extent(1);
+    dims[2] = e.x.extent(2);
+    break;
+  case EMField::H:
+    name = "h";
+    dims[0] = h.x.extent(0);
+    dims[1] = h.x.extent(1);
+    dims[2] = h.x.extent(2);
+    break;
   }
 
-  SPDLOG_TRACE("exit World::write_h5_ex");
-}
-
-void World::write_h5_ey(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_ey");
-
-  // field dimensions
-  const hsize_t dims[3] = {e.y.extent(0), e.y.extent(1), e.y.extent(2)};
-
-  // HDF5 dataspace
-  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
-
-  // compile time switch on fpp
+  hid_t h5_t;
   if constexpr (std::is_same_v<fpp, double>) {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "ey", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.y.data_handle());
-
+    h5_t = H5T_NATIVE_DOUBLE;
   } else {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "ey", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.y.data_handle());
+    h5_t = H5T_NATIVE_FLOAT;
   }
 
-  SPDLOG_TRACE("exit World::write_h5_ey");
-}
-
-void World::write_h5_ez(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_ez");
-
-  // field dimensions
-  const hsize_t dims[3] = {e.z.extent(0), e.z.extent(1), e.z.extent(2)};
-
-  // HDF5 dataspace
   const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
+  const auto x_dset = HDF5Obj(H5Dcreate(group.get(), (name + "x").c_str(), H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT,
+                                        H5P_DEFAULT, H5P_DEFAULT),
+                              H5Dclose);
+  const auto y_dset = HDF5Obj(H5Dcreate(group.get(), (name + "y").c_str(), H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT,
+                                        H5P_DEFAULT, H5P_DEFAULT),
+                              H5Dclose);
+  const auto z_dset = HDF5Obj(H5Dcreate(group.get(), (name + "z").c_str(), H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT,
+                                        H5P_DEFAULT, H5P_DEFAULT),
+                              H5Dclose);
 
-  // compile time switch on fpp
-  if constexpr (std::is_same_v<fpp, double>) {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "ez", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  H5Dwrite(x_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.x.data_handle());
+  H5Dwrite(y_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.y.data_handle());
+  H5Dwrite(z_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.z.data_handle());
 
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.z.data_handle());
-
-  } else {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "ez", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.z.data_handle());
-  }
-
-  SPDLOG_TRACE("exit World::write_h5_ez");
-}
-
-void World::write_h5_hx(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_hx");
-
-  // field dimensions
-  const hsize_t dims[3] = {h.x.extent(0), h.x.extent(1), h.x.extent(2)};
-
-  // HDF5 dataspace
-  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
-
-  // compile time switch on fpp
-  if constexpr (std::is_same_v<fpp, double>) {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "hx", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.x.data_handle());
-
-  } else {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "hx", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.x.data_handle());
-  }
-
-  SPDLOG_TRACE("exit World::write_h5_hx");
-}
-
-void World::write_h5_hy(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_hy");
-
-  // field dimensions
-  const hsize_t dims[3] = {h.y.extent(0), h.y.extent(1), h.y.extent(2)};
-
-  // HDF5 dataspace
-  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
-
-  // compile time switch on fpp
-  if constexpr (std::is_same_v<fpp, double>) {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "hy", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.y.data_handle());
-
-  } else {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "hy", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.y.data_handle());
-  }
-
-  SPDLOG_TRACE("exit World::write_h5_hy");
-}
-
-void World::write_h5_hz(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_h5_hz");
-
-  // field dimensions
-  const hsize_t dims[3] = {h.z.extent(0), h.z.extent(1), h.z.extent(2)};
-
-  // HDF5 dataspace
-  const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
-
-  // compile time switch on fpp
-  if constexpr (std::is_same_v<fpp, double>) {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "hz", H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.z.data_handle());
-
-  } else {
-    // HDF5 dataset
-    const auto dset = HDF5Obj(
-        H5Dcreate(group.get(), "hz", H5T_NATIVE_FLOAT, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-    // write field data
-    H5Dwrite(dset.get(), H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.z.data_handle());
-  }
-
-  SPDLOG_TRACE("exit World::write_h5_hz");
+  SPDLOG_TRACE("exit World::h5_write_field");
 }

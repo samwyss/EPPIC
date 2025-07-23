@@ -14,6 +14,11 @@
 #include "vector.h"
 
 /*!
+ * electromagnetic field enum
+ */
+enum class EMField { E, H };
+
+/*!
  * EPPIC World object
  */
 class World {
@@ -144,58 +149,17 @@ private:
   void update_hz(fpp hxa, fpp hya) const;
 
   /*!
-   * writes internal field state to hdf5 group
+   * writes an electromagnetic field as Vector3 to HDF5 group
    * @param group HDF5 group to write to
+   * @param field field to be written
+   * @param type electromagnetic field type
+   *
+   * this is not error handled as if writing to HDF5 fails no exception is thrown
+   * todo improve error handling
+   *
+   * @return void
    */
-  void write_h5(const HDF5Obj &group) const;
-
-  /*!
-   * writes all electric field data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_e(const HDF5Obj &group) const;
-
-  /*!
-   * writes all magnetic field data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_h(const HDF5Obj &group) const;
-
-  /*!
-   * writes all electric field x-component data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_ex(const HDF5Obj &group) const;
-
-  /*!
-   * writes all electric field y-component data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_ey(const HDF5Obj &group) const;
-
-  /*!
-   * writes all electric field z-component data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_ez(const HDF5Obj &group) const;
-
-  /*!
-   * writes all magnetic field x-component data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_hx(const HDF5Obj &group) const;
-
-  /*!
-   * writes all magnetic field y-component data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_hy(const HDF5Obj &group) const;
-
-  /*!
-   * writes all magnetic field z-component data to HDF5 group
-   * @param group HDF5 group
-   */
-  void write_h5_hz(const HDF5Obj &group) const;
+  void h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type);
 
   /// configuration from file
   const Config cfg;
