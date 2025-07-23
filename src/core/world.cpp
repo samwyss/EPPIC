@@ -413,7 +413,7 @@ void World::update_hz(const fpp hxa, const fpp hya) const {
   SPDLOG_TRACE("exit World::update_hz");
 }
 
-void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, const EMField type) {
+void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, const EMField type) const {
   SPDLOG_TRACE("enter World::h5_write_field");
 
   std::string name;
