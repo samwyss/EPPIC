@@ -161,6 +161,11 @@ private:
    */
   void h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type) const;
 
+  /*!
+   * finalizes and writes XDMF file
+   */
+  void xdmf_finalize();
+
   /// configuration from file
   const Config cfg;
 

@@ -175,8 +175,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   }
   SPDLOG_DEBUG("exit main time loop with success");
 
-  xdmf.endDomain();
-  xdmf.generate(fmt::format("{}/data.xdmf", cfg.out.string()));
+  xdmf_finalize();
 
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto end_time = std::chrono::high_resolution_clock::now();
@@ -456,4 +455,13 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
   H5Dwrite(z_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.z.data_handle());
 
   SPDLOG_TRACE("exit World::h5_write_field");
+}
+
+void World::xdmf_finalize() {
+  SPDLOG_TRACE("enter World::xdmf_finalize");
+
+  xdmf.endDomain();
+  xdmf.generate(fmt::format("{}/data.xdmf", cfg.out.string()));
+
+  SPDLOG_TRACE("exit World::xdmf_finalize");
 }
