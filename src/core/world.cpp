@@ -120,7 +120,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
       // advance by one step
       step(dt);
-      time += dt;
 
       if (0 == i % cfg.ds_ratio || i == steps - 1) [[unlikely]] {
         SPDLOG_DEBUG("begin data logging");
