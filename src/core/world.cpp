@@ -124,8 +124,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         SPDLOG_DEBUG("begin data logging");
 
         // HDF5 group for this particular step
-        const auto group =
-            HDF5Obj(H5Gcreate(h5.get(), fmt::to_string(i).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
+        const auto group = HDF5Obj(
+            H5Gcreate(h5.get(), fmt::to_string(i + 1).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
 
         // write field data
         h5_write_field(group, e, EMField::E);
