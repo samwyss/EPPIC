@@ -160,7 +160,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         xdmf.setDimensions("4 4 4");
         xdmf.setPrecision("4");
         xdmf.setFormat("HDF");
-        xdmf.addItem(fmt::format("data.h5:/{}/ex", i));
+        xdmf.addItem(fmt::format("data.h5:/{}/ex", i + 1));
         xdmf.endDataItem();
         xdmf.endAttribute();
 
