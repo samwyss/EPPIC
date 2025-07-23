@@ -8,6 +8,7 @@ World::World(const std::string &input_file_path, const std::string &id)
   xdmf.setVersion("3.0");
   xdmf.setNewLineCodeLF();
   xdmf.setIndentSpaceSize(4);
+  xdmf.beginDomain();
   SPDLOG_DEBUG("initialized XDMF writer");
 
   // (m) maximum spatial step based on maximum frequency
@@ -109,8 +110,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // loop start time
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto start_time = std::chrono::high_resolution_clock::now();
-
-  xdmf.beginDomain();
 
   // main time loop
   SPDLOG_DEBUG("enter main time loop");
