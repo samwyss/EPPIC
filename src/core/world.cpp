@@ -443,15 +443,15 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
   }
 
   const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
-  const auto x_dset = HDF5Obj(H5Dcreate(group.get(), (name + "x").c_str(), H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT,
-                                        H5P_DEFAULT, H5P_DEFAULT),
-                              H5Dclose);
-  const auto y_dset = HDF5Obj(H5Dcreate(group.get(), (name + "y").c_str(), H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT,
-                                        H5P_DEFAULT, H5P_DEFAULT),
-                              H5Dclose);
-  const auto z_dset = HDF5Obj(H5Dcreate(group.get(), (name + "z").c_str(), H5T_NATIVE_DOUBLE, dspace.get(), H5P_DEFAULT,
-                                        H5P_DEFAULT, H5P_DEFAULT),
-                              H5Dclose);
+  const auto x_dset =
+      HDF5Obj(H5Dcreate(group.get(), (name + "x").c_str(), h5_t, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
+  const auto y_dset =
+      HDF5Obj(H5Dcreate(group.get(), (name + "y").c_str(), h5_t, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
+  const auto z_dset =
+      HDF5Obj(H5Dcreate(group.get(), (name + "z").c_str(), h5_t, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
 
   H5Dwrite(x_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.x.data_handle());
   H5Dwrite(y_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.y.data_handle());
