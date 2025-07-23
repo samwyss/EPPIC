@@ -132,7 +132,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         h5_write_field(group, h, EMField::H);
 
         // todo move me
-        xdmf.beginGrid(fmt::format("Step{}", i + 1));
+        xdmf.beginGrid(fmt::format("{}", i + 1));
 
         xdmf.beginTime();
         xdmf.setValue(fmt::to_string(time));
