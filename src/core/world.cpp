@@ -28,9 +28,9 @@ World::World(const std::string &input_file_path, const std::string &id)
   SPDLOG_DEBUG("maximum spatial step (m): {:.3e}", ds);
 
   // number of voxels in each direction snapped to ds
-  nv = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
-        static_cast<size_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
-        static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
+  const Coord3 nv = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
+                     static_cast<size_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
+                     static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
   SPDLOG_DEBUG("field voxel dimensions: {} x {} x {}", nv.x, nv.y, nv.z);
   SPDLOG_DEBUG("voxels to update each step: {}", 6 * nv.x);
 
@@ -174,7 +174,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto end_time = std::chrono::high_resolution_clock::now();
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
-  [[maybe_unused]] const auto num_cells = 6 * nv.x * steps; // assumes number of voxels in all fields is the same as x
+  [[maybe_unused]] const auto num_cells = 6 * e.x.size() * steps; // assumes the number of voxels in e.x is the same for all fields
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto loop_time = end_time - start_time;
   SPDLOG_INFO("loop runtime: {:%H:%M:%S}", loop_time);
