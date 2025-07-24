@@ -1,6 +1,7 @@
 #ifndef CORE_SCALAR_H
 #define CORE_SCALAR_H
 
+#include <concepts>
 #include <mdspan/mdspan.hpp>
 #include <memory>
 
@@ -8,11 +9,9 @@
 
 /*!
  * 3D scalar field
- * @tparam T arithmetic type
+ * @tparam T numeric type
  */
-template <typename T>
-requires std::is_arithmetic_v<T>
-class Scalar3 {
+template <numeric T> class Scalar3 {
 public:
   /*!
    * Scalar3 default constructor;
@@ -25,12 +24,12 @@ public:
    * @param val initial field value
    */
   Scalar3(const Coord3<size_t> &dims, const T val) {
-    const size_t nelems = dims.x * dims.y * dims.z;
+    const size_t n = dims.x * dims.y * dims.z;
 
-    data_arr = std::make_unique<T[]>(nelems);
+    data_arr = std::make_unique<T[]>(n);
     data = Kokkos::mdspan(data_arr.get(), dims.x, dims.y, dims.z);
 
-    for (size_t i = 0; i < nelems; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
       data_arr[i] = val;
     }
   }

@@ -4,16 +4,14 @@
 #include <concepts>
 #include <mdspan/mdspan.hpp>
 #include <memory>
-#include <type_traits>
 
 #include "coordinate.h"
 
 /*!
  * vector field
  * @tparam T numeric type
- * @tparam U unsigned integral type
  */
-template <numeric T, std::unsigned_integral U> class Vector3 {
+template <numeric T> class Vector3 {
 public:
   /*!
    * Vector3 default constructor
@@ -25,8 +23,8 @@ public:
    * @param dims field dimensions
    * @param val initial field value
    */
-  Vector3(const Coord3<U> &dims, const T val) {
-    const U n = dims.x * dims.y * dims.z;
+  Vector3(const Coord3<size_t> &dims, const T val) {
+    const size_t n = dims.x * dims.y * dims.z;
 
     x_data = std::make_unique<T[]>(n);
     y_data = std::make_unique<T[]>(n);
@@ -44,13 +42,13 @@ public:
   }
 
   /// x-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<U, 3>> x;
+  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> x;
 
   /// y-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<U, 3>> y;
+  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> y;
 
   /// z-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<U, 3>> z;
+  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> z;
 
 private:
   /// x-component data container
