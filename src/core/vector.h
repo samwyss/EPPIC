@@ -1,18 +1,19 @@
 #ifndef CORE_VECTOR_H
 #define CORE_VECTOR_H
 
+#include <concepts>
 #include <mdspan/mdspan.hpp>
 #include <memory>
+#include <type_traits>
 
 #include "coordinate.h"
 
 /*!
- * 3D vector field
- * @tparam T arithmetic type
+ * vector field
+ * @tparam T numeric type
+ * @tparam U unsigned integral type
  */
-template <typename T>
-requires std::is_arithmetic_v<T>
-class Vector3 {
+template <numeric T, std::unsigned_integral U> class Vector3 {
 public:
   /*!
    * Vector3 default constructor
@@ -24,18 +25,18 @@ public:
    * @param dims field dimensions
    * @param val initial field value
    */
-  Vector3(const Coord3<size_t> &dims, const T val) {
-    const size_t nelems = dims.x * dims.y * dims.z;
+  Vector3(const Coord3<U> &dims, const T val) {
+    const U n = dims.x * dims.y * dims.z;
 
-    x_data = std::make_unique<T[]>(nelems);
-    y_data = std::make_unique<T[]>(nelems);
-    z_data = std::make_unique<T[]>(nelems);
+    x_data = std::make_unique<T[]>(n);
+    y_data = std::make_unique<T[]>(n);
+    z_data = std::make_unique<T[]>(n);
 
     x = Kokkos::mdspan(x_data.get(), dims.x, dims.y, dims.z);
     y = Kokkos::mdspan(y_data.get(), dims.x, dims.y, dims.z);
     z = Kokkos::mdspan(z_data.get(), dims.x, dims.y, dims.z);
 
-    for (size_t i = 0; i < nelems; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
       x_data[i] = val;
       y_data[i] = val;
       z_data[i] = val;
@@ -43,13 +44,13 @@ public:
   }
 
   /// x-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> x;
+  Kokkos::mdspan<T, Kokkos::dextents<U, 3>> x;
 
   /// y-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> y;
+  Kokkos::mdspan<T, Kokkos::dextents<U, 3>> y;
 
   /// z-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> z;
+  Kokkos::mdspan<T, Kokkos::dextents<U, 3>> z;
 
 private:
   /// x-component data container
