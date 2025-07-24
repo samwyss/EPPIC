@@ -1,5 +1,5 @@
-#ifndef CORE_HDF5_WRAPPER_H
-#define CORE_HDF5_WRAPPER_H
+#ifndef CORE_IO_WRAPPER_H
+#define CORE_IO_WRAPPER_H
 
 #include <hdf5/openmpi/hdf5.h>
 
@@ -82,4 +82,4 @@ private:
 /// type alias for HDF5Mgr
 using HDF5Obj = HDF5Mgr<herr_t (*)(hid_t)>;
 
-#endif // CORE_HDF5_WRAPPER_H
+#endif // CORE_IO_WRAPPER_H
