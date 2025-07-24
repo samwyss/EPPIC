@@ -174,8 +174,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto end_time = std::chrono::high_resolution_clock::now();
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
-  [[maybe_unused]] const auto num_cells =
-      6 * e.x.size() * steps; // assumes the number of voxels in e.x is the same for all fields
+  // NOTE the number of voxels in e.x is the same for all fields
+  [[maybe_unused]] const auto num_cells = 6 * e.x.size() * steps;
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto loop_time = end_time - start_time;
   SPDLOG_INFO("loop runtime: {:%H:%M:%S}", loop_time);
@@ -412,7 +412,6 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
   std::string name;
   hsize_t dims[3];
 
-  // assumes all components of electric and magnetic fields are equivalent to their x-component
   switch (type) {
   case EMField::E:
     name = "e";
@@ -428,27 +427,20 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
     break;
   }
 
-  hid_t h5_t;
-  if constexpr (std::is_same_v<fpp, double>) {
-    h5_t = H5T_NATIVE_DOUBLE;
-  } else {
-    h5_t = H5T_NATIVE_FLOAT;
-  }
-
   const auto dspace = HDF5Obj(H5Screate_simple(3, dims, nullptr), H5Sclose);
   const auto x_dset =
-      HDF5Obj(H5Dcreate(group.get(), (name + "x").c_str(), h5_t, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+      HDF5Obj(H5Dcreate(group.get(), (name + "x").c_str(), h5_fpp, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
               H5Dclose);
   const auto y_dset =
-      HDF5Obj(H5Dcreate(group.get(), (name + "y").c_str(), h5_t, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+      HDF5Obj(H5Dcreate(group.get(), (name + "y").c_str(), h5_fpp, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
               H5Dclose);
   const auto z_dset =
-      HDF5Obj(H5Dcreate(group.get(), (name + "z").c_str(), h5_t, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+      HDF5Obj(H5Dcreate(group.get(), (name + "z").c_str(), h5_fpp, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
               H5Dclose);
 
-  H5Dwrite(x_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.x.data_handle());
-  H5Dwrite(y_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.y.data_handle());
-  H5Dwrite(z_dset.get(), h5_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.z.data_handle());
+  H5Dwrite(x_dset.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.x.data_handle());
+  H5Dwrite(y_dset.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.y.data_handle());
+  H5Dwrite(z_dset.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.z.data_handle());
 
   SPDLOG_TRACE("exit World::h5_write_field");
 }
