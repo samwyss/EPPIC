@@ -176,8 +176,9 @@ private:
    * writes an electromagnetic field as Vector3 to XDMF file
    * @param field field to be written
    * @param type field type
+   * @param step time step
    */
-  void xdmf_write_field(const Vector3<fpp> &field, EMField type) const;
+  void xdmf_write_field(const Vector3<fpp> &field, EMField type, uint64_t step);
 
   /*!
    * finalizes and writes XDMF file

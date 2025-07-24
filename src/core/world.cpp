@@ -133,32 +133,9 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         h5_write_field(group, h, EMField::H);
 
         xdmf_begin_step(i + 1);
-
-        xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
-        xdmf.setDimensions("5 5 5"); // number of points not cells
-        xdmf.endStructuredTopology();
-        xdmf.beginGeometory("FieldMesh", "ORIGIN_DXDYDZ");
-        xdmf.beginDataItem();
-        xdmf.setDimensions("3");
-        xdmf.setFormat("XML");
-        xdmf.addItem("0 0 0");
-        xdmf.endDataItem();
-        xdmf.beginDataItem();
-        xdmf.setDimensions("3");
-        xdmf.setFormat("XML");
-        xdmf.addItem("1 1 1");
-        xdmf.endDataItem();
-        xdmf.endGeometory();
-
-        xdmf.beginAttribute("ex");
-        xdmf.setCenter("Cell");
-        xdmf.beginDataItem();
-        xdmf.setDimensions("4 4 4");
-        xdmf.setPrecision("4");
-        xdmf.setFormat("HDF");
-        xdmf.addItem(fmt::format("data.h5:/{}/ex", i + 1));
-        xdmf.endDataItem();
-        xdmf.endAttribute();
+        xdmf_write_field(e, EMField::E, i + 1);
+        xdmf_write_field(h, EMField::H, i + 1);
+        xdmf_end_step();
 
         SPDLOG_DEBUG("end data logging");
       }
@@ -446,15 +423,55 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
 }
 
 void World::xdmf_begin_step(const uint64_t step) {
+  SPDLOG_TRACE("enter World::xdmf_begin_step");
+
   xdmf.beginGrid(fmt::format("{}", step));
   xdmf.beginTime();
   xdmf.setValue(fmt::to_string(time));
   xdmf.endTime();
+
+  SPDLOG_TRACE("end World::xdmf_begin_step");
 }
 
-void World::xdmf_end_step() { xdmf.endGrid(); }
+void World::xdmf_end_step() {
+  SPDLOG_TRACE("enter World::xdmf_end_step");
 
-void World::xdmf_write_field(const Vector3<fpp> &field, EMField) const {}
+  xdmf.endGrid();
+
+  SPDLOG_TRACE("exit World::xdmf_end_step");
+}
+
+void World::xdmf_write_field(const Vector3<fpp> &field, EMField, const uint64_t step) {
+  SPDLOG_TRACE("enter World::write_field");
+
+  xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
+  xdmf.setDimensions("5 5 5"); // number of points not cells
+  xdmf.endStructuredTopology();
+  xdmf.beginGeometory("FieldMesh", "ORIGIN_DXDYDZ");
+  xdmf.beginDataItem();
+  xdmf.setDimensions("3");
+  xdmf.setFormat("XML");
+  xdmf.addItem("0 0 0");
+  xdmf.endDataItem();
+  xdmf.beginDataItem();
+  xdmf.setDimensions("3");
+  xdmf.setFormat("XML");
+  xdmf.addItem("1 1 1");
+  xdmf.endDataItem();
+  xdmf.endGeometory();
+
+  xdmf.beginAttribute("ex");
+  xdmf.setCenter("Cell");
+  xdmf.beginDataItem();
+  xdmf.setDimensions("4 4 4");
+  xdmf.setPrecision("4");
+  xdmf.setFormat("HDF");
+  xdmf.addItem(fmt::format("data.h5:/{}/ex", step));
+  xdmf.endDataItem();
+  xdmf.endAttribute();
+
+  SPDLOG_TRACE("exit World::xdmf_write_field");
+}
 
 void World::xdmf_finalize() {
   SPDLOG_TRACE("enter World::xdmf_finalize");
