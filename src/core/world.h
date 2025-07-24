@@ -193,7 +193,8 @@ private:
   /// (H/m) diagonally isotropic permeability of material inside bounding box
   const fpp mu;
 
-  /// number of voxels in all directions
+  /// number of voxels in all directions for e and v
+  /// NOTE assumes these are all equal
   Coord3<size_t> nv;
 
   /// (m) spatial increments in all directions
