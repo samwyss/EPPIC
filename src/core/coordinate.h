@@ -4,9 +4,7 @@
 #include <concepts>
 #include <type_traits>
 
-/*!
- * ensures a given template type is numeric
- */
+
 template <typename T>
 concept numeric = std::is_arithmetic_v<T>;
 
