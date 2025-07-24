@@ -314,23 +314,10 @@ void World::update_ez(const fpp ea, const fpp eb) const {
 void World::update_hx(const fpp hya, const fpp hza) const {
   SPDLOG_TRACE("enter World::update_hx");
 
-  // todo remove branches
   for (size_t i = 0; i < h.x.extent(0); ++i) {
     for (size_t j = 0; j < h.x.extent(1); ++j) {
       for (size_t k = 0; k < h.x.extent(2); ++k) {
-        [[likely]] if (j != h.x.extent(1) - 1 && k != h.x.extent(2) - 1) {
-          // j- k-low volume
-          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) + hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
-        } else if (j != h.x.extent(1) - 1 && k == h.x.extent(2) - 1) {
-          // k-high plane
-          h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) + hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
-        } else if (j == h.x.extent(1) - 1 && k != h.x.extent(2) - 1) {
-          // j-high plane
-          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) + hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
-        } else {
-          // j- k-high line
-          h.x[i, j, k] += -hya * (static_cast<fpp>(0.0) - e.z[i, j, k]) + hza * (static_cast<fpp>(0.0) - e.y[i, j, k]);
-        }
+        h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) + hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
       }
     }
   }
@@ -341,23 +328,10 @@ void World::update_hx(const fpp hya, const fpp hza) const {
 void World::update_hy(const fpp hxa, const fpp hza) const {
   SPDLOG_TRACE("enter World::update_hy");
 
-  // todo remove branches
   for (size_t i = 0; i < h.y.extent(0); ++i) {
     for (size_t j = 0; j < h.y.extent(1); ++j) {
       for (size_t k = 0; k < h.y.extent(2); ++k) {
-        [[likely]] if (i != h.y.extent(0) - 1 && k != h.y.extent(2) - 1) {
-          // i- k-low volume
-          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) + hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
-        } else if (i != h.y.extent(0) - 1 && k == h.y.extent(2) - 1) {
-          // k-high plane
-          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) + hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
-        } else if (i == h.y.extent(0) - 1 && k != h.y.extent(2) - 1) {
-          // i-high plane
-          h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) + hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
-        } else {
-          // i- k-high line
-          h.y[i, j, k] += -hza * (static_cast<fpp>(0.0) - e.x[i, j, k]) + hxa * (static_cast<fpp>(0.0) - e.z[i, j, k]);
-        }
+        h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) + hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
       }
     }
   }
@@ -368,23 +342,10 @@ void World::update_hy(const fpp hxa, const fpp hza) const {
 void World::update_hz(const fpp hxa, const fpp hya) const {
   SPDLOG_TRACE("enter World::update_hz");
 
-  // todo remove branches
   for (size_t i = 0; i < h.z.extent(0); ++i) {
     for (size_t j = 0; j < h.z.extent(1); ++j) {
       for (size_t k = 0; k < h.z.extent(2); ++k) {
-        [[likely]] if (i != h.y.extent(0) - 1 && j != h.y.extent(1) - 1) {
-          // i- j-low volume
-          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) + hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
-        } else if (i != h.y.extent(0) - 1 && j == h.y.extent(1) - 1) {
-          // j-high plane
-          h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) + hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
-        } else if (i == h.y.extent(0) - 1 && j != h.y.extent(1) - 1) {
-          // i-high plane
-          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) + hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
-        } else {
-          // i- j-high line
-          h.z[i, j, k] += -hxa * (static_cast<fpp>(0.0) - e.y[i, j, k]) + hya * (static_cast<fpp>(0.0) - e.x[i, j, k]);
-        }
+        h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) + hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
       }
     }
   }
