@@ -161,11 +161,23 @@ private:
    */
   void h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type) const;
 
+  /*!
+   * writes beginning of XDMF file at given timestep
+   * @param step time step
+   */
   void xdmf_begin_step(uint64_t step);
 
+  /*!
+   * writes end of XDMF file for given timestep
+   */
   void xdmf_end_step();
 
-  void xdmf_write_field(const Vector3<fpp> &field, EMField) const;
+  /*!
+   * writes an electromagnetic field as Vector3 to XDMF file
+   * @param field field to be written
+   * @param type field type
+   */
+  void xdmf_write_field(const Vector3<fpp> &field, EMField type) const;
 
   /*!
    * finalizes and writes XDMF file
