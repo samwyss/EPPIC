@@ -1,15 +1,20 @@
 #ifndef CORE_COORDINATE_H
 #define CORE_COORDINATE_H
 
+#include <concepts>
 #include <type_traits>
 
 /*!
- * arithmetic container with x, y, and z components
- * @tparam T arithmetic type
+ * ensures a given template type is numeric
  */
 template <typename T>
-requires std::is_arithmetic_v<T>
-struct Coord3 {
+concept numeric = std::is_arithmetic_v<T>;
+
+/*!
+ * arithmetic container with x, y, and z components
+ * @tparam T numeric type
+ */
+template <numeric T> struct Coord3 {
   T x;
   T y;
   T z;
@@ -17,22 +22,18 @@ struct Coord3 {
 
 /*!
  * arithmetic container with an x and y component
- * @tparam T arithmetic type
+ * @tparam T numeric type
  */
-template <typename T>
-requires std::is_arithmetic_v<T>
-struct Coord2 {
+template <numeric T> struct Coord2 {
   T x;
   T y;
 };
 
 /*!
  * arithmetic container with an x component
- * @tparam T arithmetic type
+ * @tparam T numeric type
  */
-template <typename T>
-requires std::is_arithmetic_v<T>
-struct Coord1 {
+template <numeric T> struct Coord1 {
   T x;
 };
 
