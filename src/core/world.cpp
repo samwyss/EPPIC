@@ -2,6 +2,7 @@
 
 World::World(const std::string &input_file_path, const std::string &id)
     : cfg(input_file_path, id), ep(cfg.ep_r * VAC_PERMITTIVITY), mu(cfg.mu_r * VAC_PERMEABILITY) {
+
   h5 = HDF5Obj(H5Fcreate((cfg.out / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT), H5Fclose);
   SPDLOG_DEBUG("created output HDF5 file at `{}`", (cfg.out / "data.h5").string());
 
@@ -42,8 +43,8 @@ World::World(const std::string &input_file_path, const std::string &id)
   SPDLOG_DEBUG("inverse voxel size (m^-1): {:.3e} x {:.3e} x {:.3e}", d_inv.x, d_inv.y, d_inv.z);
 
   // initialize fields
-  e = Vector3<fpp>(nv, 0.0);
-  h = Vector3<fpp>(nv, 0.0);
+  e = Vector3(nv, 0.0);
+  h = Vector3(nv, 0.0);
 }
 
 std::expected<World, std::string> World::create(const std::string &input_file_path, const std::string &id) {
@@ -131,14 +132,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         h5_write_field(group, e, EMField::E);
         h5_write_field(group, h, EMField::H);
 
-        // todo move me
-        xdmf.beginGrid(fmt::format("{}", i + 1));
-
-        // todo temporally offset E and H? may require writing xdmf for both E and H at half timesteps but only updating
-        // the changed field
-        xdmf.beginTime();
-        xdmf.setValue(fmt::to_string(time));
-        xdmf.endTime();
+        xdmf_begin_step(i + 1);
 
         xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
         xdmf.setDimensions("5 5 5"); // number of points not cells
@@ -165,8 +159,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         xdmf.addItem(fmt::format("data.h5:/{}/ex", i + 1));
         xdmf.endDataItem();
         xdmf.endAttribute();
-
-        xdmf.endGrid();
 
         SPDLOG_DEBUG("end data logging");
       }
@@ -459,6 +451,17 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
 
   SPDLOG_TRACE("exit World::h5_write_field");
 }
+
+void World::xdmf_begin_step(const uint64_t step) {
+  xdmf.beginGrid(fmt::format("{}", step));
+  xdmf.beginTime();
+  xdmf.setValue(fmt::to_string(time));
+  xdmf.endTime();
+}
+
+void World::xdmf_end_step() { xdmf.endGrid(); }
+
+void World::xdmf_write_field(const Vector3<fpp> &field, EMField) const {}
 
 void World::xdmf_finalize() {
   SPDLOG_TRACE("enter World::xdmf_finalize");

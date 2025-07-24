@@ -161,6 +161,12 @@ private:
    */
   void h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type) const;
 
+  void xdmf_begin_step(uint64_t step);
+
+  void xdmf_end_step();
+
+  void xdmf_write_field(const Vector3<fpp> &field, EMField) const;
+
   /*!
    * finalizes and writes XDMF file
    */
@@ -171,6 +177,9 @@ private:
 
   /// output HDF5 file
   HDF5Obj h5;
+
+  /// output HDF5 floating point type
+  const hid_t h5_fpp = (std::is_same_v<fpp, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
 
   /// xdmf writer
   SimpleXdmf xdmf;
