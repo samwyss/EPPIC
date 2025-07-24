@@ -8,7 +8,7 @@
 #include <string>
 
 #include "config.h"
-#include "hdf5_wrapper.h"
+#include "io_wrapper.h"
 #include "numeric.h"
 #include "physical.h"
 #include "vector.h"
