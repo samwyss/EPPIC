@@ -441,11 +441,29 @@ void World::xdmf_end_step() {
   SPDLOG_TRACE("exit World::xdmf_end_step");
 }
 
-void World::xdmf_write_field(const Vector3<fpp> &field, EMField, const uint64_t step) {
+void World::xdmf_write_field(const Vector3<fpp> &field, EMField type, const uint64_t step) {
   SPDLOG_TRACE("enter World::write_field");
 
+  std::string name;
+  hsize_t dims[3];
+
+  switch (type) {
+  case EMField::E:
+    name = "e";
+    dims[0] = e.x.extent(0);
+    dims[1] = e.x.extent(1);
+    dims[2] = e.x.extent(2);
+    break;
+  case EMField::H:
+    name = "h";
+    dims[0] = h.x.extent(0);
+    dims[1] = h.x.extent(1);
+    dims[2] = h.x.extent(2);
+    break;
+  }
+
   xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
-  xdmf.setDimensions("5 5 5"); // number of points not cells
+  xdmf.setDimensions("4 4 4");
   xdmf.endStructuredTopology();
   xdmf.beginGeometory("FieldMesh", "ORIGIN_DXDYDZ");
   xdmf.beginDataItem();
