@@ -27,15 +27,24 @@ World::World(const std::string &input_file_path, const std::string &id)
   const fpp ds = std::min({ds_min_wavelength, ds_min_feature_size});
   SPDLOG_DEBUG("maximum spatial step (m): {:.3e}", ds);
 
-  // number of voxels in each direction snapped to ds
-  const Coord3 nv = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
-                     static_cast<size_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
-                     static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
-  SPDLOG_DEBUG("field voxel dimensions: {} x {} x {}", nv.x, nv.y, nv.z);
-  SPDLOG_DEBUG("voxels to update each step: {}", 6 * nv.x);
+  // number of voxels in each direction snapped to ds for magnetic field
+  const Coord3 nv_h = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
+                       static_cast<size_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
+                       static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
+
+  // number of voxels in each direction snapped to ds for electric field
+  // the +1 is a result of the convention that all magnetic field points are wrapped by an electric field
+  // this makes it easier to manage boundary conditions
+  const Coord3 nv_e = {nv_h.x + 1, nv_h.y + 1, nv_h.z + 1};
+
+  SPDLOG_DEBUG("electric field voxel dimensions: {} x {} x {}", nv_e.x, nv_e.y, nv_e.z);
+  SPDLOG_DEBUG("magnetic field voxel dimensions: {} x {} x {}", nv_h.x, nv_h.y, nv_h.z);
+  SPDLOG_DEBUG("voxels to update each step: {}", 3 * (nv_e.x * nv_e.y * nv_e.z + nv_h.x * nv_h.y * nv_h.z));
 
   // (m) final spatial steps
-  d = {cfg.len.x / static_cast<fpp>(nv.x), cfg.len.y / static_cast<fpp>(nv.y), cfg.len.z / static_cast<fpp>(nv.z)};
+  // the magnetic field numbers are used as a result of the aforementioned magnetic field wrapping of the electric field
+  d = {cfg.len.x / static_cast<fpp>(nv_h.x), cfg.len.y / static_cast<fpp>(nv_h.y),
+       cfg.len.z / static_cast<fpp>(nv_h.z)};
   SPDLOG_DEBUG("voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
 
   // (m^-1) inverse spatial steps
@@ -43,8 +52,8 @@ World::World(const std::string &input_file_path, const std::string &id)
   SPDLOG_DEBUG("inverse voxel size (m^-1): {:.3e} x {:.3e} x {:.3e}", d_inv.x, d_inv.y, d_inv.z);
 
   // initialize fields
-  e = Vector3(nv, 0.0);
-  h = Vector3(nv, 0.0);
+  e = Vector3(nv_e, 0.0);
+  h = Vector3(nv_h, 0.0);
 }
 
 std::expected<World, std::string> World::create(const std::string &input_file_path, const std::string &id) {
