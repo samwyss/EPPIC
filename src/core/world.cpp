@@ -445,7 +445,7 @@ void World::xdmf_write_field(const Vector3<fpp> &field, EMField type, const uint
   SPDLOG_TRACE("enter World::write_field");
 
   std::string name;
-  hsize_t dims[3];
+  size_t dims[3];
 
   switch (type) {
   case EMField::E:
@@ -462,31 +462,31 @@ void World::xdmf_write_field(const Vector3<fpp> &field, EMField type, const uint
     break;
   }
 
-  xdmf.beginStructuredTopology("Topo1", "3DCoRectMesh");
-  xdmf.setDimensions("4 4 4");
+  xdmf.beginStructuredTopology("", "3DCoRectMesh");
+  xdmf.setDimensions(dims[0], dims[1], dims[2]);
   xdmf.endStructuredTopology();
-  xdmf.beginGeometory("FieldMesh", "ORIGIN_DXDYDZ");
+  xdmf.beginGeometory("", "ORIGIN_DXDYDZ");
   xdmf.beginDataItem();
-  xdmf.setDimensions("3");
+  xdmf.setDimensions(3);
   xdmf.setFormat("XML");
-  xdmf.addItem("0 0 0");
+  xdmf.addItem(0.0, 0.0, 0.0);
   xdmf.endDataItem();
   xdmf.beginDataItem();
-  xdmf.setDimensions("3");
+  xdmf.setDimensions(3);
   xdmf.setFormat("XML");
-  xdmf.addItem("1 1 1");
+  xdmf.addItem(d.x, d.y, d.z);
   xdmf.endDataItem();
   xdmf.endGeometory();
 
-  xdmf.beginAttribute("ex");
-  xdmf.setCenter("Cell");
-  xdmf.beginDataItem();
-  xdmf.setDimensions("4 4 4");
-  xdmf.setPrecision("4");
-  xdmf.setFormat("HDF");
-  xdmf.addItem(fmt::format("data.h5:/{}/ex", step));
-  xdmf.endDataItem();
-  xdmf.endAttribute();
+  // xdmf.beginAttribute("ex");
+  // xdmf.setCenter("Cell");
+  // xdmf.beginDataItem();
+  // xdmf.setDimensions("4 4 4");
+  // xdmf.setPrecision("4");
+  // xdmf.setFormat("HDF");
+  // xdmf.addItem(fmt::format("data.h5:/{}/ex", step));
+  // xdmf.endDataItem();
+  // xdmf.endAttribute();
 
   SPDLOG_TRACE("exit World::xdmf_write_field");
 }
