@@ -23,13 +23,11 @@ enum class EMField { E, H };
 class World {
 public:
   /*!
-   * World static factory method
+   * World constructor
    * @param input_file_path todo document
    * @param id todo document
-   * @return void
    */
-  [[nodiscard]] static std::expected<World, std::string> create(const std::string &input_file_path,
-                                                                const std::string &id);
+  World(const std::string &input_file_path, const std::string &id);
 
   /*!
    * advances internal state to `end_time` parameter as defined in configuration file
@@ -62,13 +60,6 @@ public:
   [[nodiscard]] std::filesystem::path get_output_dir() const;
 
 private:
-  /*!
-   * World constructor
-   * @param input_file_path todo document
-   * @param id todo document
-   */
-  explicit World(const std::string &input_file_path, const std::string &id);
-
   [[nodiscard]] HDF5Obj init_h5() const;
 
   [[nodiscard]] Coord3<size_t> init_nv_h() const;

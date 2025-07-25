@@ -65,18 +65,6 @@ Coord3<fpp> World::init_d_inv() const {
   return d_inv;
 }
 
-std::expected<World, std::string> World::create(const std::string &input_file_path, const std::string &id) {
-  SPDLOG_TRACE("enter World::create");
-  try {
-    auto world = World(input_file_path, id);
-    SPDLOG_TRACE("exit World::create with success");
-    return world;
-  } catch (const std::exception &err) {
-    SPDLOG_CRITICAL("failed to configure World object: {}", err.what());
-    return std::unexpected(err.what());
-  }
-}
-
 std::expected<void, std::string> World::run() {
   SPDLOG_TRACE("enter World::run");
   SPDLOG_DEBUG("running EPPIC to end time of {:.3e} (s)", cfg.end_time);
