@@ -3,7 +3,6 @@
 
 #include <expected>
 #include <fmt/chrono.h>
-#include <simple_xdmf.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -161,30 +160,6 @@ private:
    */
   void h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type) const;
 
-  /*!
-   * writes beginning of XDMF file at given timestep
-   * @param step time step
-   */
-  void xdmf_begin_step(uint64_t step);
-
-  /*!
-   * writes end of XDMF file for given timestep
-   */
-  void xdmf_end_step();
-
-  /*!
-   * writes an electromagnetic field as Vector3 to XDMF file
-   * @param field field to be written
-   * @param type field type
-   * @param step time step
-   */
-  void xdmf_write_field(const Vector3<fpp> &field, EMField type, uint64_t step);
-
-  /*!
-   * finalizes and writes XDMF file
-   */
-  void xdmf_finalize();
-
   /// configuration from file
   const Config cfg;
 
@@ -193,9 +168,6 @@ private:
 
   /// output HDF5 floating point type
   const hid_t h5_fpp = (std::is_same_v<fpp, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
-
-  /// xdmf writer
-  SimpleXdmf xdmf;
 
   /// (s) elapsed time
   fpp time = 0.0;

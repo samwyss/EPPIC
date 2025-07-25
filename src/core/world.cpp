@@ -6,12 +6,6 @@ World::World(const std::string &input_file_path, const std::string &id)
   h5 = HDF5Obj(H5Fcreate((cfg.out / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT), H5Fclose);
   SPDLOG_DEBUG("created output HDF5 file at `{}`", (cfg.out / "data.h5").string());
 
-  xdmf.setVersion("3.0");
-  xdmf.setNewLineCodeLF();
-  xdmf.setIndentSpaceSize(4);
-  xdmf.beginDomain();
-  SPDLOG_DEBUG("initialized XDMF writer");
-
   // (m) maximum spatial step based on maximum frequency
   const fpp ds_min_wavelength =
       VAC_SPEED_OF_LIGHT /
@@ -141,11 +135,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
         h5_write_field(group, e, EMField::E);
         h5_write_field(group, h, EMField::H);
 
-        xdmf_begin_step(i + 1);
-        xdmf_write_field(e, EMField::E, i + 1);
-        xdmf_write_field(h, EMField::H, i + 1);
-        xdmf_end_step();
-
         SPDLOG_DEBUG("end data logging");
       }
     }
@@ -154,8 +143,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
     return std::unexpected(err.what());
   }
   SPDLOG_DEBUG("exit main time loop with success");
-
-  xdmf_finalize();
 
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto end_time = std::chrono::high_resolution_clock::now();
@@ -390,87 +377,4 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
   H5Dwrite(z_dset.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, field.z.data_handle());
 
   SPDLOG_TRACE("exit World::h5_write_field");
-}
-
-void World::xdmf_begin_step(const uint64_t step) {
-  SPDLOG_TRACE("enter World::xdmf_begin_step");
-
-  xdmf.beginGrid(fmt::format("{}", step), "Collection");
-  xdmf.setCollectionType("Spatial");
-  xdmf.beginTime();
-  xdmf.setValue(fmt::to_string(time));
-  xdmf.endTime();
-
-  SPDLOG_TRACE("end World::xdmf_begin_step");
-}
-
-void World::xdmf_end_step() {
-  SPDLOG_TRACE("enter World::xdmf_end_step");
-
-  xdmf.endGrid();
-
-  SPDLOG_TRACE("exit World::xdmf_end_step");
-}
-
-void World::xdmf_write_field(const Vector3<fpp> &field, EMField type, const uint64_t step) {
-  SPDLOG_TRACE("enter World::write_field");
-
-  std::string name;
-  Coord3<size_t> dims = {0, 0, 0};
-  Coord3<fpp> origin = {0, 0, 0};
-
-  switch (type) {
-  case EMField::E:
-    name = "e";
-    dims.x = e.x.extent(0);
-    dims.y = e.x.extent(1);
-    dims.z = e.x.extent(2);
-    break;
-  case EMField::H:
-    name = "h";
-    dims.x = h.x.extent(0);
-    dims.y = h.x.extent(1);
-    dims.z = h.x.extent(2);
-    origin.x = d.x * ONE_OVER_TWO;
-    origin.y = d.y * ONE_OVER_TWO;
-    origin.z = d.z * ONE_OVER_TWO;
-    break;
-  }
-
-  xdmf.beginStructuredTopology(name + "_mesh", "3DCoRectMesh");
-  xdmf.setDimensions(dims.x, dims.y, dims.z);
-  xdmf.endStructuredTopology();
-  xdmf.beginGeometory("", "ORIGIN_DXDYDZ");
-  xdmf.beginDataItem();
-  xdmf.setDimensions(3);
-  xdmf.setFormat("XML");
-  xdmf.addItem(origin.x, origin.y, origin.z);
-  xdmf.endDataItem();
-  xdmf.beginDataItem();
-  xdmf.setDimensions(3);
-  xdmf.setFormat("XML");
-  xdmf.addItem(d.x, d.y, d.z);
-  xdmf.endDataItem();
-  xdmf.endGeometory();
-
-  // xdmf.beginAttribute("ex");
-  // xdmf.setCenter("Cell");
-  // xdmf.beginDataItem();
-  // xdmf.setDimensions("4 4 4");
-  // xdmf.setPrecision("4");
-  // xdmf.setFormat("HDF");
-  // xdmf.addItem(fmt::format("data.h5:/{}/ex", step));
-  // xdmf.endDataItem();
-  // xdmf.endAttribute();
-
-  SPDLOG_TRACE("exit World::xdmf_write_field");
-}
-
-void World::xdmf_finalize() {
-  SPDLOG_TRACE("enter World::xdmf_finalize");
-
-  xdmf.endDomain();
-  xdmf.generate(fmt::format("{}/data.xdmf", cfg.out.string()));
-
-  SPDLOG_TRACE("exit World::xdmf_finalize");
 }

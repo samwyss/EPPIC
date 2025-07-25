@@ -84,22 +84,6 @@ else ()
     message(STATUS "Library `mdspan` found on system.")
 endif ()
 
-find_package(SimpleXdmf QUIET)
-if (NOT SimpleXdmf_FOUND)
-    message(STATUS "Library `SimpleXdmf` not found. Installing locally now.")
-    FetchContent_Declare(SimpleXdmf
-            GIT_REPOSITORY https://github.com/hsimyu/SimpleXdmf.git
-            GIT_TAG master
-            GIT_PROGRESS TRUE
-            GIT_SHALLOW TRUE
-            GIT_SUBMODULES "" # prevents cloning submodules
-            EXCLUDE_FROM_ALL
-    )
-    FetchContent_MakeAvailable(SimpleXdmf)
-else ()
-    message(STATUS "Library `SimpleXdmf` found on system.")
-endif ()
-
 find_package(toml11 QUIET)
 if (NOT toml11_FOUND)
     message(STATUS "Library `toml11` not found. Installing locally now.")
@@ -144,7 +128,6 @@ add_library(Core
 )
 
 target_include_directories(Core
-        PUBLIC ${simplexdmf_SOURCE_DIR}/include
         PUBLIC ${MPI_CXX_INCLUDE_PATH}
         PUBLIC ${OPENMP_CXX_INCLUDE_PATH}
         PUBLIC ${HDF5_INCLUDE_DIRS}
