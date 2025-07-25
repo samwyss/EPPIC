@@ -3,7 +3,6 @@
 
 #include <concepts>
 #include <mdspan/mdspan.hpp>
-#include <memory>
 
 #include "coordinate.h"
 
@@ -21,12 +20,19 @@ public:
   Scalar3(const Coord3<size_t> &dims, const T val) {
     const size_t n = dims.x * dims.y * dims.z;
 
-    data_arr = std::make_unique<T[]>(n);
-    data = Kokkos::mdspan(data_arr.get(), dims.x, dims.y, dims.z);
+    data_arr = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
+    data = Kokkos::mdspan(data_arr, dims.x, dims.y, dims.z);
 
     for (size_t i = 0; i < n; ++i) {
       data_arr[i] = val;
     }
+  }
+
+  /*!
+   * Scalar destructor
+   */
+  ~Scalar3() {
+    std::free(data_arr);
   }
 
   /// data view
@@ -34,7 +40,7 @@ public:
 
 private:
   /// data container
-  std::unique_ptr<T[]> data_arr;
+  T *data_arr;
 };
 
 #endif // CORE_SCALAR_H

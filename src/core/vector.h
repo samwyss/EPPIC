@@ -3,7 +3,6 @@
 
 #include <concepts>
 #include <mdspan/mdspan.hpp>
-#include <memory>
 
 #include "coordinate.h"
 
@@ -21,19 +20,28 @@ public:
   Vector3(const Coord3<size_t> &dims, const T val) {
     const size_t n = dims.x * dims.y * dims.z;
 
-    x_data = std::make_unique<T[]>(n);
-    y_data = std::make_unique<T[]>(n);
-    z_data = std::make_unique<T[]>(n);
+    x_data = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
+    y_data = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
+    z_data = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
 
-    x = Kokkos::mdspan(x_data.get(), dims.x, dims.y, dims.z);
-    y = Kokkos::mdspan(y_data.get(), dims.x, dims.y, dims.z);
-    z = Kokkos::mdspan(z_data.get(), dims.x, dims.y, dims.z);
+    x = Kokkos::mdspan(x_data, dims.x, dims.y, dims.z);
+    y = Kokkos::mdspan(y_data, dims.x, dims.y, dims.z);
+    z = Kokkos::mdspan(z_data, dims.x, dims.y, dims.z);
 
     for (size_t i = 0; i < n; ++i) {
       x_data[i] = val;
       y_data[i] = val;
       z_data[i] = val;
     }
+  }
+
+  /*!
+   * Vector3 destructor
+   */
+  ~Vector3() {
+    std::free(x_data);
+    std::free(y_data);
+    std::free(z_data);
   }
 
   /// x-component data view
@@ -47,13 +55,13 @@ public:
 
 private:
   /// x-component data container
-  std::unique_ptr<T[]> x_data;
+  T *x_data;
 
   /// y-component data container
-  std::unique_ptr<T[]> y_data;
+  T *y_data;
 
   /// z-component data container
-  std::unique_ptr<T[]> z_data;
+  T *z_data;
 };
 
 #endif // CORE_VECTOR_H
