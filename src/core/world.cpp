@@ -39,7 +39,8 @@ Coord3<size_t> World::init_nv_h() const {
                        static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
 
   SPDLOG_DEBUG("magnetic field voxel dimensions: {} x {} x {}", nv_h.x, nv_h.y, nv_h.z);
- SPDLOG_TRACE("exit World::init_nv_h()");
+
+  SPDLOG_TRACE("exit World::init_nv_h()");
   return nv_h;
 }
 
