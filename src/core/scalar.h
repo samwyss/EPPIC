@@ -29,7 +29,7 @@ public:
     data_arr = std::make_unique<T[]>(n);
     data = Kokkos::mdspan(data_arr.get(), dims.x, dims.y, dims.z);
 
-    for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
+    for (size_t i = 0; i < n; ++i) {
       data_arr[i] = val;
     }
   }

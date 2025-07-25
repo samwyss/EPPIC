@@ -34,7 +34,7 @@ public:
     y = Kokkos::mdspan(y_data.get(), dims.x, dims.y, dims.z);
     z = Kokkos::mdspan(z_data.get(), dims.x, dims.y, dims.z);
 
-    for (size_t i = 0; i < static_cast<size_t>(n); ++i) {
+    for (size_t i = 0; i < n; ++i) {
       x_data[i] = val;
       y_data[i] = val;
       z_data[i] = val;
