@@ -56,7 +56,6 @@ int main(const int argc, char **argv) {
   }
 
 #if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
-
   try {
     const auto log_dir = world->get_output_dir() / "log";
 
