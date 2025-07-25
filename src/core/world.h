@@ -60,14 +60,34 @@ public:
   [[nodiscard]] std::filesystem::path get_output_dir() const;
 
 private:
+  /*!
+   * initializes h5
+   * @return HDF5Obj
+   */
   [[nodiscard]] HDF5Obj init_h5() const;
 
+  /*!
+   * initializes nv_h
+   * @return Coord3<size_t>
+   */
   [[nodiscard]] Coord3<size_t> init_nv_h() const;
 
+  /*!
+   * initializes nv_e
+   * @return Coord3<size_t>
+   */
   [[nodiscard]] Coord3<size_t> init_nv_e() const;
 
+  /*!
+   * initializes d
+   * @return Coord3<fpp>
+   */
   [[nodiscard]] Coord3<fpp> init_d() const;
 
+  /*!
+   * initializes d_inv
+   * @return Coord3<fpp>
+   */
   [[nodiscard]] Coord3<fpp> init_d_inv() const;
 
   /*!
