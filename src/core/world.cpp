@@ -395,7 +395,8 @@ void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, cons
 void World::xdmf_begin_step(const uint64_t step) {
   SPDLOG_TRACE("enter World::xdmf_begin_step");
 
-  xdmf.beginGrid(fmt::format("{}", step));
+  xdmf.beginGrid(fmt::format("{}", step), "Collection");
+  xdmf.setCollectionType("Spatial");
   xdmf.beginTime();
   xdmf.setValue(fmt::to_string(time));
   xdmf.endTime();
@@ -415,31 +416,35 @@ void World::xdmf_write_field(const Vector3<fpp> &field, EMField type, const uint
   SPDLOG_TRACE("enter World::write_field");
 
   std::string name;
-  size_t dims[3];
+  Coord3<size_t> dims = {0, 0, 0};
+  Coord3<fpp> origin = {0, 0, 0};
 
   switch (type) {
   case EMField::E:
     name = "e";
-    dims[0] = e.x.extent(0);
-    dims[1] = e.x.extent(1);
-    dims[2] = e.x.extent(2);
+    dims.x = e.x.extent(0);
+    dims.y = e.x.extent(1);
+    dims.z = e.x.extent(2);
     break;
   case EMField::H:
     name = "h";
-    dims[0] = h.x.extent(0);
-    dims[1] = h.x.extent(1);
-    dims[2] = h.x.extent(2);
+    dims.x = h.x.extent(0);
+    dims.y = h.x.extent(1);
+    dims.z = h.x.extent(2);
+    origin.x = d.x * ONE_OVER_TWO;
+    origin.y = d.y * ONE_OVER_TWO;
+    origin.z = d.z * ONE_OVER_TWO;
     break;
   }
 
-  xdmf.beginStructuredTopology("", "3DCoRectMesh");
-  xdmf.setDimensions(dims[0], dims[1], dims[2]);
+  xdmf.beginStructuredTopology(name + "_mesh", "3DCoRectMesh");
+  xdmf.setDimensions(dims.x, dims.y, dims.z);
   xdmf.endStructuredTopology();
   xdmf.beginGeometory("", "ORIGIN_DXDYDZ");
   xdmf.beginDataItem();
   xdmf.setDimensions(3);
   xdmf.setFormat("XML");
-  xdmf.addItem(0.0, 0.0, 0.0);
+  xdmf.addItem(origin.x, origin.y, origin.z);
   xdmf.endDataItem();
   xdmf.beginDataItem();
   xdmf.setDimensions(3);
