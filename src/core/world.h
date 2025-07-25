@@ -210,6 +210,7 @@ private:
   const Coord3<fpp> d_inv;
 
   /// (V/m) electric field vector
+  /// NOTE: as configured e wraps h to make it easier to manage boundary conditions
   const Vector3<fpp> e;
 
   /// (A/m) magnetic field vector
