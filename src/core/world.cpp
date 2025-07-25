@@ -2,8 +2,8 @@
 
 World::World(const std::string &input_file_path, const std::string &id)
   : cfg(input_file_path, id), h5(init_h5()), ep(cfg.ep_r * VAC_PERMITTIVITY), mu(cfg.mu_r * VAC_PERMEABILITY),
-    nv_h(init_nv_h()), nv_e(init_nv_e()), d(init_d()), d_inv(init_d_inv()), e(Vector3(nv_e, 0.0)),
-    h(Vector3(nv_h, 0.0)) {
+    nv_h(init_nv_h()), nv_e(init_nv_e()), d(init_d()), d_inv(init_d_inv()), e(Vector3(nv_e, static_cast<fpp>(0.0))),
+    h(Vector3(nv_h, static_cast<fpp>(0.0))) {
 }
 
 HDF5Obj World::init_h5() const {
