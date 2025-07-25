@@ -69,6 +69,16 @@ private:
    */
   explicit World(const std::string &input_file_path, const std::string &id);
 
+  [[nodiscard]] HDF5Obj init_h5() const;
+
+  [[nodiscard]] Coord3<size_t> init_nv_h() const;
+
+  [[nodiscard]] Coord3<size_t> init_nv_e() const;
+
+  [[nodiscard]] Coord3<fpp> init_d() const;
+
+  [[nodiscard]] Coord3<fpp> init_d_inv() const;
+
   /*!
    * calculates the number of steps required to advance engine state by some
    * time period
@@ -164,7 +174,7 @@ private:
   const Config cfg;
 
   /// output HDF5 file
-  HDF5Obj h5;
+  const HDF5Obj h5;
 
   /// output HDF5 floating point type
   const hid_t h5_fpp = (std::is_same_v<fpp, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
@@ -178,17 +188,21 @@ private:
   /// (H/m) diagonally isotropic permeability of material inside bounding box
   const fpp mu;
 
+  const Coord3<size_t> nv_h;
+
+  const Coord3<size_t> nv_e;
+
   /// (m) spatial increments in all directions
-  Coord3<fpp> d;
+  const Coord3<fpp> d;
 
   /// (m) inverse spatial increments in all directions
-  Coord3<fpp> d_inv;
+  const Coord3<fpp> d_inv;
 
   /// (V/m) electric field vector
-  Vector3<fpp> e;
+  const Vector3<fpp> e;
 
   /// (A/m) magnetic field vector
-  Vector3<fpp> h;
+  const Vector3<fpp> h;
 };
 
 #endif // CORE_WORLD_H
