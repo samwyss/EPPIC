@@ -24,8 +24,8 @@ class World {
 public:
   /*!
    * World constructor
-   * @param input_file_path todo document
-   * @param id todo document
+   * @param input_file_path input file path as std::string
+   * @param id unique run identifier
    */
   World(const std::string &input_file_path, const std::string &id);
 

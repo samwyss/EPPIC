@@ -21,6 +21,8 @@ class Config {
 public:
   /*!
    * Config constructor
+   * @param input_file_path input file path as std::string
+   * @param id unique run identifier
    */
   explicit Config(const std::string &input_file_path, const std::string &id);
 
