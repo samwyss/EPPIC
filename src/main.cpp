@@ -18,7 +18,7 @@ int main(const int argc, char **argv) {
   const auto id = fmt::format("{:%Y-%m-%d_%H:%M:%S}", start_time);
 
   if (argc < 2) {
-    SPDLOG_CRITICAL("io prefix not provided ... please rerun as `EPPIC <io_prefix>`");
+    SPDLOG_CRITICAL("io prefix not provided ... please rerun as `EPPIC <cfg_toml_path>`");
     return EXIT_FAILURE;
   }
 
