@@ -1,5 +1,6 @@
 #include <chrono>
 #include <filesystem>
+#include <memory>
 #include <fmt/chrono.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
@@ -46,13 +47,16 @@ int main(const int argc, char **argv) {
 
   SPDLOG_INFO("EPPIC run begin: {}", start_time);
 
-  auto world = World::create(argv[1], id);
-  if (!world.has_value()) {
-    SPDLOG_CRITICAL("failed to configure World object: {}", world.error());
+  std::unique_ptr<World> world;
+  try {
+    world.reset(new World(argv[1], id));
+  } catch (const std::exception &err) {
+    SPDLOG_CRITICAL("failed to configure World object: {}", err.what());
     return EXIT_FAILURE;
   }
 
 #if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
+
   try {
     const auto log_dir = world->get_output_dir() / "log";
 
@@ -79,7 +83,7 @@ int main(const int argc, char **argv) {
   SPDLOG_INFO("begin EPPIC run");
 #endif
 
-  if (const auto result = world.value().run(); !result.has_value()) {
+  if (const auto result = world->run(); !result.has_value()) {
     SPDLOG_CRITICAL("EPPIC run failed: {}", result.error());
     return EXIT_FAILURE;
   }
