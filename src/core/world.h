@@ -13,11 +13,6 @@
 #include "vector.h"
 
 /*!
- * electromagnetic field enum
- */
-enum class EMField { E, H };
-
-/*!
  * EPPIC World object
  */
 class World {
@@ -169,17 +164,33 @@ private:
   void update_hz(fpp hxa, fpp hya) const;
 
   /*!
-   * writes an electromagnetic field as Vector3 to HDF5 group
+   * writes an electromagnetic field to HDF5 group
    * @param group HDF5 group to write to
-   * @param field field to be written
-   * @param type electromagnetic field type
    *
-   * this is not error handled as if writing to HDF5 fails no exception is thrown
    * todo improve error handling
    *
    * @return void
    */
-  void write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type) const;
+  void write_fields(const HDF5Obj &group) const;
+
+  /*!
+   * writes time to HDF5 group
+   *
+   * todo improve error handling
+   *
+   * @param group HDF5 group to write to
+   */
+  void write_time(const HDF5Obj &group) const;
+
+  /*!
+   * writes metadata required for gen_xdmf.py
+   *
+   * todo improve error handling
+   *
+   * @param group HDF5 group to write to
+   * @param dt (s) timestep
+   */
+  void write_metadata(const HDF5Obj &group, double dt) const;
 
   /// configuration from file
   const Config cfg;
