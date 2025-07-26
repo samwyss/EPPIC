@@ -179,7 +179,7 @@ private:
    *
    * @return void
    */
-  void h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type) const;
+  void write_field(const HDF5Obj &group, const Vector3<fpp> &field, EMField type) const;
 
   /// configuration from file
   const Config cfg;

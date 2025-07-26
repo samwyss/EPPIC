@@ -150,8 +150,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
             H5Gcreate(h5.get(), fmt::to_string(i + 1).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
 
         // write field data
-        h5_write_field(group, e, EMField::E);
-        h5_write_field(group, h, EMField::H);
+        write_field(group, e, EMField::E);
+        write_field(group, h, EMField::H);
 
         SPDLOG_DEBUG("end data logging");
       }
@@ -358,7 +358,7 @@ void World::update_hz(const fpp hxa, const fpp hya) const {
   SPDLOG_TRACE("exit World::update_hz");
 }
 
-void World::h5_write_field(const HDF5Obj &group, const Vector3<fpp> &field, const EMField type) const {
+void World::write_field(const HDF5Obj &group, const Vector3<fpp> &field, const EMField type) const {
   SPDLOG_TRACE("enter World::h5_write_field");
 
   std::string name;
