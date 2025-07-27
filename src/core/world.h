@@ -7,7 +7,7 @@
 #include <string>
 
 #include "config.h"
-#include "io_wrapper.h"
+#include "io.h"
 #include "numeric.h"
 #include "physical.h"
 #include "vector.h"

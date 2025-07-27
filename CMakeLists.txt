@@ -116,7 +116,7 @@ message(STATUS "C/C++ Compile Options: ${EPPIC_COMPILE_OPTIONS}")
 add_library(Core
         src/core/config.cpp
         src/core/config.h
-        src/core/io_wrapper.h
+        src/core/io.h
         src/core/physical.h
         src/core/numeric.h
         src/core/type.h
