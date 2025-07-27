@@ -427,4 +427,3 @@ void World::write_metadata(const HDF5Obj &group, const double dt) const {
 
   SPDLOG_TRACE("exit World::write_metadata");
 }
-
