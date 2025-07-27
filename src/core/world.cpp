@@ -166,8 +166,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto end_time = std::chrono::high_resolution_clock::now();
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
-  // NOTE the number of voxels in e.x is the same for all fields
-  [[maybe_unused]] const auto num_cells = 6 * e.x.size() * steps;
+  [[maybe_unused]] const auto num_cells = 3 * (e.x.size() + h.x.size()) * steps;
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto loop_time = end_time - start_time;
   SPDLOG_INFO("loop runtime: {:%H:%M:%S}", loop_time);
