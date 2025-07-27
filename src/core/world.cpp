@@ -96,7 +96,7 @@ std::expected<void, std::string> World::run() {
 std::expected<void, std::string> World::advance_to(const fpp end_t) {
   SPDLOG_TRACE("enter World::advance_to");
   SPDLOG_DEBUG("current time (s): {:.3e}", time);
-  SPDLOG_DEBUG("advance time to (s):  {:.3e} (s)", end_t);
+  SPDLOG_DEBUG("advance time to (s):  {:.3e}", end_t);
 
   if (end_t > time) {
     const fpp adv_t = end_t - time;
