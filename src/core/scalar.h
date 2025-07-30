@@ -2,6 +2,7 @@
 #define CORE_SCALAR_H
 
 #include <concepts>
+#include <cstdlib>
 #include <mdspan/mdspan.hpp>
 
 #include "coordinate.h"
@@ -31,9 +32,7 @@ public:
   /*!
    * Scalar destructor
    */
-  ~Scalar3() {
-    std::free(data_arr);
-  }
+  ~Scalar3() { std::free(data_arr); }
 
   /// data view
   Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> data;

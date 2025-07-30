@@ -2,6 +2,7 @@
 #define CORE_VECTOR_H
 
 #include <concepts>
+#include <cstdlib>
 #include <mdspan/mdspan.hpp>
 
 #include "coordinate.h"
