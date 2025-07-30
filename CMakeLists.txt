@@ -34,12 +34,12 @@ find_package(OpenMP REQUIRED COMPONENTS CXX)
 set(HDF5_PREFER_PARALLEL TRUE)
 find_package(HDF5 REQUIRED)
 if (NOT HDF5_IS_PARALLEL)
-    message(FATAL_ERROR "Found HDF5 ${HDF5_VERSION} is not parallel. Please correct and reconfigure.")
+    message(FATAL_ERROR "found HDF5 ${HDF5_VERSION} is not parallel ... please correct and reconfigure")
 endif ()
 
 find_package(fmt QUIET)
 if (NOT fmt_FOUND)
-    message(STATUS "Library `{fmt}` not found. Installing locally now.")
+    message(STATUS "library `{fmt}` not found ... installing locally now")
     FetchContent_Declare(fmt
             GIT_REPOSITORY https://github.com/fmtlib/fmt.git
             GIT_TAG 11.2.0
@@ -49,12 +49,12 @@ if (NOT fmt_FOUND)
     )
     FetchContent_MakeAvailable(fmt)
 else ()
-    message(STATUS "Library `{fmt}` found on system.")
+    message(STATUS "library `{fmt}` found on system")
 endif ()
 
 find_package(spdlog QUIET)
 if (NOT spdlog_FOUND)
-    message(STATUS "Library `spdlog` not found. Installing locally now.")
+    message(STATUS "library `spdlog` not found ... installing locally now")
     FetchContent_Declare(spdlog
             GIT_REPOSITORY https://github.com/gabime/spdlog.git
             GIT_TAG v1.15.3
@@ -64,14 +64,14 @@ if (NOT spdlog_FOUND)
     )
     FetchContent_MakeAvailable(spdlog)
 else ()
-    message(STATUS "Library `spdlog` found on system.")
+    message(STATUS "library `spdlog` found on system")
 endif ()
 
 set(MDSPAN_ENABLE_TESTS OFF)
 set(MDSPAN_ENABLE_BENCHMARKS OFF)
 find_package(mdspan QUIET)
 if (NOT mdspan_FOUND)
-    message(STATUS "Library `mdspan` not found. Installing locally now.")
+    message(STATUS "library `mdspan` not found ... installing locally now")
     FetchContent_Declare(mdspan
             GIT_REPOSITORY https://github.com/kokkos/mdspan.git
             GIT_TAG stable
@@ -81,12 +81,12 @@ if (NOT mdspan_FOUND)
     )
     FetchContent_MakeAvailable(mdspan)
 else ()
-    message(STATUS "Library `mdspan` found on system.")
+    message(STATUS "library `mdspan` found on system")
 endif ()
 
 find_package(toml11 QUIET)
 if (NOT toml11_FOUND)
-    message(STATUS "Library `toml11` not found. Installing locally now.")
+    message(STATUS "library `toml11` not found ... installing locally now")
     FetchContent_Declare(toml11
             GIT_REPOSITORY https://github.com/ToruNiina/toml11.git
             GIT_TAG v4.4.0
@@ -96,7 +96,7 @@ if (NOT toml11_FOUND)
     )
     FetchContent_MakeAvailable(toml11)
 else ()
-    message(STATUS "Library `toml11` found on system.")
+    message(STATUS "library `toml11` found on system")
 endif ()
 
 # EPPIC setup ------------------------------------------------------------------------------------------------
