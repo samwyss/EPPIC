@@ -229,6 +229,9 @@ private:
 
   /// (A/m) magnetic field vector
   const Vector3<fpp> h;
+
+  /// all dataspaces for writable data
+  const Dataspaces dataspaces;
 };
 
 #endif // CORE_WORLD_H
