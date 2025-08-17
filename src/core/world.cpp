@@ -122,14 +122,14 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE
   [[maybe_unused]] const auto init_time = time;
 
-  // number of steps required
+  // number of steps required to satisfy most stringent requirement
   const auto steps = calc_num_steps(adv_t);
-
-  const uint64_t logged_steps = steps / cfg.ds_ratio + 1;
 
   // (s) time step
   const fpp dt = adv_t / static_cast<fpp>(steps);
   SPDLOG_DEBUG("timestep (s): {:.3e}", dt);
+
+  const uint64_t logged_steps = steps / cfg.ds_ratio + 1;
 
   const auto metadata_group = HDF5Obj(H5Gcreate(h5.get(), "metadata", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
   write_metadata(metadata_group, dt);
