@@ -132,7 +132,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   const uint64_t logged_steps = steps / cfg.ds_ratio + 1;
 
   const auto metadata_group = HDF5Obj(H5Gcreate(h5.get(), "metadata", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
-  write_metadata(metadata_group, dt);
+  write_metadata(metadata_group, dt, logged_steps);
 
   // loop start time
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
@@ -404,11 +404,12 @@ void World::write_time(const HDF5Obj &group) const {
   SPDLOG_TRACE("exit World::write_time");
 }
 
-void World::write_metadata(const HDF5Obj &group, const double dt) const {
+void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t num) const {
   SPDLOG_TRACE("enter World::write_metadata");
 
   const fpp delta_t[1] = {dt};
   const fpp dxdydz[3] = {d.x, d.y, d.z};
+  const uint64_t num_logs[1] = {num};
 
   constexpr hsize_t dims_scalar[1] = {1};
   constexpr hsize_t dims_xyz[1] = {3};
@@ -422,9 +423,13 @@ void World::write_metadata(const HDF5Obj &group, const double dt) const {
   const auto spacing = HDF5Obj(
       H5Dcreate(group.get(), "dxdydz", h5_fpp, dspace_xyz.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
       H5Dclose);
+  const auto number_logs = HDF5Obj(
+    H5Dcreate(group.get(), "logged_steps", H5T_NATIVE_UINT64, dspace_scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+    H5Dclose);
 
   H5Dwrite(timestep.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &delta_t);
   H5Dwrite(spacing.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dxdydz);
+  H5Dwrite(number_logs.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &num_logs);
 
   SPDLOG_TRACE("exit World::write_metadata");
 }

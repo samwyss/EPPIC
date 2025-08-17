@@ -189,8 +189,9 @@ private:
    *
    * @param group HDF5 group to write to
    * @param dt (s) timestep
+   * @param num number of logged steps
    */
-  void write_metadata(const HDF5Obj &group, double dt) const;
+  void write_metadata(const HDF5Obj &group, double dt, uint64_t num) const;
 
   /// configuration from file
   const Config cfg;
