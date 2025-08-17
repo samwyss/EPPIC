@@ -2,7 +2,7 @@
 
 World::World(const std::string &input_file_path, const std::string &id)
     : cfg(input_file_path, id), h5(init_h5()), ep(cfg.ep_r * VAC_PERMITTIVITY), mu(cfg.mu_r * VAC_PERMEABILITY),
-      nv_e(init_nv_e()), nv_h(init_nv_h()), d(init_d()), d_inv(init_d_inv()), e(Vector3(nv_e, static_cast<fpp>(0.0))),
+      nv_h(init_nv_h()), nv_e(init_nv_e()), d(init_d()), d_inv(init_d_inv()), e(Vector3(nv_e, static_cast<fpp>(0.0))),
       h(Vector3(nv_h, static_cast<fpp>(0.0))) {}
 
 HDF5Obj World::init_h5() const {
@@ -128,13 +128,15 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   const fpp dt = adv_t / static_cast<fpp>(steps);
   SPDLOG_DEBUG("timestep (s): {:.3e}", dt);
 
-  const uint64_t logged_steps = steps / cfg.ds_ratio + 1;
+  const uint64_t logged_steps = steps / cfg.ds_ratio + 2;
 
   const auto metadata_group = HDF5Obj(H5Gcreate(h5.get(), "metadata", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
   write_metadata(metadata_group, dt, logged_steps);
 
+  setup_dataspaces(logged_steps);
+
   const auto data_group = HDF5Obj(H5Gcreate(h5.get(), "data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
-  setup_datasets(data_group, logged_steps);
+  setup_datasets(data_group);
 
   // loop start time
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
@@ -164,6 +166,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
         // write_time(group);
         // write_fields(group);
+        log(hyperslab, i);
 
         SPDLOG_DEBUG("end data logging");
       }
@@ -369,12 +372,43 @@ void World::update_hz(const fpp hxa, const fpp hya) const {
   SPDLOG_TRACE("exit World::update_hz");
 }
 
-void World::log(uint64_t hyperslab) const {
+void World::log(const uint64_t hyperslab, const uint64_t step) const {
   SPDLOG_TRACE("enter World::log");
+
+  constexpr hsize_t scalar_count[1] = {1};
+  const hsize_t e_count[4] = {1, static_cast<hsize_t>(nv_e.x), static_cast<hsize_t>(nv_e.y),
+                              static_cast<hsize_t>(nv_e.z)};
+  const hsize_t h_count[4] = {1, static_cast<hsize_t>(nv_h.x), static_cast<hsize_t>(nv_h.y),
+                              static_cast<hsize_t>(nv_h.z)};
+
+  const hsize_t scalar_offset[1] = {hyperslab};
+  const hsize_t field_offset[4] = {hyperslab, 0, 0, 0};
+
+  H5Sselect_hyperslab(dataspaces.scalar.get(), H5S_SELECT_SET, scalar_offset, nullptr, scalar_count, nullptr);
+  H5Sselect_hyperslab(dataspaces.e.get(), H5S_SELECT_SET, field_offset, nullptr, e_count, nullptr);
+  H5Sselect_hyperslab(dataspaces.h.get(), H5S_SELECT_SET, field_offset, nullptr, h_count, nullptr);
+
+  const auto scalar_memspace = HDF5Obj(H5Screate_simple(1, scalar_count, nullptr), H5Sclose);
+  const auto e_memspace = HDF5Obj(H5Screate_simple(4, e_count, nullptr), H5Sclose);
+  const auto h_memspace = HDF5Obj(H5Screate_simple(4, h_count, nullptr), H5Sclose);
+
+  const fpp time_arr[1] = {time};
+  const uint64_t step_arr[1] = {step};
+
+  H5Dwrite(datasets.time.get(), h5_fpp, scalar_memspace.get(), dataspaces.scalar.get(), H5P_DEFAULT, time_arr);
+  H5Dwrite(datasets.step.get(), H5T_NATIVE_UINT64, scalar_memspace.get(), dataspaces.scalar.get(), H5P_DEFAULT,
+           step_arr);
+  H5Dwrite(datasets.ex.get(), h5_fpp, e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.x.data_handle());
+  H5Dwrite(datasets.ey.get(), h5_fpp, e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.y.data_handle());
+  H5Dwrite(datasets.ez.get(), h5_fpp, e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.z.data_handle());
+  H5Dwrite(datasets.hx.get(), h5_fpp, h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.x.data_handle());
+  H5Dwrite(datasets.hy.get(), h5_fpp, h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.y.data_handle());
+  H5Dwrite(datasets.hz.get(), h5_fpp, h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.z.data_handle());
 
   SPDLOG_TRACE("exit World::log");
 }
 
+/*
 void World::write_fields(const HDF5Obj &group) const {
   SPDLOG_TRACE("enter World::h5_write_field");
 
@@ -418,6 +452,7 @@ void World::write_time(const HDF5Obj &group) const {
 
   SPDLOG_TRACE("exit World::write_time");
 }
+*/
 
 void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t num) const {
   SPDLOG_TRACE("enter World::write_metadata");
@@ -451,10 +486,14 @@ void World::setup_dataspaces(const uint64_t num) {
   SPDLOG_TRACE("enter World::setup_dataspaces");
 
   const hsize_t dims_scalar[1] = {num};
-  const hsize_t dims_e[4] = {static_cast<hsize_t>(nv_e.x), static_cast<hsize_t>(nv_e.y), static_cast<hsize_t>(nv_e.z),
-                             static_cast<hsize_t>(num)};
-  const hsize_t dims_h[4] = {static_cast<hsize_t>(nv_h.x), static_cast<hsize_t>(nv_h.y), static_cast<hsize_t>(nv_h.z),
-                             static_cast<hsize_t>(num)};
+  const hsize_t dims_e[4] = {static_cast<hsize_t>(num), static_cast<hsize_t>(nv_e.x), static_cast<hsize_t>(nv_e.y),
+                             static_cast<hsize_t>(nv_e.z)};
+  const hsize_t dims_h[4] = {
+      static_cast<hsize_t>(num),
+      static_cast<hsize_t>(nv_h.x),
+      static_cast<hsize_t>(nv_h.y),
+      static_cast<hsize_t>(nv_h.z),
+  };
 
   dataspaces.scalar = HDF5Obj(H5Screate_simple(1, dims_scalar, nullptr), H5Sclose);
   dataspaces.e = HDF5Obj(H5Screate_simple(4, dims_e, nullptr), H5Sclose);

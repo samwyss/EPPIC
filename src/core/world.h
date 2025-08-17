@@ -169,8 +169,9 @@ private:
    * todo improve error handling
    *
    * @param hyperslab hyperslab index to write to
+   * @param step current time step
    */
-  void log(uint64_t hyperslab) const;
+  void log(uint64_t hyperslab, uint64_t step) const;
 
   /*!
    * writes metadata required for gen_xdmf.py
@@ -219,11 +220,11 @@ private:
   /// (H/m) diagonally isotropic permeability of material inside bounding box
   const fpp mu;
 
-  /// number of voxels in electric field
-  const Coord3<size_t> nv_e;
-
   /// number of voxels in magnetic field
   const Coord3<size_t> nv_h;
+
+  /// number of voxels in electric field
+  const Coord3<size_t> nv_e;
 
   /// (m) spatial increments in all directions
   const Coord3<fpp> d;
