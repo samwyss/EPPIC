@@ -83,6 +83,20 @@ private:
 using HDF5Obj = HDF5Mgr<herr_t (*)(hid_t)>;
 
 /*!
+ * dataspace container for writable data
+ */
+struct Dataspaces {
+  /// dataspace for scalar data
+  HDF5Obj scalar;
+
+  /// dataspace for electric field data
+  HDF5Obj e;
+
+  /// dataspace for magnetic field data
+  HDF5Obj h;
+};
+
+/*!
  * dataset container for writable data
  */
 struct Datasets {
