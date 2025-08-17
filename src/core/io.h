@@ -16,16 +16,12 @@ public:
    * @param handle HDF5 object handle
    * @param release HDF5 object release function
    */
-  HDF5Mgr(const hid_t handle, const CloseFunc release)
-    : handle(handle), close(release) {
-  }
+  HDF5Mgr(const hid_t handle, const CloseFunc release) : handle(handle), close(release) {}
 
   /*!
    * HDF5 object wrapper default constructor
    */
-  HDF5Mgr()
-    : handle(-1), close(nullptr) {
-  };
+  HDF5Mgr() : handle(-1), close(nullptr) {};
 
   /*!
    * HDF5 object wrapper destructor
@@ -50,9 +46,7 @@ public:
    * HDF5 object wrapper move constructor
    * @param other other HDF5 object wrapper
    */
-  HDF5Mgr(HDF5Mgr &&other) noexcept
-    : handle(std::exchange(other.handle, -1)), close(std::move(other.close)) {
-  };
+  HDF5Mgr(HDF5Mgr &&other) noexcept : handle(std::exchange(other.handle, -1)), close(std::move(other.close)) {};
 
   /*!
    * HDF5 object wrapper move assignment operator
