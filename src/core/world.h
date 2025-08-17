@@ -210,9 +210,11 @@ private:
   /// (H/m) diagonally isotropic permeability of material inside bounding box
   const fpp mu;
 
-  const Coord3<size_t> nv_h;
-
+  /// number of voxels in electric field
   const Coord3<size_t> nv_e;
+
+  /// number of voxels in magnetic field
+  const Coord3<size_t> nv_h;
 
   /// (m) spatial increments in all directions
   const Coord3<fpp> d;
