@@ -134,6 +134,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   write_metadata(metadata_group, dt, logged_steps);
 
   const auto data_group = HDF5Obj(H5Gcreate(h5.get(), "data", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
+  setup_datasets(data_group, logged_steps);
 
   // loop start time
   // NOTE only used if SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO
