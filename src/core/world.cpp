@@ -152,11 +152,18 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
       if (0 == i % cfg.ds_ratio || i == steps - 1) [[unlikely]] {
         SPDLOG_DEBUG("begin data logging");
 
-        const auto group = HDF5Obj(
-            H5Gcreate(h5.get(), fmt::to_string(i + 1).c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
+        // hyperslab index to write to
+        uint64_t hyperslab = i / cfg.ds_ratio;
 
-        write_time(group);
-        write_fields(group);
+        // case for the last timestep
+        if (i == steps - 1) [[unlikely]] {
+          hyperslab++;
+        }
+
+        SPDLOG_DEBUG("hyperslab index: {}/{}", hyperslab, logged_steps);
+
+        // write_time(group);
+        // write_fields(group);
 
         SPDLOG_DEBUG("end data logging");
       }
