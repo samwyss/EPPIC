@@ -193,6 +193,16 @@ private:
    */
   void write_metadata(const HDF5Obj &group, double dt, uint64_t num) const;
 
+  /*!
+   * sets up datasets for logging
+   *
+   * todo improve error handling
+   *
+   * @param group group to create datasets within
+   * @param num number of timesteps to be written
+   */
+  void setup_datasets(const HDF5Obj &group, uint64_t num);
+
   /// configuration from file
   const Config cfg;
 
@@ -230,8 +240,8 @@ private:
   /// (A/m) magnetic field vector
   const Vector3<fpp> h;
 
-  /// all dataspaces for writable data
-  const Dataspaces dataspaces;
+  /// all datasets for writable data
+  Datasets datasets;
 };
 
 #endif // CORE_WORLD_H

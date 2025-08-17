@@ -1,10 +1,9 @@
 #include "world.h"
 
 World::World(const std::string &input_file_path, const std::string &id)
-  : cfg(input_file_path, id), h5(init_h5()), ep(cfg.ep_r * VAC_PERMITTIVITY), mu(cfg.mu_r * VAC_PERMEABILITY),
-    nv_e(init_nv_e()), nv_h(init_nv_h()), d(init_d()), d_inv(init_d_inv()), e(Vector3(nv_e, static_cast<fpp>(0.0))),
-    h(Vector3(nv_h, static_cast<fpp>(0.0))) {
-}
+    : cfg(input_file_path, id), h5(init_h5()), ep(cfg.ep_r * VAC_PERMITTIVITY), mu(cfg.mu_r * VAC_PERMEABILITY),
+      nv_e(init_nv_e()), nv_h(init_nv_h()), d(init_d()), d_inv(init_d_inv()), e(Vector3(nv_e, static_cast<fpp>(0.0))),
+      h(Vector3(nv_h, static_cast<fpp>(0.0))) {}
 
 HDF5Obj World::init_h5() const {
   SPDLOG_TRACE("enter World::init_h5");
@@ -371,18 +370,18 @@ void World::write_fields(const HDF5Obj &group) const {
   const auto dspace_e = HDF5Obj(H5Screate_simple(3, dims_e, nullptr), H5Sclose);
   const auto dspace_h = HDF5Obj(H5Screate_simple(3, dims_h, nullptr), H5Sclose);
 
-  const auto ex = HDF5Obj(H5Dcreate(group.get(), "ex", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                          H5Dclose);
-  const auto ey = HDF5Obj(H5Dcreate(group.get(), "ey", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                          H5Dclose);
-  const auto ez = HDF5Obj(H5Dcreate(group.get(), "ez", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                          H5Dclose);
-  const auto hx = HDF5Obj(H5Dcreate(group.get(), "hx", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                          H5Dclose);
-  const auto hy = HDF5Obj(H5Dcreate(group.get(), "hy", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                          H5Dclose);
-  const auto hz = HDF5Obj(H5Dcreate(group.get(), "hz", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                          H5Dclose);
+  const auto ex =
+      HDF5Obj(H5Dcreate(group.get(), "ex", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  const auto ey =
+      HDF5Obj(H5Dcreate(group.get(), "ey", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  const auto ez =
+      HDF5Obj(H5Dcreate(group.get(), "ez", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  const auto hx =
+      HDF5Obj(H5Dcreate(group.get(), "hx", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  const auto hy =
+      HDF5Obj(H5Dcreate(group.get(), "hy", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  const auto hz =
+      HDF5Obj(H5Dcreate(group.get(), "hz", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
 
   H5Dwrite(ex.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.x.data_handle());
   H5Dwrite(ey.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.y.data_handle());
@@ -399,8 +398,8 @@ void World::write_time(const HDF5Obj &group) const {
 
   constexpr hsize_t dims[1] = {1};
   const auto dspace = HDF5Obj(H5Screate_simple(1, dims, nullptr), H5Sclose);
-  const auto time = HDF5Obj(H5Dcreate(group.get(), "time", h5_fpp, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-                            H5Dclose);
+  const auto time =
+      HDF5Obj(H5Dcreate(group.get(), "time", h5_fpp, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
   H5Dwrite(time.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &this->time);
 
   SPDLOG_TRACE("exit World::write_time");
@@ -420,18 +419,50 @@ void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t
   const auto dspace_xyz = HDF5Obj(H5Screate_simple(1, dims_xyz, nullptr), H5Sclose);
 
   const auto timestep = HDF5Obj(
-      H5Dcreate(group.get(), "dt", h5_fpp, dspace_scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-      H5Dclose);
+      H5Dcreate(group.get(), "dt", h5_fpp, dspace_scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
   const auto spacing = HDF5Obj(
-      H5Dcreate(group.get(), "dxdydz", h5_fpp, dspace_xyz.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-      H5Dclose);
-  const auto number_logs = HDF5Obj(
-    H5Dcreate(group.get(), "logged_steps", H5T_NATIVE_UINT64, dspace_scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-    H5Dclose);
+      H5Dcreate(group.get(), "dxdydz", h5_fpp, dspace_xyz.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  const auto number_logs = HDF5Obj(H5Dcreate(group.get(), "logged_steps", H5T_NATIVE_UINT64, dspace_scalar.get(),
+                                             H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                                   H5Dclose);
 
   H5Dwrite(timestep.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &delta_t);
   H5Dwrite(spacing.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dxdydz);
   H5Dwrite(number_logs.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &num_logs);
 
   SPDLOG_TRACE("exit World::write_metadata");
+}
+
+void World::setup_datasets(const HDF5Obj &group, const uint64_t num) {
+  SPDLOG_TRACE("enter World::setup_datasets");
+
+  const hsize_t dims_scalar[1] = {num};
+  const hsize_t dims_e[4] = {static_cast<hsize_t>(nv_e.x), static_cast<hsize_t>(nv_e.y), static_cast<hsize_t>(nv_e.z),
+                             static_cast<hsize_t>(num)};
+  const hsize_t dims_h[4] = {static_cast<hsize_t>(nv_h.x), static_cast<hsize_t>(nv_h.y), static_cast<hsize_t>(nv_h.z),
+                             static_cast<hsize_t>(num)};
+
+  const auto scalar_dspace = HDF5Obj(H5Screate_simple(1, dims_scalar, nullptr), H5Sclose);
+  const auto e_dspace = HDF5Obj(H5Screate_simple(4, dims_e, nullptr), H5Sclose);
+  const auto h_dspace = HDF5Obj(H5Screate_simple(4, dims_h, nullptr), H5Sclose);
+
+  datasets.time = HDF5Obj(
+      H5Dcreate(group.get(), "time", h5_fpp, scalar_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.step = HDF5Obj(
+      H5Dcreate(group.get(), "step", H5T_NATIVE_UINT64, scalar_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+      H5Dclose);
+  datasets.ex =
+      HDF5Obj(H5Dcreate(group.get(), "ex", h5_fpp, e_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.ey =
+      HDF5Obj(H5Dcreate(group.get(), "ey", h5_fpp, e_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.ez =
+      HDF5Obj(H5Dcreate(group.get(), "ez", h5_fpp, e_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.hx =
+      HDF5Obj(H5Dcreate(group.get(), "hx", h5_fpp, h_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.hy =
+      HDF5Obj(H5Dcreate(group.get(), "hy", h5_fpp, h_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.hz =
+      HDF5Obj(H5Dcreate(group.get(), "hz", h5_fpp, h_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+
+  SPDLOG_TRACE("exit World::setup_datasets");
 }
