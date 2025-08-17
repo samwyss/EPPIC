@@ -88,4 +88,27 @@ private:
 /// type alias for HDF5Mgr
 using HDF5Obj = HDF5Mgr<herr_t (*)(hid_t)>;
 
+/*!
+ * dataspace container for writing field data
+ */
+struct FieldDataspaces {
+  /// electric field x-component data space
+  HDF5Obj ex;
+
+  /// electric field y-component data space
+  HDF5Obj ey;
+
+  /// electric field z-component data space
+  HDF5Obj ez;
+
+  /// magnetic field x-component data space
+  HDF5Obj hx;
+
+  /// magnetic field y-component data space
+  HDF5Obj hy;
+
+  /// magnetic field z-component data space
+  HDF5Obj hz;
+};
+
 #endif // CORE_IO_H
