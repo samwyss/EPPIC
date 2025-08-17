@@ -89,25 +89,31 @@ private:
 using HDF5Obj = HDF5Mgr<herr_t (*)(hid_t)>;
 
 /*!
- * dataspace container for writing field data
+ * dataspace container for writable data
  */
-struct FieldDataspaces {
-  /// electric field x-component data space
+struct Dataspaces {
+  /// time dataspace
+  HDF5Obj time;
+
+  /// step dataspace
+  HDF5Obj step;
+
+  /// electric field x-component dataspace
   HDF5Obj ex;
 
-  /// electric field y-component data space
+  /// electric field y-component dataspace
   HDF5Obj ey;
 
-  /// electric field z-component data space
+  /// electric field z-component dataspace
   HDF5Obj ez;
 
-  /// magnetic field x-component data space
+  /// magnetic field x-component dataspace
   HDF5Obj hx;
 
-  /// magnetic field y-component data space
+  /// magnetic field y-component dataspace
   HDF5Obj hy;
 
-  /// magnetic field z-component data space
+  /// magnetic field z-component dataspace
   HDF5Obj hz;
 };
 
