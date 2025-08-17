@@ -85,7 +85,7 @@ using HDF5Obj = HDF5Mgr<herr_t (*)(hid_t)>;
 /*!
  * dataset container for writable data
  */
-struct Dataspaces {
+struct Datasets {
   /// time dataspace
   HDF5Obj time;
 
