@@ -408,52 +408,6 @@ void World::log(const uint64_t hyperslab, const uint64_t step) const {
   SPDLOG_TRACE("exit World::log");
 }
 
-/*
-void World::write_fields(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::h5_write_field");
-
-  const hsize_t dims_e[3] = {static_cast<hsize_t>(nv_e.x), static_cast<hsize_t>(nv_e.y), static_cast<hsize_t>(nv_e.z)};
-  const hsize_t dims_h[3] = {static_cast<hsize_t>(nv_h.x), static_cast<hsize_t>(nv_h.y), static_cast<hsize_t>(nv_h.z)};
-
-  const auto dspace_e = HDF5Obj(H5Screate_simple(3, dims_e, nullptr), H5Sclose);
-  const auto dspace_h = HDF5Obj(H5Screate_simple(3, dims_h, nullptr), H5Sclose);
-
-  const auto ex =
-      HDF5Obj(H5Dcreate(group.get(), "ex", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  const auto ey =
-      HDF5Obj(H5Dcreate(group.get(), "ey", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  const auto ez =
-      HDF5Obj(H5Dcreate(group.get(), "ez", h5_fpp, dspace_e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  const auto hx =
-      HDF5Obj(H5Dcreate(group.get(), "hx", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  const auto hy =
-      HDF5Obj(H5Dcreate(group.get(), "hy", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  const auto hz =
-      HDF5Obj(H5Dcreate(group.get(), "hz", h5_fpp, dspace_h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-
-  H5Dwrite(ex.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.x.data_handle());
-  H5Dwrite(ey.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.y.data_handle());
-  H5Dwrite(ez.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, e.z.data_handle());
-  H5Dwrite(hx.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.x.data_handle());
-  H5Dwrite(hy.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.y.data_handle());
-  H5Dwrite(hz.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, h.z.data_handle());
-
-  SPDLOG_TRACE("exit World::h5_write_field");
-}
-
-void World::write_time(const HDF5Obj &group) const {
-  SPDLOG_TRACE("enter World::write_time");
-
-  constexpr hsize_t dims[1] = {1};
-  const auto dspace = HDF5Obj(H5Screate_simple(1, dims, nullptr), H5Sclose);
-  const auto time =
-      HDF5Obj(H5Dcreate(group.get(), "time", h5_fpp, dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  H5Dwrite(time.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &this->time);
-
-  SPDLOG_TRACE("exit World::write_time");
-}
-*/
-
 void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t num) const {
   SPDLOG_TRACE("enter World::write_metadata");
 
@@ -475,9 +429,9 @@ void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t
                                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
                                    H5Dclose);
 
-  H5Dwrite(timestep.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &delta_t);
-  H5Dwrite(spacing.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &dxdydz);
-  H5Dwrite(number_logs.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, &num_logs);
+  H5Dwrite(timestep.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, delta_t);
+  H5Dwrite(spacing.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, dxdydz);
+  H5Dwrite(number_logs.get(), H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, num_logs);
 
   SPDLOG_TRACE("exit World::write_metadata");
 }
