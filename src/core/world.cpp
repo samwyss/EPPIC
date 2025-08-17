@@ -125,6 +125,8 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   // number of steps required
   const auto steps = calc_num_steps(adv_t);
 
+  const uint64_t logged_steps = steps / cfg.ds_ratio + 1;
+
   // (s) time step
   const fpp dt = adv_t / static_cast<fpp>(steps);
   SPDLOG_DEBUG("timestep (s): {:.3e}", dt);
