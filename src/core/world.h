@@ -164,23 +164,13 @@ private:
   void update_hz(fpp hxa, fpp hya) const;
 
   /*!
-   * writes an electromagnetic field to HDF5 group
-   * @param group HDF5 group to write to
+   * logs runtime data to out
    *
    * todo improve error handling
    *
-   * @return void
+   * @param hyperslab hyperslab index to write to
    */
-  void write_fields(const HDF5Obj &group) const;
-
-  /*!
-   * writes time to HDF5 group
-   *
-   * todo improve error handling
-   *
-   * @param group HDF5 group to write to
-   */
-  void write_time(const HDF5Obj &group) const;
+  void log(uint64_t hyperslab) const;
 
   /*!
    * writes metadata required for gen_xdmf.py
@@ -192,6 +182,15 @@ private:
    * @param num number of logged steps
    */
   void write_metadata(const HDF5Obj &group, double dt, uint64_t num) const;
+
+  /*!
+   * sets up dataspaces for logging
+   *
+   * todo improve error handling
+   *
+   * @param num number of logged steps
+   */
+  void setup_dataspaces(uint64_t num);
 
   /*!
    * sets up datasets for logging
@@ -240,7 +239,10 @@ private:
   /// (A/m) magnetic field vector
   const Vector3<fpp> h;
 
-  /// all datasets for writable data
+  /// dataspaces for writable data
+  Dataspaces dataspaces;
+
+  /// datasets for writable data
   Datasets datasets;
 };
 

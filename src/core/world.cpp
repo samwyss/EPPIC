@@ -369,6 +369,12 @@ void World::update_hz(const fpp hxa, const fpp hya) const {
   SPDLOG_TRACE("exit World::update_hz");
 }
 
+void World::log(uint64_t hyperslab) const {
+  SPDLOG_TRACE("enter World::log");
+
+  SPDLOG_TRACE("exit World::log");
+}
+
 void World::write_fields(const HDF5Obj &group) const {
   SPDLOG_TRACE("enter World::h5_write_field");
 
@@ -441,8 +447,8 @@ void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t
   SPDLOG_TRACE("exit World::write_metadata");
 }
 
-void World::setup_datasets(const HDF5Obj &group, const uint64_t num) {
-  SPDLOG_TRACE("enter World::setup_datasets");
+void World::setup_dataspaces(const uint64_t num) {
+  SPDLOG_TRACE("enter World::setup_dataspaces");
 
   const hsize_t dims_scalar[1] = {num};
   const hsize_t dims_e[4] = {static_cast<hsize_t>(nv_e.x), static_cast<hsize_t>(nv_e.y), static_cast<hsize_t>(nv_e.z),
@@ -450,27 +456,33 @@ void World::setup_datasets(const HDF5Obj &group, const uint64_t num) {
   const hsize_t dims_h[4] = {static_cast<hsize_t>(nv_h.x), static_cast<hsize_t>(nv_h.y), static_cast<hsize_t>(nv_h.z),
                              static_cast<hsize_t>(num)};
 
-  const auto scalar_dspace = HDF5Obj(H5Screate_simple(1, dims_scalar, nullptr), H5Sclose);
-  const auto e_dspace = HDF5Obj(H5Screate_simple(4, dims_e, nullptr), H5Sclose);
-  const auto h_dspace = HDF5Obj(H5Screate_simple(4, dims_h, nullptr), H5Sclose);
+  dataspaces.scalar = HDF5Obj(H5Screate_simple(1, dims_scalar, nullptr), H5Sclose);
+  dataspaces.e = HDF5Obj(H5Screate_simple(4, dims_e, nullptr), H5Sclose);
+  dataspaces.h = HDF5Obj(H5Screate_simple(4, dims_h, nullptr), H5Sclose);
+
+  SPDLOG_TRACE("exit World::setup_dataspaces");
+}
+
+void World::setup_datasets(const HDF5Obj &group, const uint64_t num) {
+  SPDLOG_TRACE("enter World::setup_datasets");
 
   datasets.time = HDF5Obj(
-      H5Dcreate(group.get(), "time", h5_fpp, scalar_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+      H5Dcreate(group.get(), "time", h5_fpp, dataspaces.scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
   datasets.step = HDF5Obj(
-      H5Dcreate(group.get(), "step", H5T_NATIVE_UINT64, scalar_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+      H5Dcreate(group.get(), "step", H5T_NATIVE_UINT64, dataspaces.scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
       H5Dclose);
-  datasets.ex =
-      HDF5Obj(H5Dcreate(group.get(), "ex", h5_fpp, e_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.ey =
-      HDF5Obj(H5Dcreate(group.get(), "ey", h5_fpp, e_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.ez =
-      HDF5Obj(H5Dcreate(group.get(), "ez", h5_fpp, e_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.hx =
-      HDF5Obj(H5Dcreate(group.get(), "hx", h5_fpp, h_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.hy =
-      HDF5Obj(H5Dcreate(group.get(), "hy", h5_fpp, h_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.hz =
-      HDF5Obj(H5Dcreate(group.get(), "hz", h5_fpp, h_dspace.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.ex = HDF5Obj(H5Dcreate(group.get(), "ex", h5_fpp, dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                        H5Dclose);
+  datasets.ey = HDF5Obj(H5Dcreate(group.get(), "ey", h5_fpp, dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                        H5Dclose);
+  datasets.ez = HDF5Obj(H5Dcreate(group.get(), "ez", h5_fpp, dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                        H5Dclose);
+  datasets.hx = HDF5Obj(H5Dcreate(group.get(), "hx", h5_fpp, dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                        H5Dclose);
+  datasets.hy = HDF5Obj(H5Dcreate(group.get(), "hy", h5_fpp, dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                        H5Dclose);
+  datasets.hz = HDF5Obj(H5Dcreate(group.get(), "hz", h5_fpp, dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+                        H5Dclose);
 
   SPDLOG_TRACE("exit World::setup_datasets");
 }
