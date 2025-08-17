@@ -463,7 +463,7 @@ void World::setup_dataspaces(const uint64_t num) {
   SPDLOG_TRACE("exit World::setup_dataspaces");
 }
 
-void World::setup_datasets(const HDF5Obj &group, const uint64_t num) {
+void World::setup_datasets(const HDF5Obj &group) {
   SPDLOG_TRACE("enter World::setup_datasets");
 
   datasets.time = HDF5Obj(

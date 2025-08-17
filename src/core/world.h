@@ -198,9 +198,8 @@ private:
    * todo improve error handling
    *
    * @param group group to create datasets within
-   * @param num number of timesteps to be written
    */
-  void setup_datasets(const HDF5Obj &group, uint64_t num);
+  void setup_datasets(const HDF5Obj &group);
 
   /// configuration from file
   const Config cfg;
