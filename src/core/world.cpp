@@ -132,7 +132,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   const uint64_t logged_steps = steps / cfg.ds_ratio + 2;
 
   const auto metadata_group = HDF5Obj(H5Gcreate(h5.get(), "metadata", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
-  write_metadata(metadata_group, dt, logged_steps);
+  log_metadata(metadata_group, dt, logged_steps);
 
   setup_dataspaces(logged_steps);
 
