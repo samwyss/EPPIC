@@ -7,11 +7,12 @@ World::World(const std::string &input_file_path, const std::string &id)
 
 HDF5Obj World::init_h5() const {
   SPDLOG_TRACE("enter World::init_h5");
-  HDF5Obj h5(H5Fcreate((cfg.out / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT), H5Fclose);
+
+  HDF5Obj h5_l(H5Fcreate((cfg.out / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT), H5Fclose);
   SPDLOG_DEBUG("created output HDF5 file at `{}`", (cfg.out / "data.h5").string());
 
   SPDLOG_TRACE("exit World::init_h5");
-  return h5;
+  return h5_l;
 }
 
 Coord3<size_t> World::init_nv_h() const {
@@ -33,27 +34,26 @@ Coord3<size_t> World::init_nv_h() const {
   SPDLOG_DEBUG("maximum spatial step (m): {:.3e}", ds);
 
   // the computation here is a result of snapping the maximum step to the geometry
-  const Coord3 nv_h = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
-                       static_cast<size_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
-                       static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
+  const Coord3 nv_h_l = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
+                         static_cast<size_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
+                         static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
 
-  SPDLOG_DEBUG("magnetic field voxel dimensions: {} x {} x {}", nv_h.x, nv_h.y, nv_h.z);
+  SPDLOG_DEBUG("magnetic field voxel dimensions: {} x {} x {}", nv_h_l.x, nv_h_l.y, nv_h_l.z);
 
   SPDLOG_TRACE("exit World::init_nv_h");
-  return nv_h;
+  return nv_h_l;
 }
 
 Coord3<size_t> World::init_nv_e() const {
   SPDLOG_TRACE("enter World::init_nv_e");
 
   // the +1 is a result of the convention that all magnetic field points are wrapped by an electric field
-  const Coord3 nv_e = {nv_h.x + 1, nv_h.y + 1, nv_h.z + 1};
+  const Coord3 nv_e_l = {nv_h.x + 1, nv_h.y + 1, nv_h.z + 1};
 
-  SPDLOG_DEBUG("electric field voxel dimensions: {} x {} x {}", nv_e.x, nv_e.y, nv_e.z);
-  SPDLOG_DEBUG("voxels to update each step: {}", 3 * (nv_e.x * nv_e.y * nv_e.z + nv_h.x * nv_h.y * nv_h.z));
+  SPDLOG_DEBUG("electric field voxel dimensions: {} x {} x {}", nv_e_l.x, nv_e_l.y, nv_e_l.z);
 
   SPDLOG_TRACE("exit World::init_nv_e");
-  return nv_e;
+  return nv_e_l;
 }
 
 Coord3<fpp> World::init_d() const {
@@ -61,22 +61,22 @@ Coord3<fpp> World::init_d() const {
 
   // the magnetic field numbers are used as a result of the aforementioned magnetic field wrapping of the electric field
   // the math works out nicely this way
-  const Coord3 d = {cfg.len.x / static_cast<fpp>(nv_h.x), cfg.len.y / static_cast<fpp>(nv_h.y),
-                    cfg.len.z / static_cast<fpp>(nv_h.z)};
-  SPDLOG_DEBUG("voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
+  const Coord3 d_l = {cfg.len.x / static_cast<fpp>(nv_h.x), cfg.len.y / static_cast<fpp>(nv_h.y),
+                      cfg.len.z / static_cast<fpp>(nv_h.z)};
+  SPDLOG_DEBUG("voxel size (m): {:.3e} x {:.3e} x {:.3e}", d_l.x, d_l.y, d_l.z);
 
   SPDLOG_TRACE("exit World::init_d");
-  return d;
+  return d_l;
 }
 
 Coord3<fpp> World::init_d_inv() const {
   SPDLOG_TRACE("enter World::init_d_inv");
 
-  const Coord3 d_inv = {static_cast<fpp>(1.0) / d.x, static_cast<fpp>(1.0) / d.y, static_cast<fpp>(1.0) / d.z};
-  SPDLOG_DEBUG("inverse voxel size (m^-1): {:.3e} x {:.3e} x {:.3e}", d_inv.x, d_inv.y, d_inv.z);
+  const Coord3 d_inv_l = {static_cast<fpp>(1.0) / d.x, static_cast<fpp>(1.0) / d.y, static_cast<fpp>(1.0) / d.z};
+  SPDLOG_DEBUG("inverse voxel size (m^-1): {:.3e} x {:.3e} x {:.3e}", d_inv_l.x, d_inv_l.y, d_inv_l.z);
 
   SPDLOG_TRACE("exit World::init_d_inv");
-  return d_inv;
+  return d_inv_l;
 }
 
 std::expected<void, std::string> World::run() {
@@ -165,8 +165,6 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
 
         SPDLOG_DEBUG("hyperslab index: {}/{}", hyperslab, logged_steps - 1);
 
-        // write_time(group);
-        // write_fields(group);
         log(hyperslab, i);
 
         SPDLOG_DEBUG("end data logging");
