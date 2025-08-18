@@ -128,6 +128,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
   const fpp dt = adv_t / static_cast<fpp>(steps);
   SPDLOG_DEBUG("timestep (s): {:.3e}", dt);
 
+  // +2 comes from first and last timestep
   const uint64_t logged_steps = steps / cfg.ds_ratio + 2;
 
   const auto metadata_group = HDF5Obj(H5Gcreate(h5.get(), "metadata", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
@@ -162,7 +163,7 @@ std::expected<void, std::string> World::advance_by(const fpp adv_t) {
           hyperslab++;
         }
 
-        SPDLOG_DEBUG("hyperslab index: {}/{}", hyperslab, logged_steps);
+        SPDLOG_DEBUG("hyperslab index: {}/{}", hyperslab, logged_steps - 1);
 
         // write_time(group);
         // write_fields(group);
