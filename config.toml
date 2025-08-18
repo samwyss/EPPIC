@@ -1,0 +1,19 @@
+[time]
+end_time = 5e-9
+
+[geometry]
+x_len = 0.001
+y_len = 0.001
+z_len = 0.001
+max_frequency = 15e9
+num_vox_min_wavelength = 20
+num_vox_min_feature = 4
+
+[material]
+ep_r = 1.0
+mu_r = 1.0
+sigma = 0.0
+
+[data]
+out_dir = "."
+ds_ratio = 100000

@@ -1,11 +1,9 @@
-#include <mdspan/mdspan.hpp>
-#include <spdlog/spdlog.h>
-
+#include <chrono>
 #include <filesystem>
+#include <memory>
+#include <fmt/chrono.h>
 #include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-#include <string>
 
 #include "world.h"
 
@@ -15,103 +13,87 @@
  * @param argv argument vector
  * @return
  */
-int main(int argc, char **argv) {
+int main(const int argc, char **argv) {
 
-  // todo
-  // log other constructs
-  // fdtd engine
-  // hdf5 io
-  // particles
-  // configuration
-  // parallelization
+  const auto start_time = std::chrono::high_resolution_clock::now();
+  const auto id = fmt::format("{:%Y-%m-%d_%H:%M:%S}", start_time);
 
-  // spdlog setup
-  try {
-    // remove old logs
-    if (std::filesystem::is_directory("./logs/")) {
-      std::filesystem::remove_all("./logs/");
-    }
-
-    // create empty logging directory
-    std::filesystem::create_directory("./logs/");
-
-    // file based default logger
-    const auto logger = spdlog::basic_logger_mt("logger", "./logs/log.log");
-    spdlog::set_default_logger(logger);
-
-    // logger options
-    spdlog::set_level(spdlog::level::trace);
-    spdlog::flush_every(std::chrono::seconds(5));
-
-  } catch (const std::exception &err) {
-    // temp logger for writing to stderr
-    const auto logger = spdlog::stderr_color_mt("stderr");
-    logger->critical(err.what());
-
+  if (argc < 2) {
+    SPDLOG_CRITICAL("io prefix not provided ... please rerun as `EPPIC <cfg_toml_path>`");
     return EXIT_FAILURE;
   }
 
-  // initial diagnostics
-  SPDLOG_INFO("EPPIC begin");
-  SPDLOG_INFO("logs will be written to `./logs/`");
+#if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
+  const auto tmp_log_dir = std::filesystem::current_path() / "logs";
 
-  // floating point precision
-  // todo get this from configuration
-  const std::string precision = "single";
-  SPDLOG_INFO("floating point precision: {}", precision);
-
-  if (precision == "single") {
-    // EPPIC configuration
-    const auto config = Config<float>();
-
-    // EPPIC world
-    auto world_creation_result = World<float>::create(config);
-    if (!world_creation_result.has_value()) {
-      SPDLOG_CRITICAL("failed to create World object: {}",
-                      world_creation_result.error());
-
-      return EXIT_FAILURE;
+  try {
+    if (!is_directory(tmp_log_dir)) {
+      create_directory(tmp_log_dir);
+    } else {
+      SPDLOG_WARN("found previous temporary logging directory at `{}` ... removing now", tmp_log_dir.string());
+      std::filesystem::remove_all(tmp_log_dir);
+      std::filesystem::create_directory(tmp_log_dir);
     }
-    auto world = std::move(world_creation_result).value();
+  } catch (const std::filesystem::filesystem_error &err) {
+    SPDLOG_CRITICAL("unable to create temporary logging directory at `{}`: {}", tmp_log_dir.string(), err.what());
+  }
+  SPDLOG_DEBUG("created temporary logging directory `{}`", tmp_log_dir.string());
 
-    // run EPPIC
-    if (auto world_run_result = world.advance_to(config.end_time);
-        !world_run_result.has_value()) {
-      SPDLOG_CRITICAL("failed to run EPPIC: {}", world_run_result.error());
+  const auto tmp_logger = spdlog::basic_logger_mt("tmp_logger", (tmp_log_dir / "log.log").string());
+  spdlog::set_default_logger(tmp_logger);
+  spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
+  SPDLOG_DEBUG("created temporary logging directory and logger at `{}`", tmp_log_dir.string());
+#endif
 
-      return EXIT_FAILURE;
-    }
+  SPDLOG_INFO("EPPIC run begin: {}", start_time);
 
-  } else {
-    // check for invalid configuration
-    if (precision != "double") {
-      SPDLOG_WARN("floating point precision `{}` is not supported and will "
-                  "default to `double`",
-                  precision);
-    }
-
-    // EPPIC configuration
-    const auto config = Config<double>();
-
-    // EPPIC world
-    auto world_creation_result = World<double>::create(config);
-    if (!world_creation_result.has_value()) {
-      SPDLOG_CRITICAL("failed to create World object: {}",
-                      world_creation_result.error());
-
-      return EXIT_FAILURE;
-    }
-    auto world = std::move(world_creation_result).value();
-
-    // run EPPIC
-    if (auto world_run_result = world.advance_to(config.end_time);
-        !world_run_result.has_value()) {
-      SPDLOG_CRITICAL("failed to run EPPIC: {}", world_run_result.error());
-
-      return EXIT_FAILURE;
-    }
+  std::unique_ptr<World> world;
+  try {
+    world.reset(new World(argv[1], id));
+  } catch (const std::exception &err) {
+    SPDLOG_CRITICAL("failed to configure World object: {}", err.what());
+    return EXIT_FAILURE;
   }
 
-  SPDLOG_INFO("EPPIC exiting");
+#if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
+  try {
+    const auto log_dir = world->get_output_dir() / "log";
+
+    std::filesystem::rename(tmp_log_dir, log_dir);
+    SPDLOG_DEBUG("moved {} to {}", tmp_log_dir.string(), log_dir.string());
+
+    tmp_logger->flush();
+    const auto logger = spdlog::basic_logger_mt("logger", (log_dir / "log.log").string(), false);
+    spdlog::set_default_logger(logger);
+    spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
+    spdlog::flush_every(std::chrono::seconds(5));
+    SPDLOG_DEBUG("reset default logger to write to `{}`", (log_dir / "logs.log").string());
+
+  } catch (const std::filesystem::filesystem_error &err) {
+    SPDLOG_CRITICAL("unable to move `{}` directory to `{}`: {}", tmp_log_dir.string(),
+                    (world->get_output_dir() / "log").string(), err.what());
+    return EXIT_FAILURE;
+  }
+
+  // NOTE: only used if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_INFO
+  [[maybe_unused]] const auto config_time = std::chrono::high_resolution_clock::now();
+  SPDLOG_INFO("EPPIC successfully configured: {}", config_time);
+  SPDLOG_INFO("elapsed time: {:%H:%M:%S}", config_time - start_time);
+  SPDLOG_INFO("begin EPPIC run");
+#endif
+
+  if (const auto result = world->run(); !result.has_value()) {
+    SPDLOG_CRITICAL("EPPIC run failed: {}", result.error());
+    return EXIT_FAILURE;
+  }
+
+#if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
+  // NOTE: only used if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_INFO
+  [[maybe_unused]] const auto run_time = std::chrono::high_resolution_clock::now();
+  SPDLOG_INFO("EPPIC run successfully completed: {}", run_time);
+  SPDLOG_INFO("elapsed time: {:%H:%M:%S}", run_time - config_time);
+  SPDLOG_INFO("total time: {:%H:%M:%S}", run_time - start_time);
+#endif
+
   return EXIT_SUCCESS;
 }
