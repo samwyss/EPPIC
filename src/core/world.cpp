@@ -31,7 +31,7 @@ Coord3<size_t> World::init_nv_h() const {
 
   // (m) maximum required spatial step
   const fpp ds = std::min({ds_min_wavelength, ds_min_feature_size});
-  SPDLOG_DEBUG("maximum spatial step (m): {:.3e}", ds);
+  SPDLOG_DEBUG("minimum of maximum spatial steps (m): {:.3e}", ds);
 
   // the computation here is a result of snapping the maximum step to the geometry
   const Coord3 nv_h_l = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
