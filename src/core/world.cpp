@@ -407,8 +407,8 @@ void World::log(const uint64_t hyperslab, const uint64_t step) const {
   SPDLOG_TRACE("exit World::log");
 }
 
-void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t num) const {
-  SPDLOG_TRACE("enter World::write_metadata");
+void World::log_metadata(const HDF5Obj &group, const double dt, const uint64_t num) const {
+  SPDLOG_TRACE("enter World::log_metadata");
 
   const fpp delta_t[1] = {dt};
   const fpp dxdydz[3] = {d.x, d.y, d.z};
@@ -432,7 +432,7 @@ void World::write_metadata(const HDF5Obj &group, const double dt, const uint64_t
   H5Dwrite(spacing.get(), h5_fpp, H5S_ALL, H5S_ALL, H5P_DEFAULT, dxdydz);
   H5Dwrite(number_logs.get(), H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, num_logs);
 
-  SPDLOG_TRACE("exit World::write_metadata");
+  SPDLOG_TRACE("exit World::log_metadata");
 }
 
 void World::setup_dataspaces(const uint64_t num) {

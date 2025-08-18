@@ -174,7 +174,7 @@ private:
   void log(uint64_t hyperslab, uint64_t step) const;
 
   /*!
-   * writes metadata required for gen_xdmf.py
+   * logs metadata required for gen_xdmf.py
    *
    * todo improve error handling
    *
@@ -182,7 +182,7 @@ private:
    * @param dt (s) timestep
    * @param num number of logged steps
    */
-  void write_metadata(const HDF5Obj &group, double dt, uint64_t num) const;
+  void log_metadata(const HDF5Obj &group, double dt, uint64_t num) const;
 
   /*!
    * sets up dataspaces for logging
