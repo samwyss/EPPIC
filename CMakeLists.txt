@@ -12,13 +12,15 @@ project(EPPIC
 
 # compiler settings ----------------------------------------------------------------------------------------------------
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_compile_options(-O0 -Wall -g3)
+    add_compile_options(-O0 -Wall -g3 -fsanitize=address)
+    add_link_options(-fsanitize=address)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG)
 elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options(-O3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -flto)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 elseif (CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    add_compile_options(-O2 -g3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -fno-omit-frame-pointer)
+    add_compile_options(-O2 -g3 -DNDEBUG -Wall -march=native -mtune=native -ffast-math -fno-omit-frame-pointer -fsanitize=address)
+    add_link_options(-fsanitize=address)
     add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_OFF)
 endif ()
 
