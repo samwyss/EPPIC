@@ -44,34 +44,34 @@ public:
   explicit Config(const std::string &input_file_path, const std::string &id);
 
   /// (s) end time of simulation
-  fpp end_time;
+  fp_t end_time;
 
   /// (m) size of bounding box in all directions
-  Coord3<fpp> len;
+  Coord3<fp_t> len;
 
   /// (Hz) maximum frequency to resolve with FDTD engine
-  fpp max_frequency;
+  fp_t max_frequency;
 
   /// number of voxels per minimum wavelength for FDTD engine
-  size_t num_vox_min_wavelength;
+  ui_t num_vox_min_wavelength;
 
   /// number of voxels per minimum feature dimension for FDTD engine
-  size_t num_vox_min_feature;
+  ui_t num_vox_min_feature;
 
   /// relative diagonally isotropic permittivity of material inside bounding box
-  fpp ep_r;
+  fp_t ep_r;
 
   /// relative diagonally isotropic permeability of material inside bounding box
-  fpp mu_r;
+  fp_t mu_r;
 
   /// (S / m) diagonally isotropic conductivity of material in bounding box
-  fpp sigma;
+  fp_t sigma;
 
   /// output directory
   std::filesystem::path out;
 
   /// data output downsampling ratio, number of steps between logged timesteps
-  uint64_t ds_ratio;
+  ui_t ds_ratio;
 
 private:
   /*!

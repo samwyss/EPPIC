@@ -145,8 +145,8 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
     }
     SPDLOG_DEBUG("`max_frequency` passed all checks");
 
-    num_vox_min_wavelength = toml::find<size_t>(config, "geometry", "num_vox_min_wavelength");
-    SPDLOG_DEBUG("`num_vox_min_wavelength` successfully parsed as size_t with value `{}`", num_vox_min_wavelength);
+    num_vox_min_wavelength = toml::find<ui_t>(config, "geometry", "num_vox_min_wavelength");
+    SPDLOG_DEBUG("`num_vox_min_wavelength` successfully parsed as ui_t with value `{}`", num_vox_min_wavelength);
     if (num_vox_min_wavelength <= 0) {
       SPDLOG_CRITICAL("`num_vox_min_wavelength` must be non-zero and non-negative ... value was `{}`",
                       num_vox_min_wavelength);
@@ -155,8 +155,8 @@ std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<
     }
     SPDLOG_DEBUG("`num_vox_min_wavelength` passed all checks");
 
-    num_vox_min_feature = toml::find<size_t>(config, "geometry", "num_vox_min_feature");
-    SPDLOG_DEBUG("`num_vox_min_feature` successfully parsed as size_t with value `{}`", num_vox_min_feature);
+    num_vox_min_feature = toml::find<ui_t>(config, "geometry", "num_vox_min_feature");
+    SPDLOG_DEBUG("`num_vox_min_feature` successfully parsed as ui_t with value `{}`", num_vox_min_feature);
     if (num_vox_min_feature <= 0) {
       SPDLOG_CRITICAL("`num_vox_min_feature` must be non-zero and non-negative ... value was `{}`",
                       num_vox_min_feature);
@@ -229,8 +229,8 @@ std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml
       return std::unexpected(result.error());
     }
 
-    ds_ratio = toml::find<uint64_t>(config, "data", "ds_ratio");
-    SPDLOG_DEBUG("`ds_ratio` successfully parsed as uint64_t with value `{}`", ds_ratio);
+    ds_ratio = toml::find<ui_t>(config, "data", "ds_ratio");
+    SPDLOG_DEBUG("`ds_ratio` successfully parsed as ui_t with value `{}`", ds_ratio);
     if (ds_ratio <= 0) {
       SPDLOG_CRITICAL("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio);
       throw std::invalid_argument(

@@ -54,14 +54,14 @@ public:
    * @param end_t (s) end time
    * @return void
    */
-  [[nodiscard]] std::expected<void, std::string> advance_to(fpp end_t);
+  [[nodiscard]] std::expected<void, std::string> advance_to(fp_t end_t);
 
   /*!
    * advances internal state by a given time period
    * @param adv_t (s) time period to advance by
    * @return void
    */
-  [[nodiscard]] std::expected<void, std::string> advance_by(fpp adv_t);
+  [[nodiscard]] std::expected<void, std::string> advance_by(fp_t adv_t);
 
   /*!
    * returns configured output directory
@@ -80,56 +80,56 @@ private:
 
   /*!
    * initializes nv_h
-   * @return Coord3<size_t>
+   * @return Coord3<ui_t>
    */
-  [[nodiscard]] Coord3<size_t> init_nv_h() const;
+  [[nodiscard]] Coord3<ui_t> init_nv_h() const;
 
   /*!
    * initializes nv_e
-   * @return Coord3<size_t>
+   * @return Coord3<ui_t>
    */
-  [[nodiscard]] Coord3<size_t> init_nv_e() const;
+  [[nodiscard]] Coord3<ui_t> init_nv_e() const;
 
   /*!
    * initializes d
-   * @return Coord3<fpp>
+   * @return Coord3<fp_t>
    */
-  [[nodiscard]] Coord3<fpp> init_d() const;
+  [[nodiscard]] Coord3<fp_t> init_d() const;
 
   /*!
    * initializes d_inv
-   * @return Coord3<fpp>
+   * @return Coord3<fp_t>
    */
-  [[nodiscard]] Coord3<fpp> init_d_inv() const;
+  [[nodiscard]] Coord3<fp_t> init_d_inv() const;
 
   /*!
    * calculates the number of steps required to advance engine state by some
    * time period
    * @param adv_t (s) time period to advance by
-   * @return uint64_t
+   * @return ui_t
    */
-  [[nodiscard]] uint64_t calc_num_steps(fpp adv_t) const;
+  [[nodiscard]] ui_t calc_num_steps(fp_t adv_t) const;
 
   /*!
    * calculates the number of steps required to model a given time span
    * @param time_span (s) time span to be modeled
    * @return number of steps required by CFL stability condition
    */
-  [[nodiscard]] uint64_t calc_cfl_steps(fpp time_span) const;
+  [[nodiscard]] ui_t calc_cfl_steps(fp_t time_span) const;
 
   /*!
    * advances internal field state by one time step
    * @param dt (s) time step
    * @return void
    */
-  void step(fpp dt);
+  void step(fp_t dt);
 
   /*!
    * advances internal electric field state by one time step
    * @param ea electric field a loop constant
    * @param eb electric field b loop constant
    */
-  void update_e(fpp ea, fpp eb) const;
+  void update_e(fp_t ea, fp_t eb) const;
 
   /*!
    * advances internal magnetic field state by one time step
@@ -137,48 +137,48 @@ private:
    * @param hya magnetic field a loop constant for y-component
    * @param hza magnetic field a loop constant for z-component
    */
-  void update_h(fpp hxa, fpp hya, fpp hza) const;
+  void update_h(fp_t hxa, fp_t hya, fp_t hza) const;
 
   /*!
    * advances internal electric field x-component state by one time step
    * @param ea electric field a loop constant
    * @param eb electric field b loop constant
    */
-  void update_ex(fpp ea, fpp eb) const;
+  void update_ex(fp_t ea, fp_t eb) const;
   /*!
    * advances internal electric field y-component state by one time step
    * @param ea electric field a loop constant
    * @param eb electric field b loop constant
    */
-  void update_ey(fpp ea, fpp eb) const;
+  void update_ey(fp_t ea, fp_t eb) const;
 
   /*!
    * advances internal electric field z-component state by one time step
    * @param ea electric field a loop constant
    * @param eb electric field b loop constant
    */
-  void update_ez(fpp ea, fpp eb) const;
+  void update_ez(fp_t ea, fp_t eb) const;
 
   /*!
    * advances internal magnetic field x-component state by one time step
    * @param hya magnetic field a loop constant for y-component
    * @param hza magnetic field a loop constant for z-component
    */
-  void update_hx(fpp hya, fpp hza) const;
+  void update_hx(fp_t hya, fp_t hza) const;
 
   /*!
    * advances internal magnetic field y-component state by one time step
    * @param hxa magnetic field a loop constant for x-component
    * @param hza magnetic field a loop constant for z-component
    */
-  void update_hy(fpp hxa, fpp hza) const;
+  void update_hy(fp_t hxa, fp_t hza) const;
 
   /*!
    * advances internal magnetic field z-component state by one time step
    * @param hxa magnetic field a loop constant for x-component
    * @param hya magnetic field a loop constant for y-component
    */
-  void update_hz(fpp hxa, fpp hya) const;
+  void update_hz(fp_t hxa, fp_t hya) const;
 
   /*!
    * logs runtime data to out
@@ -188,7 +188,7 @@ private:
    * @param hyperslab hyperslab index to write to
    * @param step current time step
    */
-  void log(uint64_t hyperslab, uint64_t step) const;
+  void log(ui_t hyperslab, ui_t step) const;
 
   /*!
    * logs metadata required for gen_xdmf.py
@@ -199,7 +199,7 @@ private:
    * @param dt (s) timestep
    * @param num number of logged steps
    */
-  void log_metadata(const HDF5Obj &group, double dt, uint64_t num) const;
+  void log_metadata(const HDF5Obj &group, double dt, ui_t num) const;
 
   /*!
    * sets up dataspaces for logging
@@ -208,7 +208,7 @@ private:
    *
    * @param num number of logged steps
    */
-  void setup_dataspaces(uint64_t num);
+  void setup_dataspaces(ui_t num);
 
   /*!
    * sets up datasets for logging
@@ -226,35 +226,35 @@ private:
   const HDF5Obj h5;
 
   /// output HDF5 floating point type
-  const hid_t h5_fpp = (std::is_same_v<fpp, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
+  const hid_t h5_fpp = (std::is_same_v<fp_t, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
 
   /// (s) elapsed time
-  fpp time = 0.0;
+  fp_t time = 0.0;
 
   /// (F/m) diagonally isotropic permittivity of material inside bounding box
-  const fpp ep;
+  const fp_t ep;
 
   /// (H/m) diagonally isotropic permeability of material inside bounding box
-  const fpp mu;
+  const fp_t mu;
 
   /// number of voxels in magnetic field
-  const Coord3<size_t> nv_h;
+  const Coord3<ui_t> nv_h;
 
   /// number of voxels in electric field
-  const Coord3<size_t> nv_e;
+  const Coord3<ui_t> nv_e;
 
   /// (m) spatial increments in all directions
-  const Coord3<fpp> d;
+  const Coord3<fp_t> d;
 
   /// (m) inverse spatial increments in all directions
-  const Coord3<fpp> d_inv;
+  const Coord3<fp_t> d_inv;
 
   /// (V/m) electric field vector
   /// NOTE: as configured e wraps h to make it easier to manage boundary conditions
-  const Vector3<fpp> e;
+  const Vector3<fp_t> e;
 
   /// (A/m) magnetic field vector
-  const Vector3<fpp> h;
+  const Vector3<fp_t> h;
 
   /// dataspaces for writable data
   Dataspaces dataspaces;

@@ -23,6 +23,7 @@
 #include <mdspan/mdspan.hpp>
 
 #include "coordinate.h"
+#include "type.h"
 
 /*!
  * vector field
@@ -35,8 +36,8 @@ public:
    * @param dims field dimensions
    * @param val initial field value
    */
-  Vector3(const Coord3<size_t> &dims, const T val) {
-    const size_t n = dims.x * dims.y * dims.z;
+  Vector3(const Coord3<ui_t> &dims, const T val) {
+    const ui_t n = dims.x * dims.y * dims.z;
 
     x_data = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
     y_data = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
@@ -46,7 +47,7 @@ public:
     y = Kokkos::mdspan(y_data, dims.x, dims.y, dims.z);
     z = Kokkos::mdspan(z_data, dims.x, dims.y, dims.z);
 
-    for (size_t i = 0; i < n; ++i) {
+    for (ui_t i = 0; i < n; ++i) {
       x_data[i] = val;
       y_data[i] = val;
       z_data[i] = val;
@@ -63,13 +64,13 @@ public:
   }
 
   /// x-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> x;
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> x;
 
   /// y-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> y;
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> y;
 
   /// z-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> z;
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> z;
 
 private:
   /// x-component data container

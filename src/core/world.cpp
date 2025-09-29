@@ -32,7 +32,7 @@ HDF5Obj World::init_h5() const {
   return h5_l;
 }
 
-Coord3<size_t> World::init_nv_h() const {
+Coord3<ui_t> World::init_nv_h() const {
   SPDLOG_TRACE("enter World::init_nv_h");
 
   // (m) maximum spatial step based on maximum frequency
@@ -51,9 +51,9 @@ Coord3<size_t> World::init_nv_h() const {
   SPDLOG_DEBUG("minimum of maximum spatial steps (m): {:.3e}", ds);
 
   // the computation here is a result of snapping the maximum step to the geometry
-  const Coord3 nv_h_l = {static_cast<size_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
-                         static_cast<size_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
-                         static_cast<size_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
+  const Coord3 nv_h_l = {static_cast<ui_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
+                         static_cast<ui_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
+                         static_cast<ui_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
 
   SPDLOG_DEBUG("magnetic field voxel dimensions: {} x {} x {}", nv_h_l.x, nv_h_l.y, nv_h_l.z);
 
@@ -61,7 +61,7 @@ Coord3<size_t> World::init_nv_h() const {
   return nv_h_l;
 }
 
-Coord3<size_t> World::init_nv_e() const {
+Coord3<ui_t> World::init_nv_e() const {
   SPDLOG_TRACE("enter World::init_nv_e");
 
   // the +1 is a result of the convention that all magnetic field points are wrapped by an electric field
@@ -146,7 +146,7 @@ std::expected<void, std::string> World::advance_by(const fp_t adv_t) {
   SPDLOG_DEBUG("timestep (s): {:.3e}", dt);
 
   // +2 comes from first and last timestep
-  const uint64_t logged_steps = steps / cfg.ds_ratio + 2;
+  const ui_t logged_steps = steps / cfg.ds_ratio + 2;
 
   const auto metadata_group = HDF5Obj(H5Gcreate(h5.get(), "metadata", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Gclose);
   log_metadata(metadata_group, dt, logged_steps);
@@ -163,7 +163,7 @@ std::expected<void, std::string> World::advance_by(const fp_t adv_t) {
   // main time loop
   SPDLOG_DEBUG("enter main time loop");
   try {
-    for (uint64_t i = 0; i < steps; ++i) {
+    for (ui_t i = 0; i < steps; ++i) {
       SPDLOG_DEBUG("step: {}/{} elapsed time (s): {:.5e}/{:.5e}", i + 1, steps, time, init_time + adv_t);
 
       // advance by one step
@@ -173,7 +173,7 @@ std::expected<void, std::string> World::advance_by(const fp_t adv_t) {
         SPDLOG_DEBUG("begin data logging");
 
         // hyperslab index to write to
-        uint64_t hyperslab = i / cfg.ds_ratio;
+        ui_t hyperslab = i / cfg.ds_ratio;
 
         // case for the last timestep
         if (i == steps - 1) [[unlikely]] {
@@ -210,25 +210,25 @@ std::expected<void, std::string> World::advance_by(const fp_t adv_t) {
 
 std::filesystem::path World::get_output_dir() const { return cfg.out; }
 
-uint64_t World::calc_num_steps(const fp_t adv_t) const {
+ui_t World::calc_num_steps(const fp_t adv_t) const {
   SPDLOG_TRACE("enter World::calc_num_steps");
 
   // find maximum number of timesteps required for any solver
-  const uint64_t max_num_steps = calc_cfl_steps(adv_t);
+  const ui_t max_num_steps = calc_cfl_steps(adv_t);
   SPDLOG_DEBUG("maximum number of steps required by any solver: {}", max_num_steps);
 
   SPDLOG_TRACE("exit World::calc_num_steps");
   return max_num_steps;
 }
 
-uint64_t World::calc_cfl_steps(const fp_t time_span) const {
+ui_t World::calc_cfl_steps(const fp_t time_span) const {
   SPDLOG_TRACE("enter World::calc_cfl_steps");
 
   const fp_t maximum_dt = static_cast<fp_t>(1.0 / (VAC_SPEED_OF_LIGHT / sqrt(cfg.ep_r * cfg.mu_r) *
                                                    sqrt(pow(d_inv.x, 2) + pow(d_inv.y, 2) + pow(d_inv.z, 2))));
   SPDLOG_DEBUG("maximum possible timestep to satisfy CFL condition (s): {:.3e}", maximum_dt);
 
-  const auto num_steps = static_cast<uint64_t>(ceil(time_span / maximum_dt));
+  const auto num_steps = static_cast<ui_t>(ceil(time_span / maximum_dt));
   SPDLOG_DEBUG("steps required to satisfy CFL condition: {}", num_steps);
 
   SPDLOG_TRACE("exit World::calc_cfl_steps");
@@ -302,9 +302,9 @@ void World::update_ex(const fp_t ea, const fp_t eb) const {
   SPDLOG_TRACE("enter World::update_ex");
 
   // assumes PEC outer boundary
-  for (size_t i = 1; i < e.x.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < e.x.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < e.x.extent(2) - 1; ++k) {
+  for (ui_t i = 1; i < e.x.extent(0) - 1; ++i) {
+    for (ui_t j = 1; j < e.x.extent(1) - 1; ++j) {
+      for (ui_t k = 1; k < e.x.extent(2) - 1; ++k) {
         e.x[i, j, k] = ea * (eb * e.x[i, j, k] + d_inv.y * (h.z[i, j, k] - h.z[i, j - 1, k]) -
                              d_inv.z * (h.y[i, j, k] - h.y[i, j, k - 1]));
       }
@@ -318,9 +318,9 @@ void World::update_ey(const fp_t ea, const fp_t eb) const {
   SPDLOG_TRACE("enter World::update_ey");
 
   // assumes PEC outer boundary
-  for (size_t i = 1; i < e.y.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < e.y.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < e.y.extent(2) - 1; ++k) {
+  for (ui_t i = 1; i < e.y.extent(0) - 1; ++i) {
+    for (ui_t j = 1; j < e.y.extent(1) - 1; ++j) {
+      for (ui_t k = 1; k < e.y.extent(2) - 1; ++k) {
         e.y[i, j, k] = ea * (eb * e.y[i, j, k] + d_inv.z * (h.x[i, j, k] - h.x[i, j, k - 1]) -
                              d_inv.x * (h.z[i, j, k] - h.z[i - 1, j, k]));
       }
@@ -334,9 +334,9 @@ void World::update_ez(const fp_t ea, const fp_t eb) const {
   SPDLOG_TRACE("enter World::update_ez");
 
   // assumes PEC outer boundary
-  for (size_t i = 1; i < e.z.extent(0) - 1; ++i) {
-    for (size_t j = 1; j < e.z.extent(1) - 1; ++j) {
-      for (size_t k = 1; k < e.z.extent(2) - 1; ++k) {
+  for (ui_t i = 1; i < e.z.extent(0) - 1; ++i) {
+    for (ui_t j = 1; j < e.z.extent(1) - 1; ++j) {
+      for (ui_t k = 1; k < e.z.extent(2) - 1; ++k) {
         e.z[i, j, k] = ea * (eb * e.z[i, j, k] + d_inv.x * (h.y[i, j, k] - h.y[i - 1, j, k]) -
                              d_inv.y * (h.x[i, j, k] - h.x[i, j - 1, k]));
       }
@@ -349,9 +349,9 @@ void World::update_ez(const fp_t ea, const fp_t eb) const {
 void World::update_hx(const fp_t hya, const fp_t hza) const {
   SPDLOG_TRACE("enter World::update_hx");
 
-  for (size_t i = 0; i < h.x.extent(0); ++i) {
-    for (size_t j = 0; j < h.x.extent(1); ++j) {
-      for (size_t k = 0; k < h.x.extent(2); ++k) {
+  for (ui_t i = 0; i < h.x.extent(0); ++i) {
+    for (ui_t j = 0; j < h.x.extent(1); ++j) {
+      for (ui_t k = 0; k < h.x.extent(2); ++k) {
         h.x[i, j, k] += -hya * (e.z[i, j + 1, k] - e.z[i, j, k]) + hza * (e.y[i, j, k + 1] - e.y[i, j, k]);
       }
     }
@@ -363,9 +363,9 @@ void World::update_hx(const fp_t hya, const fp_t hza) const {
 void World::update_hy(const fp_t hxa, const fp_t hza) const {
   SPDLOG_TRACE("enter World::update_hy");
 
-  for (size_t i = 0; i < h.y.extent(0); ++i) {
-    for (size_t j = 0; j < h.y.extent(1); ++j) {
-      for (size_t k = 0; k < h.y.extent(2); ++k) {
+  for (ui_t i = 0; i < h.y.extent(0); ++i) {
+    for (ui_t j = 0; j < h.y.extent(1); ++j) {
+      for (ui_t k = 0; k < h.y.extent(2); ++k) {
         h.y[i, j, k] += -hza * (e.x[i, j, k + 1] - e.x[i, j, k]) + hxa * (e.z[i + 1, j, k] - e.z[i, j, k]);
       }
     }
@@ -377,9 +377,9 @@ void World::update_hy(const fp_t hxa, const fp_t hza) const {
 void World::update_hz(const fp_t hxa, const fp_t hya) const {
   SPDLOG_TRACE("enter World::update_hz");
 
-  for (size_t i = 0; i < h.z.extent(0); ++i) {
-    for (size_t j = 0; j < h.z.extent(1); ++j) {
-      for (size_t k = 0; k < h.z.extent(2); ++k) {
+  for (ui_t i = 0; i < h.z.extent(0); ++i) {
+    for (ui_t j = 0; j < h.z.extent(1); ++j) {
+      for (ui_t k = 0; k < h.z.extent(2); ++k) {
         h.z[i, j, k] += -hxa * (e.y[i + 1, j, k] - e.y[i, j, k]) + hya * (e.x[i, j + 1, k] - e.x[i, j, k]);
       }
     }
@@ -388,7 +388,7 @@ void World::update_hz(const fp_t hxa, const fp_t hya) const {
   SPDLOG_TRACE("exit World::update_hz");
 }
 
-void World::log(const uint64_t hyperslab, const uint64_t step) const {
+void World::log(const ui_t hyperslab, const ui_t step) const {
   SPDLOG_TRACE("enter World::log");
 
   constexpr hsize_t scalar_count[1] = {1};
@@ -409,27 +409,27 @@ void World::log(const uint64_t hyperslab, const uint64_t step) const {
   const auto h_memspace = HDF5Obj(H5Screate_simple(4, h_count, nullptr), H5Sclose);
 
   const fp_t time_arr[1] = {time};
-  const uint64_t step_arr[1] = {step};
+  const ui_t step_arr[1] = {step};
 
-  H5Dwrite(datasets.time.get(), h5_fp_t, scalar_memspace.get(), dataspaces.scalar.get(), H5P_DEFAULT, time_arr);
+  H5Dwrite(datasets.time.get(), h5_fp_t<fp_t>(), scalar_memspace.get(), dataspaces.scalar.get(), H5P_DEFAULT, time_arr);
   H5Dwrite(datasets.step.get(), H5T_NATIVE_UINT64, scalar_memspace.get(), dataspaces.scalar.get(), H5P_DEFAULT,
            step_arr);
-  H5Dwrite(datasets.ex.get(), h5_fp_t, e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.x.data_handle());
-  H5Dwrite(datasets.ey.get(), h5_fp_t, e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.y.data_handle());
-  H5Dwrite(datasets.ez.get(), h5_fp_t, e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.z.data_handle());
-  H5Dwrite(datasets.hx.get(), h5_fp_t, h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.x.data_handle());
-  H5Dwrite(datasets.hy.get(), h5_fp_t, h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.y.data_handle());
-  H5Dwrite(datasets.hz.get(), h5_fp_t, h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.z.data_handle());
+  H5Dwrite(datasets.ex.get(), h5_fp_t<fp_t>(), e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.x.data_handle());
+  H5Dwrite(datasets.ey.get(), h5_fp_t<fp_t>(), e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.y.data_handle());
+  H5Dwrite(datasets.ez.get(), h5_fp_t<fp_t>(), e_memspace.get(), dataspaces.e.get(), H5P_DEFAULT, e.z.data_handle());
+  H5Dwrite(datasets.hx.get(), h5_fp_t<fp_t>(), h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.x.data_handle());
+  H5Dwrite(datasets.hy.get(), h5_fp_t<fp_t>(), h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.y.data_handle());
+  H5Dwrite(datasets.hz.get(), h5_fp_t<fp_t>(), h_memspace.get(), dataspaces.h.get(), H5P_DEFAULT, h.z.data_handle());
 
   SPDLOG_TRACE("exit World::log");
 }
 
-void World::log_metadata(const HDF5Obj &group, const double dt, const uint64_t num) const {
+void World::log_metadata(const HDF5Obj &group, const double dt, const ui_t num) const {
   SPDLOG_TRACE("enter World::log_metadata");
 
   const fp_t delta_t[1] = {dt};
   const fp_t dxdydz[3] = {d.x, d.y, d.z};
-  const uint64_t num_logs[1] = {num};
+  const ui_t num_logs[1] = {num};
 
   constexpr hsize_t dims_scalar[1] = {1};
   constexpr hsize_t dims_xyz[1] = {3};
@@ -437,22 +437,24 @@ void World::log_metadata(const HDF5Obj &group, const double dt, const uint64_t n
   const auto dspace_scalar = HDF5Obj(H5Screate_simple(1, dims_scalar, nullptr), H5Sclose);
   const auto dspace_xyz = HDF5Obj(H5Screate_simple(1, dims_xyz, nullptr), H5Sclose);
 
-  const auto timestep = HDF5Obj(
-      H5Dcreate(group.get(), "dt", h5_fp_t, dspace_scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  const auto timestep =
+      HDF5Obj(H5Dcreate(group.get(), "dt", h5_fp_t<fp_t>(), dspace_scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
   const auto spacing = HDF5Obj(
-      H5Dcreate(group.get(), "dxdydz", h5_fp_t, dspace_xyz.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+      H5Dcreate(group.get(), "dxdydz", h5_fp_t<fp_t>(), dspace_xyz.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+      H5Dclose);
   const auto number_logs = HDF5Obj(H5Dcreate(group.get(), "logged_steps", H5T_NATIVE_UINT64, dspace_scalar.get(),
                                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
                                    H5Dclose);
 
-  H5Dwrite(timestep.get(), h5_fp_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, delta_t);
-  H5Dwrite(spacing.get(), h5_fp_t, H5S_ALL, H5S_ALL, H5P_DEFAULT, dxdydz);
+  H5Dwrite(timestep.get(), h5_fp_t<fp_t>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, delta_t);
+  H5Dwrite(spacing.get(), h5_fp_t<fp_t>(), H5S_ALL, H5S_ALL, H5P_DEFAULT, dxdydz);
   H5Dwrite(number_logs.get(), H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, num_logs);
 
   SPDLOG_TRACE("exit World::log_metadata");
 }
 
-void World::setup_dataspaces(const uint64_t num) {
+void World::setup_dataspaces(const ui_t num) {
   SPDLOG_TRACE("enter World::setup_dataspaces");
 
   const hsize_t dims_scalar[1] = {num};
@@ -475,24 +477,30 @@ void World::setup_dataspaces(const uint64_t num) {
 void World::setup_datasets(const HDF5Obj &group) {
   SPDLOG_TRACE("enter World::setup_datasets");
 
-  datasets.time =
-      HDF5Obj(H5Dcreate(group.get(), "time", h5_fp_t, dataspaces.scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
-              H5Dclose);
+  datasets.time = HDF5Obj(
+      H5Dcreate(group.get(), "time", h5_fp_t<fp_t>(), dataspaces.scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+      H5Dclose);
   datasets.step = HDF5Obj(
       H5Dcreate(group.get(), "step", H5T_NATIVE_UINT64, dataspaces.scalar.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
       H5Dclose);
-  datasets.ex = HDF5Obj(
-      H5Dcreate(group.get(), "ex", h5_fp_t, dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.ey = HDF5Obj(
-      H5Dcreate(group.get(), "ey", h5_fp_t, dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.ez = HDF5Obj(
-      H5Dcreate(group.get(), "ez", h5_fp_t, dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.hx = HDF5Obj(
-      H5Dcreate(group.get(), "hx", h5_fp_t, dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.hy = HDF5Obj(
-      H5Dcreate(group.get(), "hy", h5_fp_t, dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
-  datasets.hz = HDF5Obj(
-      H5Dcreate(group.get(), "hz", h5_fp_t, dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT), H5Dclose);
+  datasets.ex =
+      HDF5Obj(H5Dcreate(group.get(), "ex", h5_fp_t<fp_t>(), dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
+  datasets.ey =
+      HDF5Obj(H5Dcreate(group.get(), "ey", h5_fp_t<fp_t>(), dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
+  datasets.ez =
+      HDF5Obj(H5Dcreate(group.get(), "ez", h5_fp_t<fp_t>(), dataspaces.e.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
+  datasets.hx =
+      HDF5Obj(H5Dcreate(group.get(), "hx", h5_fp_t<fp_t>(), dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
+  datasets.hy =
+      HDF5Obj(H5Dcreate(group.get(), "hy", h5_fp_t<fp_t>(), dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
+  datasets.hz =
+      HDF5Obj(H5Dcreate(group.get(), "hz", h5_fp_t<fp_t>(), dataspaces.h.get(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT),
+              H5Dclose);
 
   SPDLOG_TRACE("exit World::setup_datasets");
 }

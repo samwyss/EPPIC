@@ -20,6 +20,6 @@
 
 #include "type.h"
 
-constexpr fpp ONE_OVER_TWO = 1.0 / 2.0;
+inline constexpr fp_t ONE_OVER_TWO = 1.0 / 2.0;
 
 #endif // CORE_NUMERIC_H

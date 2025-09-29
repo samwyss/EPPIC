@@ -23,6 +23,7 @@
 #include <mdspan/mdspan.hpp>
 
 #include "coordinate.h"
+#include "type.h"
 
 /*!
  * 3D scalar field
@@ -35,13 +36,13 @@ public:
    * @param dims field dimensions
    * @param val initial field value
    */
-  Scalar3(const Coord3<size_t> &dims, const T val) {
-    const size_t n = dims.x * dims.y * dims.z;
+  Scalar3(const Coord3<ui_t> &dims, const T val) {
+    const ui_t n = dims.x * dims.y * dims.z;
 
     data_arr = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
     data = Kokkos::mdspan(data_arr, dims.x, dims.y, dims.z);
 
-    for (size_t i = 0; i < n; ++i) {
+    for (ui_t i = 0; i < n; ++i) {
       data_arr[i] = val;
     }
   }
@@ -52,7 +53,7 @@ public:
   ~Scalar3() { std::free(data_arr); }
 
   /// data view
-  Kokkos::mdspan<T, Kokkos::dextents<size_t, 3>> data;
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> data;
 
 private:
   /// data container
