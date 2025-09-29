@@ -18,10 +18,25 @@
 #ifndef CORE_TYPE_H
 #define CORE_TYPE_H
 
-/// floating point precision (e.g., double or float)
-using fpp = double;
+/// floating point type (e.g., double or float)
+#if EPPIC_USE_FLOAT
+using fp_t = float;
+#else
+using fp_t = double;
+#endif
 
-// ensure fpp is either double or float to use correct HDF5 and MPI type aliases
-static_assert(std::is_same_v<fpp, double> || std::is_same_v<fpp, float>);
+// ensure fp_t is either double or float to use correct HDF5 and MPI type aliases
+static_assert(std::is_same_v<fp_t, double> || std::is_same_v<fp_t, float>);
+
+/// unsigned integer type (e.g., uint64_t or unit32_t)
+#if EPPIC_USE_UINT32_T
+using ui_t = uint32_t;
+#else
+using ui_t = uint64_t;
+#endif
+
+// ensure ui_t is either uint64_t or uint32_t to use correct HDF5 and MPI type aliases
+static_assert(std::is_same_v<ui_t, uint64_t> ||
+              std::is_same_v<ui_t, uint32_t>); /// floating point type (e.g., double or float)
 
 #endif // CORE_TYPE_H
