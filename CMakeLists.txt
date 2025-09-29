@@ -21,7 +21,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 project(EPPIC
         VERSION 0.0.1
-        LANGUAGES CXX
+        LANGUAGES CXX C
         HOMEPAGE_URL https://github.com/samwyss/EPPIC
 )
 
