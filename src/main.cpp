@@ -84,7 +84,7 @@ int main(const int argc, char **argv) {
     tmp_logger->flush();
     const auto logger = spdlog::basic_logger_mt("logger", (log_dir / "log.log").string(), false);
     spdlog::set_default_logger(logger);
-    spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
+    spdlog::set_level(spdlog::level::trace);
     spdlog::flush_every(std::chrono::seconds(5));
     SPDLOG_DEBUG("reset default logger to write to `{}`", (log_dir / "logs.log").string());
 
