@@ -33,7 +33,6 @@
 int main(const int argc, char **argv) {
 
   const auto start_time = std::chrono::high_resolution_clock::now();
-  const auto id = fmt::format("{:%Y-%m-%d_%H:%M:%S}", start_time);
 
   if (argc < 2) {
     SPDLOG_CRITICAL("config file path not provided ... please ensure EPPIC is executed as `./<binary_directory>/EPPIC "
@@ -64,6 +63,8 @@ int main(const int argc, char **argv) {
 #endif
 
   SPDLOG_INFO("EPPIC started at: {:%Y-%m-%d %H:%M:%S}", start_time);
+
+  const auto id = fmt::format("{:%Y-%m-%d_%H:%M:%S}", start_time);
 
   std::unique_ptr<World> world;
   try {
