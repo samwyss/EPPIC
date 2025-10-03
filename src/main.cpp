@@ -63,7 +63,7 @@ int main(const int argc, char **argv) {
   SPDLOG_DEBUG("created temporary logging directory and logger at `{}`", tmp_log_dir.string());
 #endif
 
-  SPDLOG_INFO("EPPIC run begin: {}", start_time);
+  SPDLOG_INFO("EPPIC started at: {:%Y-%m-%d %H:%M:%S}", start_time);
 
   std::unique_ptr<World> world;
   try {
