@@ -96,7 +96,7 @@ int main(const int argc, char **argv) {
 
   // NOTE: only used if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto config_time = std::chrono::high_resolution_clock::now();
-  SPDLOG_INFO("EPPIC successfully configured: {}", config_time);
+  SPDLOG_INFO("EPPIC successfully configured: {:%Y-%m-%d_%H:%M:%S}", config_time);
   SPDLOG_INFO("elapsed time: {:%H:%M:%S}", config_time - start_time);
   SPDLOG_INFO("begin EPPIC run");
 #endif
@@ -109,7 +109,7 @@ int main(const int argc, char **argv) {
 #if SPDLOG_ACTIVE_LEVEL < SPDLOG_LEVEL_OFF
   // NOTE: only used if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_INFO
   [[maybe_unused]] const auto run_time = std::chrono::high_resolution_clock::now();
-  SPDLOG_INFO("EPPIC run successfully completed: {}", run_time);
+  SPDLOG_INFO("EPPIC run successfully completed: {:%Y-%m-%d_%H:%M:%S}", run_time);
   SPDLOG_INFO("elapsed time: {:%H:%M:%S}", run_time - config_time);
   SPDLOG_INFO("total time: {:%H:%M:%S}", run_time - start_time);
 #endif
