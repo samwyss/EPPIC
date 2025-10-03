@@ -66,7 +66,7 @@ int main(const int argc, char **argv) {
 
   std::unique_ptr<World> world;
   try {
-    world.reset(new World(argv[1], id));
+    world = std::make_unique<World>(argv[1], id);
   } catch (const std::exception &err) {
     SPDLOG_CRITICAL("failed to configure World object: {}", err.what());
     return EXIT_FAILURE;
