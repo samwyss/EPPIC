@@ -17,24 +17,36 @@
 
 #include "config.h"
 
-Config::Config(const std::string &input_file_path, const std::string &id) {
-  SPDLOG_TRACE("enter Config::Config");
+#include <expected>
 
-  const std::filesystem::path input_file = std::filesystem::canonical(input_file_path);
-  if (!std::filesystem::exists(input_file)) {
-    SPDLOG_CRITICAL("input file path `{}` not found", input_file_path);
-    throw std::runtime_error(
-        fmt::format("input file path `{}` not found ... please correct and rerun", input_file.string()));
+std::expected<void, std::string> Config::init(const std::string &input_file_path) noexcept {
+  SPDLOG_TRACE("enter Config::init");
+
+  std::filesystem::path input_file;
+  try {
+    input_file = std::filesystem::canonical(input_file_path);
+  } catch (const std::exception &err) {
+    const std::string error = fmt::format(
+        "input file path `{}` could not be canonicalized: {} ... please ensure this is a valid path and rerun",
+        input_file.string(), err.what());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
   }
+
   if (!std::filesystem::is_regular_file(input_file)) {
     SPDLOG_CRITICAL("input file path `{}` is not a regular file", input_file_path);
+
     if (!std::filesystem::is_directory(input_file)) {
-      SPDLOG_CRITICAL("input file path `{}` is a directory not a file", input_file_path);
-      throw std::runtime_error(fmt::format(
-          "input file path `{}` is a directory not a file ... please correct and rerun", input_file.string()));
+      const std::string error = fmt::format(
+          "input file path `{}` is a directory not a file ... please correct and rerun", input_file.string());
+      SPDLOG_CRITICAL(error);
+      return std::unexpected(error);
     }
-    throw std::runtime_error(
-        fmt::format("input file path `{}` is not regular file ... please correct and rerun", input_file.string()));
+
+    const std::string error =
+        fmt::format("input file path `{}` is not regular file ... please correct and rerun", input_file.string());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
   }
   SPDLOG_DEBUG("input file path `{}` successfully verified", input_file.string());
 
@@ -43,218 +55,232 @@ Config::Config(const std::string &input_file_path, const std::string &id) {
 
     const auto &config = parse_result.unwrap();
 
-    if (const auto result = parse_time(config); result.has_value()) {
-      SPDLOG_DEBUG("successfully parsed [time] section in `{}`", input_file.string());
-    } else {
-      SPDLOG_CRITICAL("cannot parse [time] section in `{}`: {}", input_file.string(), result.error());
-      throw std::runtime_error(
-          fmt::format("cannot parse [time] section in `{}`: {}", input_file.string(), result.error()));
-    }
-
-    if (const auto result = parse_geometry(config); result.has_value()) {
-      SPDLOG_DEBUG("successfully parsed [geometry] section in `{}`", input_file.string());
-    } else {
-      SPDLOG_CRITICAL("cannot parse [geometry] section in `{}`: {}", input_file.string(), result.error());
-      throw std::runtime_error(
-          fmt::format("cannot parse [geometry] section in `{}`: {}", input_file.string(), result.error()));
-    }
-
-    if (const auto result = parse_material(config); result.has_value()) {
-      SPDLOG_DEBUG("successfully parsed [material] section in `{}`", input_file.string());
-    } else {
-      SPDLOG_CRITICAL("cannot parse [material] section in `{}`: {}", input_file.string(), result.error());
-      throw std::runtime_error(
-          fmt::format("cannot parse [material] section in `{}`: {}", input_file.string(), result.error()));
-    }
-
-    if (const auto result = parse_data(config, id); result.has_value()) {
-      SPDLOG_DEBUG("successfully parsed [data] section in `{}`", input_file.string());
-    } else {
-      SPDLOG_CRITICAL("cannot parse [data] section in `{}`: {}", input_file.string(), result.error());
-      throw std::runtime_error(
-          fmt::format("cannot parse [data] section in `{}`: {}", input_file.string(), result.error()));
+    if (const auto result = parse_from(config); !result.has_value()) {
+      const std::string error = fmt::format("failed to parse configuration file: {}", result.error());
+      SPDLOG_CRITICAL(error);
+      return std::unexpected(error);
     }
 
   } else {
-    SPDLOG_CRITICAL("failed to parse config file `{}` ... provided file contains invalid toml", input_file.string());
-    throw std::runtime_error(
-        fmt::format("failed to parse config file `{}` ... provided file contains invalid toml", input_file.string()));
+    const std::string error =
+        fmt::format("failed to parse config file `{}` ... provided file contains invalid toml", input_file.string());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
   }
 
-  SPDLOG_TRACE("exit Config::Config");
-}
-
-std::expected<void, std::string> Config::parse_time(const toml::basic_value<toml::type_config> &config) {
-  SPDLOG_TRACE("enter Config::parse_time");
-  try {
-    end_time = toml::find<fp_t>(config, "time", "end_time");
-    SPDLOG_DEBUG("`end_time` successfully parsed as fp_t with value `{}`", end_time);
-    if (end_time <= 0.0) {
-      SPDLOG_CRITICAL("`end_time` must be non-zero and non-negative ... value was `{}`", end_time);
-      throw std::invalid_argument(
-          fmt::format("`end_time` must be non-zero and non-negative ... value was `{}`", end_time));
-    }
-    SPDLOG_DEBUG("`end_time` passed all checks");
-
-  } catch (const std::exception &err) {
-    SPDLOG_CRITICAL("parsing [time] section failed: {}", err.what());
-    return std::unexpected(err.what());
+  if (const auto result = validate(); !result.has_value()) {
+    const std::string error = fmt::format("failed to validate initial state: {}", result.error());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
   }
 
-  SPDLOG_TRACE("exit Config::parse_time with success");
+  SPDLOG_INFO("configuration summary");
+  SPDLOG_INFO("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
+
+  SPDLOG_TRACE("exit Config::init");
   return {};
 }
 
-std::expected<void, std::string> Config::parse_geometry(const toml::basic_value<toml::type_config> &config) {
-  SPDLOG_TRACE("enter Config::parse_geometry");
+std::expected<void, std::string> Config::parse_from(const toml::basic_value<toml::type_config> &config) noexcept {
+  SPDLOG_TRACE("enter Config::parse_from");
 
-  try {
-    const auto x_len = toml::find<fp_t>(config, "geometry", "x_len");
-    SPDLOG_DEBUG("`x_len` successfully parsed as fp_t with value `{}`", x_len);
-    if (x_len <= 0.0) {
-      SPDLOG_CRITICAL("`x_len` must be non-zero and non-negative ... value was `{}`", x_len);
-      throw std::invalid_argument(fmt::format("`x_len` must be non-zero and non-negative ... value was `{}`", x_len));
-    }
-    SPDLOG_DEBUG("`x_len` passed all checks");
-
-    const auto y_len = toml::find<fp_t>(config, "geometry", "y_len");
-    SPDLOG_DEBUG("`y_len` successfully parsed as fp_t with value `{}`", y_len);
-    if (y_len <= 0.0) {
-      SPDLOG_CRITICAL("`y_len` must be non-zero and non-negative ... value was `{}`", y_len);
-      throw std::invalid_argument(fmt::format("`y_len` must be non-zero and non-negative ... value was `{}`", y_len));
-    }
-    SPDLOG_DEBUG("`y_len` passed all checks");
-
-    const auto z_len = toml::find<fp_t>(config, "geometry", "z_len");
-    SPDLOG_DEBUG("`z_len` successfully parsed as fp_t with value `{}`", z_len);
-    if (z_len <= 0.0) {
-      SPDLOG_CRITICAL("`z_len` must be non-zero and non-negative ... value was `{}`", z_len);
-      throw std::invalid_argument(fmt::format("`z_len` must be non-zero and non-negative ... value was `{}`", z_len));
-    }
-    SPDLOG_DEBUG("`z_len` passed all checks");
-
-    len = {x_len, y_len, z_len};
-    SPDLOG_DEBUG("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
-
-    max_frequency = toml::find<fp_t>(config, "geometry", "max_frequency");
-    SPDLOG_DEBUG("`max_frequency` successfully parsed as fp_t with value `{}`", max_frequency);
-    if (max_frequency <= 0.0) {
-      SPDLOG_CRITICAL("`max_frequency` must be non-zero and non-negative ... value was `{}`", max_frequency);
-      throw std::invalid_argument(
-          fmt::format("`max_frequency` must be non-zero and non-negative ... value was `{}`", max_frequency));
-    }
-    SPDLOG_DEBUG("`max_frequency` passed all checks");
-
-    num_vox_min_wavelength = toml::find<ui_t>(config, "geometry", "num_vox_min_wavelength");
-    SPDLOG_DEBUG("`num_vox_min_wavelength` successfully parsed as ui_t with value `{}`", num_vox_min_wavelength);
-    if (num_vox_min_wavelength <= 0) {
-      SPDLOG_CRITICAL("`num_vox_min_wavelength` must be non-zero and non-negative ... value was `{}`",
-                      num_vox_min_wavelength);
-      throw std::invalid_argument(fmt::format(
-          "`num_vox_min_wavelength` must be non-zero and non-negative ... value was `{}`", num_vox_min_wavelength));
-    }
-    SPDLOG_DEBUG("`num_vox_min_wavelength` passed all checks");
-
-    num_vox_min_feature = toml::find<ui_t>(config, "geometry", "num_vox_min_feature");
-    SPDLOG_DEBUG("`num_vox_min_feature` successfully parsed as ui_t with value `{}`", num_vox_min_feature);
-    if (num_vox_min_feature <= 0) {
-      SPDLOG_CRITICAL("`num_vox_min_feature` must be non-zero and non-negative ... value was `{}`",
-                      num_vox_min_feature);
-      throw std::invalid_argument(fmt::format(
-          "`num_vox_min_feature` must be non-zero and non-negative ... value was `{}`", num_vox_min_feature));
-    }
-    SPDLOG_DEBUG("`num_vox_min_feature` passed all checks");
-
-  } catch (const std::exception &err) {
-    SPDLOG_CRITICAL("parsing [geometry] section failed: {}", err.what());
-    return std::unexpected(err.what());
+  if (auto result = parse_item<fp_t>(config, "time", "end_time"); result.has_value()) {
+    end_time = result.value();
+  } else {
+    return std::unexpected(result.error());
   }
 
-  SPDLOG_TRACE("exit Config::parse_geometry with success");
+  fp_t x_len = 0;
+  if (auto result = parse_item<fp_t>(config, "geometry", "x_len"); result.has_value()) {
+    x_len = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  fp_t y_len = 0;
+  if (auto result = parse_item<fp_t>(config, "geometry", "y_len"); result.has_value()) {
+    y_len = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  fp_t z_len = 0;
+  if (auto result = parse_item<fp_t>(config, "geometry", "z_len"); result.has_value()) {
+    z_len = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  len = {x_len, y_len, z_len};
+
+  if (auto result = parse_item<fp_t>(config, "geometry", "max_frequency"); result.has_value()) {
+    max_frequency = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  if (auto result = parse_item<ui_t>(config, "geometry", "num_vox_min_wavelength"); result.has_value()) {
+    num_vox_min_wavelength = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  if (auto result = parse_item<ui_t>(config, "geometry", "num_vox_min_feature"); result.has_value()) {
+    num_vox_min_feature = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  if (auto result = parse_item<fp_t>(config, "geometry", "ep_r"); result.has_value()) {
+    ep_r = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  if (auto result = parse_item<fp_t>(config, "geometry", "mu_r"); result.has_value()) {
+    mu_r = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  if (auto result = parse_item<fp_t>(config, "geometry", "sigma"); result.has_value()) {
+    sigma = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  std::string out_dir_str;
+  if (auto result = parse_item<std::string>(config, "data", "out_dir"); result.has_value()) {
+    out_dir_str = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+  out = std::filesystem::path(out_dir_str);
+
+  if (auto result = parse_item<fp_t>(config, "data", "log_period"); result.has_value()) {
+    log_period = result.value();
+  } else {
+    return std::unexpected(result.error());
+  }
+
+  SPDLOG_TRACE("exit Config::parse_from");
   return {};
 }
 
-std::expected<void, std::string> Config::parse_material(const toml::basic_value<toml::type_config> &config) {
-  SPDLOG_TRACE("enter Config::parse_material");
+std::expected<void, std::string> Config::validate() noexcept {
+  SPDLOG_TRACE("enter Config::validate");
 
+  if (!in_range(end_time, 0.0, std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`end_time` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`end_time` passed all checks");
+
+  if (!in_range(len.x, 0.0, std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`x_len` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`x_len` passed all checks");
+
+  if (!in_range(len.y, 0.0, std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`y_len` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`y_len` passed all checks");
+
+  if (!in_range(len.z, 0.0, std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`z_len` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`z_len` passed all checks");
+
+  if (!in_range(max_frequency, 0.0, std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`max_frequency` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`max_frequency` passed all checks");
+
+  if (!in_range(num_vox_min_wavelength, static_cast<ui_t>(0), std::numeric_limits<ui_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error =
+        fmt::format("`num_vox_min_wavelength` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`num_vox_min_wavelength` passed all checks");
+
+  if (!in_range(num_vox_min_feature, static_cast<ui_t>(0), std::numeric_limits<ui_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error =
+        fmt::format("`num_vox_min_feature` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`num_vox_min_feature` passed all checks");
+
+  if (!in_range(ep_r, 0.0, std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`ep_r` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`ep_r` passed all checks");
+
+  if (!in_range(mu_r, 0.0, std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`mu_r` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`mu_r` passed all checks");
+
+  if (!in_range(sigma, 0.0, std::numeric_limits<fp_t>::max(), Bounds::INCL)) {
+    const std::string error = fmt::format("`sigma` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`sigma` passed all checks");
+
+  const auto out_str = out.string();
   try {
-    ep_r = toml::find<fp_t>(config, "material", "ep_r");
-    SPDLOG_DEBUG("`ep_r` successfully parsed as fp_t with value `{}`", ep_r);
-    if (ep_r <= 0.0) {
-      SPDLOG_CRITICAL("`ep_r` must be non-zero and non-negative ... value was `{}`", ep_r);
-      throw std::invalid_argument(fmt::format("`ep_r` must be non-zero and non-negative ... value was `{}`", ep_r));
-    }
-    SPDLOG_DEBUG("`ep_r` passed all checks");
-
-    mu_r = toml::find<fp_t>(config, "material", "mu_r");
-    SPDLOG_DEBUG("`mu_r` successfully parsed as fp_t with value `{}`", mu_r);
-    if (mu_r <= 0.0) {
-      SPDLOG_CRITICAL("`mu_r` must be non-zero and non-negative ... value was `{}`", mu_r);
-      throw std::invalid_argument(fmt::format("`mu_r` must be non-zero and non-negative ... value was `{}`", mu_r));
-    }
-    SPDLOG_DEBUG("`mu_r` passed all checks");
-
-    sigma = toml::find<fp_t>(config, "material", "sigma");
-    SPDLOG_DEBUG("`sigma successfully parsed as fp_t with value `{}`", sigma);
-    if (sigma < 0.0) {
-      SPDLOG_CRITICAL("`sigma` must be non-zero and non-negative ... value was `{}`", sigma);
-      throw std::invalid_argument(fmt::format("`sigma` must be non-zero and non-negative ... value was `{}`", sigma));
-    }
-    SPDLOG_DEBUG("`sigma` passed all checks");
-
-  } catch (const std::exception &err) {
-    SPDLOG_CRITICAL("parsing [material] section failed: {}", err.what());
-    return std::unexpected(err.what());
+    out = std::filesystem::canonical(out);
+    SPDLOG_DEBUG("`out_dir` successfully canonicalized with value`{}`", out.string());
+  } catch (const std::filesystem::filesystem_error &err) {
+    const std::string error =
+        fmt::format("unable to canonicalize `out_dir` with path `{}`: {} ... please ensure you are using either an "
+                    "absolute path or the appropriate relative path from your current working directory",
+                    out.string(), err.what());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
   }
 
-  SPDLOG_TRACE("exit Config::parse_material with success");
+  if (!std::filesystem::is_directory(out)) {
+    const std::string error =
+        fmt::format("path `out_dir` with path `{}`: is not a directory on this filesystem ... please correct and rerun",
+                    out.string());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+
+  if (!in_range(log_period, static_cast<fp_t>(0), std::numeric_limits<fp_t>::max(), Bounds::EXCL_INCL)) {
+    const std::string error = fmt::format("`log_period` is not within accepted range ... please correct and rerun");
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+  SPDLOG_DEBUG("`log_period` passed all checks");
+
+  SPDLOG_TRACE("exit Config::validate");
   return {};
 }
 
-std::expected<void, std::string> Config::parse_data(const toml::basic_value<toml::type_config> &config,
-                                                    const std::string &id) {
-  SPDLOG_TRACE("enter Config::parse_data");
-
-  try {
-    const auto out_dir_str = toml::find<std::string>(config, "data", "out_dir");
-    SPDLOG_DEBUG("`out_dir` successfully parsed as std::string with value `{}`", out_dir_str);
-    const auto out_dir = std::filesystem::canonical(out_dir_str);
-    SPDLOG_DEBUG("`out_dir` successfully canonicalized with value`{}`", out_dir.string());
-    if (const auto result = setup_dirs(out_dir, id); result.has_value()) {
-      out = result.value();
-      SPDLOG_DEBUG("`out_dir` passed all checks");
-      SPDLOG_INFO("created output directory structure at `{}`", out.string());
-    } else {
-      SPDLOG_CRITICAL("unable to create output directory structure: {}", result.error());
-      return std::unexpected(result.error());
-    }
-
-    ds_ratio = toml::find<ui_t>(config, "data", "ds_ratio");
-    SPDLOG_DEBUG("`ds_ratio` successfully parsed as ui_t with value `{}`", ds_ratio);
-    if (ds_ratio <= 0) {
-      SPDLOG_CRITICAL("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio);
-      throw std::invalid_argument(
-          fmt::format("`ds_ratio` must be non-zero and non-negative ... value was `{}`", ds_ratio));
-    }
-    SPDLOG_DEBUG("`ds_ratio` passed all checks");
-
-  } catch (const std::exception &err) {
-    SPDLOG_CRITICAL("parsing [data] section failed: {}", err.what());
-    return std::unexpected(err.what());
-  }
-
-  SPDLOG_TRACE("exit Config::parse_data with success");
-  return {};
-}
-
-std::expected<std::filesystem::path, std::string> Config::setup_dirs(const std::filesystem::path &out_dir,
-                                                                     const std::string &id) {
+std::expected<std::filesystem::path, std::string> Config::setup_out(const std::string &id) const noexcept {
   SPDLOG_TRACE("enter Config::setup_dirs");
 
   std::filesystem::path io_dir;
 
   try {
-    const auto root_dir = out_dir / "out";
+    const auto root_dir = out / "out";
     if (!is_directory(root_dir)) {
       SPDLOG_DEBUG("directory `{}` not found ... creating now", root_dir.string());
       create_directory(root_dir);

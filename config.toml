@@ -31,4 +31,4 @@ sigma = 0.0
 
 [data]
 out_dir = "."
-ds_ratio = 100000
+log_period = 1e-9
