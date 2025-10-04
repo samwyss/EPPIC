@@ -55,7 +55,7 @@ std::expected<void, std::string> Config::init(const std::string &input_file_path
 
     const auto &config = parse_result.unwrap();
 
-    if (const auto result = parse_from(config); !result.has_value()) {
+    if (const auto result = parse_from_toml(config); !result.has_value()) {
       const std::string error = fmt::format("failed to parse configuration file: {}", result.error());
       SPDLOG_CRITICAL(error);
       return std::unexpected(error);
@@ -75,13 +75,22 @@ std::expected<void, std::string> Config::init(const std::string &input_file_path
   }
 
   SPDLOG_INFO("configuration summary");
+  SPDLOG_INFO("end time (s): {:.3e}", end_time);
   SPDLOG_INFO("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
+  SPDLOG_INFO("maximum frequency to resolve (Hz): {:.3e}", max_frequency);
+  SPDLOG_INFO("number of voxels to resolve minimum wavelength: {}", num_vox_min_wavelength);
+  SPDLOG_INFO("number of voxels to resolve minimum feature size: {}", num_vox_min_feature);
+  SPDLOG_INFO("bounding box relative permittivity: {:.3e}", ep_r);
+  SPDLOG_INFO("bounding box relative permeability: {:.3e}", mu_r);
+  SPDLOG_INFO("bounding box conductivity (S / m): {:.3e}", sigma);
+  SPDLOG_INFO("path to store output data: {}", out.string());
+  SPDLOG_INFO("period between logging steps {:.3e}", log_period);
 
   SPDLOG_TRACE("exit Config::init");
   return {};
 }
 
-std::expected<void, std::string> Config::parse_from(const toml::basic_value<toml::type_config> &config) noexcept {
+std::expected<void, std::string> Config::parse_from_toml(const toml::basic_value<toml::type_config> &config) noexcept {
   SPDLOG_TRACE("enter Config::parse_from");
 
   if (auto result = parse_item<fp_t>(config, "time", "end_time"); result.has_value()) {
@@ -297,8 +306,9 @@ std::expected<std::filesystem::path, std::string> Config::setup_out(const std::s
     }
 
   } catch (const std::filesystem::filesystem_error &err) {
-    SPDLOG_CRITICAL("unable to create output directory structure: {}", err.what());
-    return std::unexpected<std::string>(err.what());
+    const std::string error = fmt::format("unable to create output directory structure: {}", err.what());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
   }
 
   SPDLOG_TRACE("exit Config::setup_dirs with success");

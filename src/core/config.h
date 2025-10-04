@@ -85,9 +85,22 @@ struct Config {
    */
   [[nodiscard]] std::expected<void, std::string> init(const std::string &input_file_path) noexcept;
 
+  /*!
+   * parses and sets internal state from a toml configuration
+   * @param config toml configuration
+   * @return std::expected<void, std::string> for {success, error} cases respectively
+   */
   [[nodiscard]] std::expected<void, std::string>
-  parse_from(const toml::basic_value<toml::type_config> &config) noexcept;
+  parse_from_toml(const toml::basic_value<toml::type_config> &config) noexcept;
 
+  /*!
+   * parses item of type T from toml configuration at a given table and key
+   * @tparam T type to be parsed
+   * @param config toml configuration
+   * @param table table to parse from
+   * @param key item key in table
+   * @return std::expected<T, std::string> for {success, error} cases respectively
+   */
   template <typename T>
   std::expected<T, std::string> parse_item(const toml::basic_value<toml::type_config> &config, const std::string table,
                                            const std::string key) noexcept {
@@ -143,8 +156,21 @@ struct Config {
     return name;
   }
 
+  /*!
+   * validates internal state against preconfigured value ranges
+   * @return std::expected<void, std::string> for {success, error} cases respectively
+   */
   [[nodiscard]] std::expected<void, std::string> validate() noexcept;
 
+  /*!
+   * checks to see if value is within a given range
+   * @tparam T type of value
+   * @param value value to check
+   * @param lower lower end of range
+   * @param upper upper end of range
+   * @param bounds inclusivity/exclusivity of lower and upper bounds respectively
+   * @return {true, false} for {in, out} of range respectively
+   */
   template <typename T>
   static bool in_range(const T value, const T lower, const T upper, const Bounds bounds) noexcept {
     SPDLOG_TRACE("enter Config::in_range");
@@ -174,6 +200,12 @@ struct Config {
     return status;
   }
 
+  /*!
+   * sets up output filesystem at out
+   * @param id unique identifier
+   * @return std::expected<std::filesystem::path, std::string> for {success, error} cases respectively
+   * @note std::filesystem::path is a path to a unique output folder which is used to store data from a given run
+   */
   std::expected<std::filesystem::path, std::string> setup_out(const std::string &id) const noexcept;
 };
 
