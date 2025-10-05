@@ -127,7 +127,7 @@ struct Config {
    * @note defaults to mangled typename if demangling fails
    * @return typename of T as a std::string
    */
-  template <typename T> std::string type_name() const noexcept {
+  template <typename T> [[nodiscard]] std::string type_name() const noexcept {
     SPDLOG_TRACE("enter Config::type_name");
 
     using TR = std::remove_reference_t<T>;
