@@ -19,7 +19,6 @@
 #define CORE_IO_H
 
 #include <hdf5.h>
-
 #include <utility>
 
 /*!
