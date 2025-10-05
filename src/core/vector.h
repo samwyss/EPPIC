@@ -29,14 +29,31 @@
  * vector field
  * @tparam T numeric type
  */
-template <numeric T> class Vector3 {
-public:
+template <numeric T> struct Vector3 {
+  /// x-component data view
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> x;
+
+  /// y-component data view
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> y;
+
+  /// z-component data view
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> z;
+
+  /// x-component data container
+  T *x_data;
+
+  /// y-component data container
+  T *y_data;
+
+  /// z-component data container
+  T *z_data;
+
   /*!
-   * Vector3 constructor
+   * initializes Vector3
    * @param dims field dimensions
    * @param val initial field value
    */
-  Vector3(const Coord3<ui_t> &dims, const T val) {
+  void init(const Coord3<ui_t> &dims, const T val) noexcept {
     const ui_t n = dims.x * dims.y * dims.z;
 
     x_data = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
@@ -55,32 +72,22 @@ public:
   }
 
   /*!
-   * Vector3 destructor
+   * resets Vector3 to default state
+   * @note this frees existing data and resets dataview
    */
-  ~Vector3() {
+  void reset() noexcept {
     std::free(x_data);
     std::free(y_data);
     std::free(z_data);
+
+    x_data = nullptr;
+    y_data = nullptr;
+    z_data = nullptr;
+
+    x = Kokkos::mdspan(x_data, 0, 0, 0);
+    y = Kokkos::mdspan(y_data, 0, 0, 0);
+    z = Kokkos::mdspan(z_data, 0, 0, 0);
   }
-
-  /// x-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> x;
-
-  /// y-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> y;
-
-  /// z-component data view
-  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> z;
-
-private:
-  /// x-component data container
-  T *x_data;
-
-  /// y-component data container
-  T *y_data;
-
-  /// z-component data container
-  T *z_data;
 };
 
 #endif // CORE_VECTOR_H

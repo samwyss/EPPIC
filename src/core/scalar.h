@@ -29,35 +29,38 @@
  * 3D scalar field
  * @tparam T numeric type
  */
-template <numeric T> class Scalar3 {
-public:
+template <numeric T> struct Scalar3 {
+  /// data view
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> v = Kokkos::mdspan(data, 0, 0, 0);
+
+  /// data container
+  T *data = nullptr;
+
   /*!
-   * Scalar3 constructor
+   * initializes Scalar3
    * @param dims field dimensions
    * @param val initial field value
    */
-  Scalar3(const Coord3<ui_t> &dims, const T val) {
+  void init(const Coord3<ui_t> &dims, const T val) noexcept {
     const ui_t n = dims.x * dims.y * dims.z;
 
-    data_arr = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
-    data = Kokkos::mdspan(data_arr, dims.x, dims.y, dims.z);
+    data = static_cast<T *>(std::aligned_alloc(64, sizeof(T) * n));
+    v = Kokkos::mdspan(data, dims.x, dims.y, dims.z);
 
     for (ui_t i = 0; i < n; ++i) {
-      data_arr[i] = val;
+      data[i] = val;
     }
   }
 
   /*!
-   * Scalar destructor
+   * resets Scalar3 to default state
+   * @note this frees existing data and resets dataview
    */
-  ~Scalar3() { std::free(data_arr); }
-
-  /// data view
-  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> data;
-
-private:
-  /// data container
-  T *data_arr;
+  void reset() noexcept {
+    std::free(data);
+    data = nullptr;
+    v = Kokkos::mdspan(data, 0, 0, 0);
+  }
 };
 
 #endif // CORE_SCALAR_H
