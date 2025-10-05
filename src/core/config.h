@@ -206,7 +206,7 @@ struct Config {
    * @return std::expected<std::filesystem::path, std::string> for {success, error} cases respectively
    * @note std::filesystem::path is a path to a unique output folder which is used to store data from a given run
    */
-  std::expected<std::filesystem::path, std::string> setup_out(const std::string &id) const noexcept;
+  [[nodiscard]] std::expected<std::filesystem::path, std::string> setup_out(const std::string &id) const noexcept;
 };
 
 #endif // CORE_CONFIG_H
