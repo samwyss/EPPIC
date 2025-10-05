@@ -58,7 +58,7 @@ int main(const int argc, char **argv) {
 
   const auto tmp_logger = spdlog::basic_logger_mt("tmp_logger", (tmp_log_dir / "log.log").string());
   spdlog::set_default_logger(tmp_logger);
-  spdlog::set_level(spdlog::level::trace); // needed even for compile time logs
+  spdlog::set_level(spdlog::level::trace);
   SPDLOG_DEBUG("created temporary logging directory and logger at `{}`", tmp_log_dir.string());
 #endif
 
