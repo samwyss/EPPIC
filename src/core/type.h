@@ -39,11 +39,11 @@ using ui_t = uint32_t;
 using ui_t = uint64_t;
 #endif
 
-/// HDF5 floating point type
-template <typename T> hid_t h5_fp_t();
-
 // ensure ui_t is either uint64_t or uint32_t to use correct HDF5 and MPI type aliases
 static_assert(std::is_same_v<ui_t, uint64_t> || std::is_same_v<ui_t, uint32_t>);
+
+/// HDF5 floating point type
+template <typename T> hid_t h5_fp_t();
 
 /// HDF5 floating point type template specialization for double
 template <> inline hid_t h5_fp_t<double>() { return H5T_NATIVE_DOUBLE; }
