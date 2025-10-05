@@ -30,7 +30,7 @@
 #include "type.h"
 
 /*!
- * vector field
+ * 3D vector field
  * @tparam T numeric type
  */
 template <numeric T> struct Vector3 {
