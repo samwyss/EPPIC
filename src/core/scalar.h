@@ -31,7 +31,7 @@
  */
 template <numeric T> struct Scalar3 {
   /// data view
-  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> v = Kokkos::mdspan(data, 0, 0, 0);
+  Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> v;
 
   /// data container
   T *data = nullptr;
@@ -57,9 +57,9 @@ template <numeric T> struct Scalar3 {
    * @note this frees existing data and resets dataview
    */
   void reset() noexcept {
+    v = Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>>();
     std::free(data);
     data = nullptr;
-    v = Kokkos::mdspan(data, 0, 0, 0);
   }
 };
 

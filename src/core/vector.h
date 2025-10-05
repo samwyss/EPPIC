@@ -76,6 +76,10 @@ template <numeric T> struct Vector3 {
    * @note this frees existing data and resets dataview
    */
   void reset() noexcept {
+    x = Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>>();
+    y = Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>>();
+    z = Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>>();
+
     std::free(x_data);
     std::free(y_data);
     std::free(z_data);
@@ -83,10 +87,6 @@ template <numeric T> struct Vector3 {
     x_data = nullptr;
     y_data = nullptr;
     z_data = nullptr;
-
-    x = Kokkos::mdspan(x_data, 0, 0, 0);
-    y = Kokkos::mdspan(y_data, 0, 0, 0);
-    z = Kokkos::mdspan(z_data, 0, 0, 0);
   }
 };
 
