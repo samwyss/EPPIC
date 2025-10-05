@@ -40,13 +40,13 @@ template <numeric T> struct Vector3 {
   Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>> z;
 
   /// x-component data container
-  T *x_data;
+  T *x_data = nullptr;
 
   /// y-component data container
-  T *y_data;
+  T *y_data = nullptr;
 
   /// z-component data container
-  T *z_data;
+  T *z_data = nullptr;
 
   /*!
    * initializes Vector3
