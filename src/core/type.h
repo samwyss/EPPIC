@@ -19,6 +19,7 @@
 #define CORE_TYPE_H
 
 #include <H5Tpublic.h>
+#include <string>
 #include <type_traits>
 
 /// floating point type (e.g., double or float)
@@ -58,5 +59,40 @@ template <> inline hid_t h5_ui_t<uint64_t>() { return H5T_NATIVE_UINT64; }
 
 /// HDF5 unsigned integer type template specialization for uint32_t
 template <> inline hid_t h5_ui_t<uint32_t>() { return H5T_NATIVE_UINT32; }
+
+/*!
+ * returns typename of T as a std::string
+ * @tparam T type to get name of
+ * @note defaults to mangled typename if demangling fails
+ * @return typename of T as a std::string
+ */
+template <typename T> [[nodiscard]] std::string type_name() noexcept {
+  SPDLOG_TRACE("enter type_name");
+
+  using TR = std::remove_reference_t<T>;
+
+  int status = 0;
+  const std::unique_ptr<char, void (*)(void *)> name_char_arr(
+      abi::__cxa_demangle(typeid(TR).name(), nullptr, nullptr, &status), std::free);
+
+  std::string name = (status == 0) ? name_char_arr.get() : typeid(TR).name();
+
+  if (std::is_const_v<T>) {
+    name += " const";
+  }
+
+  if (std::is_volatile_v<T>) {
+    name += " volatile";
+  }
+
+  if (std::is_lvalue_reference_v<T>) {
+    name += "&";
+  } else if (std::is_rvalue_reference_v<T>) {
+    name += "&&";
+  }
+
+  SPDLOG_TRACE("exit type_name");
+  return name;
+}
 
 #endif // CORE_TYPE_H

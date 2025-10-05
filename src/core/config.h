@@ -122,41 +122,6 @@ struct Config {
   }
 
   /*!
-   * returns typename of T as a std::string
-   * @tparam T type to get name of
-   * @note defaults to mangled typename if demangling fails
-   * @return typename of T as a std::string
-   */
-  template <typename T> [[nodiscard]] std::string type_name() const noexcept {
-    SPDLOG_TRACE("enter Config::type_name");
-
-    using TR = std::remove_reference_t<T>;
-
-    int status = 0;
-    const std::unique_ptr<char, void (*)(void *)> name_char_arr(
-        abi::__cxa_demangle(typeid(TR).name(), nullptr, nullptr, &status), std::free);
-
-    std::string name = (status == 0) ? name_char_arr.get() : typeid(TR).name();
-
-    if (std::is_const_v<T>) {
-      name += " const";
-    }
-
-    if (std::is_volatile_v<T>) {
-      name += " volatile";
-    }
-
-    if (std::is_lvalue_reference_v<T>) {
-      name += "&";
-    } else if (std::is_rvalue_reference_v<T>) {
-      name += "&&";
-    }
-
-    SPDLOG_TRACE("exit Config::type_name");
-    return name;
-  }
-
-  /*!
    * validates internal state against preconfigured value ranges
    * @return std::expected<void, std::string> for {success, error} cases respectively
    */
