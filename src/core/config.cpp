@@ -75,6 +75,35 @@ std::expected<void, std::string> Config::init(const std::string &input_file_path
   }
 
   SPDLOG_INFO("configuration summary");
+  summarize();
+
+  SPDLOG_TRACE("exit Config::init");
+  return {};
+}
+
+void Config::reset() noexcept {
+  SPDLOG_TRACE("enter Config::reset");
+  SPDLOG_DEBUG("resetting Config object");
+
+  end_time = 0.0;
+  len = {0.0, 0.0, 0.0};
+  max_frequency = 0.0;
+  num_vox_min_wavelength = 0;
+  num_vox_min_feature = 0;
+  ep_r = 0.0;
+  mu_r = 0.0;
+  sigma = 0.0;
+  out = std::filesystem::path("/dev/null");
+  log_period = 0.0;
+
+  summarize();
+
+  SPDLOG_TRACE("exit Config::reset");
+}
+
+void Config::summarize() noexcept {
+  SPDLOG_TRACE("enter Config::summarize");
+
   SPDLOG_INFO("end time (s): {:.3e}", end_time);
   SPDLOG_INFO("bounding box (m): {:.3e} x {:.3e} x {:.3e}", len.x, len.y, len.z);
   SPDLOG_INFO("maximum frequency to resolve (Hz): {:.3e}", max_frequency);
@@ -86,8 +115,7 @@ std::expected<void, std::string> Config::init(const std::string &input_file_path
   SPDLOG_INFO("path to store output data: {}", out.string());
   SPDLOG_INFO("period between logging steps {:.3e}", log_period);
 
-  SPDLOG_TRACE("exit Config::init");
-  return {};
+  SPDLOG_DEBUG("exit Config::summarize");
 }
 
 std::expected<void, std::string> Config::parse_from_toml(const toml::basic_value<toml::type_config> &config) noexcept {

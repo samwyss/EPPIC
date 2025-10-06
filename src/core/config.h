@@ -86,6 +86,16 @@ struct Config {
   [[nodiscard]] std::expected<void, std::string> init(const std::string &input_file_path) noexcept;
 
   /*!
+   * resets Config to default state
+   */
+  void reset() noexcept;
+
+  /*!
+   * logs internal state summary
+   */
+  void summarize() noexcept;
+
+  /*!
    * parses and sets internal state from a toml configuration
    * @param config toml configuration
    * @return std::expected<void, std::string> for {success, error} cases respectively
