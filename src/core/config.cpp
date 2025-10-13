@@ -310,35 +310,3 @@ std::expected<void, std::string> Config::validate() noexcept {
   SPDLOG_TRACE("exit Config::validate");
   return {};
 }
-
-std::expected<std::filesystem::path, std::string> Config::setup_out(const std::string &id) const noexcept {
-  SPDLOG_TRACE("enter Config::setup_dirs");
-
-  std::filesystem::path io_dir;
-
-  try {
-    const auto root_dir = out / "out";
-    if (!is_directory(root_dir)) {
-      SPDLOG_DEBUG("directory `{}` not found ... creating now", root_dir.string());
-      create_directory(root_dir);
-    } else {
-      SPDLOG_DEBUG("directory `{}` already exists", root_dir.string());
-    }
-
-    io_dir = root_dir / id;
-    if (!is_directory(io_dir)) {
-      SPDLOG_DEBUG("directory `{}` not found ... creating now", io_dir.string());
-      create_directory(io_dir);
-    } else {
-      SPDLOG_DEBUG("directory `{}` already exists", io_dir.string());
-    }
-
-  } catch (const std::filesystem::filesystem_error &err) {
-    const std::string error = fmt::format("unable to create output directory structure: {}", err.what());
-    SPDLOG_CRITICAL(error);
-    return std::unexpected(error);
-  }
-
-  SPDLOG_TRACE("exit Config::setup_dirs with success");
-  return io_dir;
-}
