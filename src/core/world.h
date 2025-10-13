@@ -32,8 +32,50 @@
 /*!
  * EPPIC World object
  */
-class World {
-public:
+struct World {
+  /// configuration from file
+  const Config cfg;
+
+  /// output HDF5 file
+  const HDF5Obj h5;
+
+  /// output HDF5 floating point type
+  const hid_t h5_fpp = (std::is_same_v<fp_t, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
+
+  /// (s) elapsed time
+  fp_t time = 0.0;
+
+  /// (F/m) diagonally isotropic permittivity of material inside bounding box
+  const fp_t ep;
+
+  /// (H/m) diagonally isotropic permeability of material inside bounding box
+  const fp_t mu;
+
+  /// number of voxels in magnetic field
+  const Coord3<ui_t> nv_h;
+
+  /// number of voxels in electric field
+  const Coord3<ui_t> nv_e;
+
+  /// (m) spatial increments in all directions
+  const Coord3<fp_t> d;
+
+  /// (m) inverse spatial increments in all directions
+  const Coord3<fp_t> d_inv;
+
+  /// (V/m) electric field vector
+  /// NOTE: as configured e wraps h to make it easier to manage boundary conditions
+  const Vector3<fp_t> e;
+
+  /// (A/m) magnetic field vector
+  const Vector3<fp_t> h;
+
+  /// dataspaces for writable data
+  Dataspaces dataspaces;
+
+  /// datasets for writable data
+  Datasets datasets;
+
   /*!
    * World constructor
    * @param input_file_path input file path as std::string
@@ -71,7 +113,6 @@ public:
    */
   [[nodiscard]] std::filesystem::path get_output_dir() const;
 
-private:
   /*!
    * initializes h5
    * @return HDF5Obj
@@ -218,49 +259,6 @@ private:
    * @param group group to create datasets within
    */
   void setup_datasets(const HDF5Obj &group);
-
-  /// configuration from file
-  const Config cfg;
-
-  /// output HDF5 file
-  const HDF5Obj h5;
-
-  /// output HDF5 floating point type
-  const hid_t h5_fpp = (std::is_same_v<fp_t, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
-
-  /// (s) elapsed time
-  fp_t time = 0.0;
-
-  /// (F/m) diagonally isotropic permittivity of material inside bounding box
-  const fp_t ep;
-
-  /// (H/m) diagonally isotropic permeability of material inside bounding box
-  const fp_t mu;
-
-  /// number of voxels in magnetic field
-  const Coord3<ui_t> nv_h;
-
-  /// number of voxels in electric field
-  const Coord3<ui_t> nv_e;
-
-  /// (m) spatial increments in all directions
-  const Coord3<fp_t> d;
-
-  /// (m) inverse spatial increments in all directions
-  const Coord3<fp_t> d_inv;
-
-  /// (V/m) electric field vector
-  /// NOTE: as configured e wraps h to make it easier to manage boundary conditions
-  const Vector3<fp_t> e;
-
-  /// (A/m) magnetic field vector
-  const Vector3<fp_t> h;
-
-  /// dataspaces for writable data
-  Dataspaces dataspaces;
-
-  /// datasets for writable data
-  Datasets datasets;
 };
 
 #endif // CORE_WORLD_H
