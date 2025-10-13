@@ -39,26 +39,26 @@ struct World {
   /// output HDF5 file
   HDF5Obj h5;
 
+  /// dataspaces for writable data
+  Dataspaces dataspaces;
+
+  /// datasets for writable data
+  Datasets datasets;
+
   /// (s) elapsed time
   fp_t time = 0.0;
 
   /// (F/m) diagonally isotropic permittivity of material inside bounding box
-  fp_t ep;
+  fp_t ep = 0.0;
 
   /// (H/m) diagonally isotropic permeability of material inside bounding box
-  fp_t mu;
-
-  /// number of voxels in magnetic field
-  Coord3<ui_t> nv_h;
-
-  /// number of voxels in electric field
-  Coord3<ui_t> nv_e;
+  fp_t mu = 0.0;
 
   /// (m) spatial increments in all directions
-  Coord3<fp_t> d;
+  Coord3<fp_t> d = {0.0, 0.0, 0.0};
 
   /// (m) inverse spatial increments in all directions
-  Coord3<fp_t> d_inv;
+  Coord3<fp_t> d_inv = {0.0, 0.0, 0.0};
 
   /// (V/m) electric field vector
   /// NOTE: as configured e wraps h to make it easier to manage boundary conditions
@@ -67,18 +67,19 @@ struct World {
   /// (A/m) magnetic field vector
   Vector3<fp_t> h;
 
-  /// dataspaces for writable data
-  Dataspaces dataspaces;
-
-  /// datasets for writable data
-  Datasets datasets;
-
   /*!
-   * World constructor
+   * initializes World
    * @param input_file_path input file path as std::string
    * @param id unique run identifier
+   * @return
    */
-  World(const std::string &input_file_path, const std::string &id);
+  [[nodiscard]] std::expected<void, std::string> init(const std::string &input_file_path,
+                                                      const std::string &id) noexcept;
+
+  /*!
+   * resets World to default state
+   */
+  void reset() noexcept;
 
   /*!
    * advances internal state to `end_time` parameter as defined in configuration file
@@ -101,44 +102,6 @@ struct World {
    * @return void
    */
   [[nodiscard]] std::expected<void, std::string> advance_by(fp_t adv_t);
-
-  /*!
-   * returns configured output directory
-   *
-   * useful for setting a logging directory
-   * @return std::filesystem::path
-   */
-  [[nodiscard]] std::filesystem::path get_output_dir() const;
-
-  /*!
-   * initializes h5
-   * @return HDF5Obj
-   */
-  [[nodiscard]] HDF5Obj init_h5() const;
-
-  /*!
-   * initializes nv_h
-   * @return Coord3<ui_t>
-   */
-  [[nodiscard]] Coord3<ui_t> init_nv_h() const;
-
-  /*!
-   * initializes nv_e
-   * @return Coord3<ui_t>
-   */
-  [[nodiscard]] Coord3<ui_t> init_nv_e() const;
-
-  /*!
-   * initializes d
-   * @return Coord3<fp_t>
-   */
-  [[nodiscard]] Coord3<fp_t> init_d() const;
-
-  /*!
-   * initializes d_inv
-   * @return Coord3<fp_t>
-   */
-  [[nodiscard]] Coord3<fp_t> init_d_inv() const;
 
   /*!
    * calculates the number of steps required to advance engine state by some
@@ -238,6 +201,14 @@ struct World {
    * @param num number of logged steps
    */
   void log_metadata(const HDF5Obj &group, double dt, ui_t num) const;
+
+  /*!
+   * sets up output filesystem at out
+   * @param id unique identifier
+   * @return std::expected<std::filesystem::path, std::string> for {success, error} cases respectively
+   * @note std::filesystem::path is a path to a unique output folder which is used to store data from a given run
+   */
+  [[nodiscard]] std::expected<std::filesystem::path, std::string> init_filesystem(const std::string &id) const noexcept;
 
   /*!
    * sets up dataspaces for logging

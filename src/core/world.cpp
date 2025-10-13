@@ -17,23 +17,14 @@
 
 #include "world.h"
 
-World::World(const std::string &input_file_path, const std::string &id)
-    : cfg(input_file_path, id), h5(init_h5()), ep(cfg.ep_r * VAC_PERMITTIVITY), mu(cfg.mu_r * VAC_PERMEABILITY),
-      nv_h(init_nv_h()), nv_e(init_nv_e()), d(init_d()), d_inv(init_d_inv()), e(Vector3(nv_e, static_cast<fp_t>(0.0))),
-      h(Vector3(nv_h, static_cast<fp_t>(0.0))) {}
+std::expected<void, std::string> World::init(const std::string &input_file_path, const std::string &id) noexcept {
+  SPDLOG_TRACE("enter World::init");
 
-HDF5Obj World::init_h5() const {
-  SPDLOG_TRACE("enter World::init_h5");
-
-  HDF5Obj h5_l(H5Fcreate((cfg.out / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT), H5Fclose);
-  SPDLOG_DEBUG("created output HDF5 file at `{}`", (cfg.out / "data.h5").string());
-
-  SPDLOG_TRACE("exit World::init_h5");
-  return h5_l;
-}
-
-Coord3<ui_t> World::init_nv_h() const {
-  SPDLOG_TRACE("enter World::init_nv_h");
+  if (const auto result = cfg.init(input_file_path); !result.has_value()) {
+    const auto error = fmt::format("failed to initialize configuration: {}", result.error());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
 
   // (m) maximum spatial step based on maximum frequency
   const fp_t ds_min_wavelength =
@@ -51,49 +42,65 @@ Coord3<ui_t> World::init_nv_h() const {
   SPDLOG_DEBUG("minimum of maximum spatial steps (m): {:.3e}", ds);
 
   // the computation here is a result of snapping the maximum step to the geometry
-  const Coord3 nv_h_l = {static_cast<ui_t>(ceil(static_cast<double>(cfg.len.x) / ds)),
-                         static_cast<ui_t>(ceil(static_cast<double>(cfg.len.y) / ds)),
-                         static_cast<ui_t>(ceil(static_cast<double>(cfg.len.z) / ds))};
-
-  SPDLOG_DEBUG("magnetic field voxel dimensions: {} x {} x {}", nv_h_l.x, nv_h_l.y, nv_h_l.z);
-
-  SPDLOG_TRACE("exit World::init_nv_h");
-  return nv_h_l;
-}
-
-Coord3<ui_t> World::init_nv_e() const {
-  SPDLOG_TRACE("enter World::init_nv_e");
+  const Coord3 nv_h = {static_cast<ui_t>(ceil(static_cast<fp_t>(cfg.len.x) / ds)),
+                       static_cast<ui_t>(ceil(static_cast<fp_t>(cfg.len.y) / ds)),
+                       static_cast<ui_t>(ceil(static_cast<fp_t>(cfg.len.z) / ds))};
+  SPDLOG_DEBUG("magnetic field voxel dimensions: {} x {} x {}", nv_h.x, nv_h.y, nv_h.z);
 
   // the +1 is a result of the convention that all magnetic field points are wrapped by an electric field
-  const Coord3 nv_e_l = {nv_h.x + 1, nv_h.y + 1, nv_h.z + 1};
+  const Coord3 nv_e = {nv_h.x + 1, nv_h.y + 1, nv_h.z + 1};
+  SPDLOG_DEBUG("electric field voxel dimensions: {} x {} x {}", nv_e.x, nv_e.y, nv_e.z);
 
-  SPDLOG_DEBUG("electric field voxel dimensions: {} x {} x {}", nv_e_l.x, nv_e_l.y, nv_e_l.z);
-
-  SPDLOG_TRACE("exit World::init_nv_e");
-  return nv_e_l;
-}
-
-Coord3<fp_t> World::init_d() const {
-  SPDLOG_TRACE("enter World::init_d");
-
-  // the magnetic field numbers are used as a result of the aforementioned magnetic field wrapping of the electric field
+  // the magnetic field numbers are used as a result of the electric field wrapping the magnetic field
   // the math works out nicely this way
-  const Coord3 d_l = {cfg.len.x / static_cast<fp_t>(nv_h.x), cfg.len.y / static_cast<fp_t>(nv_h.y),
-                      cfg.len.z / static_cast<fp_t>(nv_h.z)};
-  SPDLOG_DEBUG("voxel size (m): {:.3e} x {:.3e} x {:.3e}", d_l.x, d_l.y, d_l.z);
+  d = {cfg.len.x / static_cast<fp_t>(nv_h.x), cfg.len.y / static_cast<fp_t>(nv_h.y),
+       cfg.len.z / static_cast<fp_t>(nv_h.z)};
+  SPDLOG_DEBUG("voxel size (m): {:.3e} x {:.3e} x {:.3e}", d.x, d.y, d.z);
 
-  SPDLOG_TRACE("exit World::init_d");
-  return d_l;
+  d_inv = {static_cast<fp_t>(1.0) / d.x, static_cast<fp_t>(1.0) / d.y, static_cast<fp_t>(1.0) / d.z};
+  SPDLOG_DEBUG("inverse voxel size (m^-1): {:.3e} x {:.3e} x {:.3e}", d_inv.x, d_inv.y, d_inv.z);
+
+  if (const auto result = h.init(nv_h, static_cast<fp_t>(0.0)); !result.has_value()) {
+    const auto error = fmt::format("failed to initialize magnetic field: {}", result.error());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+
+  if (const auto result = e.init(nv_e, static_cast<fp_t>(0.0)); !result.has_value()) {
+    const auto error = fmt::format("failed to initialize electric field: {}", result.error());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+
+  if (const auto result = init_filesystem(id); result.has_value()) {
+    const auto error = fmt::format("failed to initialize output filesystem: {}", result.error());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+
+  h5 = HDF5Obj(H5Fcreate((cfg.out / "data.h5").c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT), H5Fclose);
+  SPDLOG_DEBUG("created output HDF5 file at `{}`", (cfg.out / "data.h5").string());
+
+  // todo dataspaces/datasets
+
+  SPDLOG_TRACE("exit World::init");
+  return {};
 }
 
-Coord3<fp_t> World::init_d_inv() const {
-  SPDLOG_TRACE("enter World::init_d_inv");
+// TODO add reset for IO
+void World::reset() noexcept {
+  SPDLOG_TRACE("enter World::reset");
 
-  const Coord3 d_inv_l = {static_cast<fp_t>(1.0) / d.x, static_cast<fp_t>(1.0) / d.y, static_cast<fp_t>(1.0) / d.z};
-  SPDLOG_DEBUG("inverse voxel size (m^-1): {:.3e} x {:.3e} x {:.3e}", d_inv_l.x, d_inv_l.y, d_inv_l.z);
+  cfg.reset();
+  time = 0.0;
+  ep = 0.0;
+  mu = 0.0;
+  d = Coord3<fp_t>(0, 0, 0);
+  d_inv = Coord3<fp_t>(0, 0, 0);
+  e.reset();
+  h.reset();
 
-  SPDLOG_TRACE("exit World::init_d_inv");
-  return d_inv_l;
+  SPDLOG_TRACE("exit World::reset");
 }
 
 std::expected<void, std::string> World::run() {
@@ -207,8 +214,6 @@ std::expected<void, std::string> World::advance_by(const fp_t adv_t) {
 
   return {};
 }
-
-std::filesystem::path World::get_output_dir() const { return cfg.out; }
 
 ui_t World::calc_num_steps(const fp_t adv_t) const {
   SPDLOG_TRACE("enter World::calc_num_steps");
@@ -452,6 +457,38 @@ void World::log_metadata(const HDF5Obj &group, const double dt, const ui_t num) 
   H5Dwrite(number_logs.get(), H5T_NATIVE_UINT64, H5S_ALL, H5S_ALL, H5P_DEFAULT, num_logs);
 
   SPDLOG_TRACE("exit World::log_metadata");
+}
+
+std::expected<std::filesystem::path, std::string> World::init_filesystem(const std::string &id) const noexcept {
+  SPDLOG_TRACE("enter World::init_filesystem");
+
+  std::filesystem::path io_dir;
+
+  try {
+    const auto root_dir = out / "out";
+    if (!is_directory(root_dir)) {
+      SPDLOG_DEBUG("directory `{}` not found ... creating now", root_dir.string());
+      create_directory(root_dir);
+    } else {
+      SPDLOG_DEBUG("directory `{}` already exists", root_dir.string());
+    }
+
+    io_dir = root_dir / id;
+    if (!is_directory(io_dir)) {
+      SPDLOG_DEBUG("directory `{}` not found ... creating now", io_dir.string());
+      create_directory(io_dir);
+    } else {
+      SPDLOG_DEBUG("directory `{}` already exists", io_dir.string());
+    }
+
+  } catch (const std::filesystem::filesystem_error &err) {
+    const std::string error = fmt::format("unable to create output directory structure: {}", err.what());
+    SPDLOG_CRITICAL(error);
+    return std::unexpected(error);
+  }
+
+  SPDLOG_TRACE("exit World::init_filesystem with success");
+  return io_dir;
 }
 
 void World::setup_dataspaces(const ui_t num) {
