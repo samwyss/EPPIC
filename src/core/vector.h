@@ -114,9 +114,8 @@ template <numeric T> struct Vector3 {
   /*!
    * resets Vector3 to default state
    * @note this frees existing data and resets dataview
-   * @return std::expected<void, std::string> for {success, error} cases respectively
    */
-  [[nodiscard]] std::expected<void, std::string> reset() noexcept {
+  void reset() noexcept {
     SPDLOG_TRACE("enter Vector3::reset");
 
     x = Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>>();
@@ -132,7 +131,6 @@ template <numeric T> struct Vector3 {
     z_data = nullptr;
 
     SPDLOG_TRACE("exit Vector3::reset");
-    return {};
   }
 };
 

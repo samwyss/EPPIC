@@ -80,9 +80,8 @@ template <numeric T> struct Scalar3 {
   /*!
    * resets Scalar3 to default state
    * @note this frees existing data and resets dataview
-   * @return std::expected<void, std::string> for {success, error} cases respectively
    */
-  [[nodiscard]] std::expected<void, std::string> reset() noexcept {
+  void reset() noexcept {
     SPDLOG_TRACE("enter Scalar3::reset");
 
     v = Kokkos::mdspan<T, Kokkos::dextents<ui_t, 3>>();
@@ -90,7 +89,6 @@ template <numeric T> struct Scalar3 {
     data = nullptr;
 
     SPDLOG_TRACE("exit Scalar3::reset");
-    return {};
   }
 };
 
