@@ -39,9 +39,6 @@ struct World {
   /// output HDF5 file
   const HDF5Obj h5;
 
-  /// output HDF5 floating point type
-  const hid_t h5_fpp = (std::is_same_v<fp_t, double>) ? H5T_NATIVE_DOUBLE : H5T_NATIVE_FLOAT;
-
   /// (s) elapsed time
   fp_t time = 0.0;
 
