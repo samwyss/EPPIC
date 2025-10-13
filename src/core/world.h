@@ -34,38 +34,38 @@
  */
 struct World {
   /// configuration from file
-  const Config cfg;
+  Config cfg;
 
   /// output HDF5 file
-  const HDF5Obj h5;
+  HDF5Obj h5;
 
   /// (s) elapsed time
   fp_t time = 0.0;
 
   /// (F/m) diagonally isotropic permittivity of material inside bounding box
-  const fp_t ep;
+  fp_t ep;
 
   /// (H/m) diagonally isotropic permeability of material inside bounding box
-  const fp_t mu;
+  fp_t mu;
 
   /// number of voxels in magnetic field
-  const Coord3<ui_t> nv_h;
+  Coord3<ui_t> nv_h;
 
   /// number of voxels in electric field
-  const Coord3<ui_t> nv_e;
+  Coord3<ui_t> nv_e;
 
   /// (m) spatial increments in all directions
-  const Coord3<fp_t> d;
+  Coord3<fp_t> d;
 
   /// (m) inverse spatial increments in all directions
-  const Coord3<fp_t> d_inv;
+  Coord3<fp_t> d_inv;
 
   /// (V/m) electric field vector
   /// NOTE: as configured e wraps h to make it easier to manage boundary conditions
-  const Vector3<fp_t> e;
+  Vector3<fp_t> e;
 
   /// (A/m) magnetic field vector
-  const Vector3<fp_t> h;
+  Vector3<fp_t> h;
 
   /// dataspaces for writable data
   Dataspaces dataspaces;
